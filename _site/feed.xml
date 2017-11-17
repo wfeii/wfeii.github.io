@@ -1,0 +1,1749 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.6.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2017-11-17T18:49:25+08:00</updated><id>http://localhost:4000/</id><title type="html">杂记</title><subtitle>An amazing website.</subtitle><author><name>王飞</name><email>wangfei199101@gamil.com</email></author><entry><title type="html">Android事件传递机制</title><link href="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E8%BF%9B%E9%98%B6/Touch%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/" rel="alternate" type="text/html" title="Android事件传递机制" /><published>2016-07-29T00:40:12+08:00</published><updated>2016-07-29T00:40:12+08:00</updated><id>http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E8%BF%9B%E9%98%B6/Touch%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86</id><content type="html" xml:base="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E8%BF%9B%E9%98%B6/Touch%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/">&lt;h2 id=&quot;touch事件处理&quot;&gt;Touch事件处理&lt;/h2&gt;
+
+&lt;h3 id=&quot;activity中的touch事件处理函数&quot;&gt;Activity中的Touch事件处理函数&lt;/h3&gt;
+&lt;p&gt;有touch事件来的时候,会调用Activity的dispatchTouchEvent()派发事件,然后会调用getWindow().superDispatchTouchEvent(ev)派发事件,最终会调用布局中的View.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            onUserInteraction();
+        }
+        if (getWindow().superDispatchTouchEvent(ev)) {
+            return true;
+        }
+        return onTouchEvent(ev);
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;如果View中没有消耗事件,最后会调用Activity的onTouchEvent()处理.&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;h3 id=&quot;view的touch事件处理&quot;&gt;View的Touch事件处理&lt;/h3&gt;
+
+&lt;h4 id=&quot;view的touch事件处理特性&quot;&gt;View的Touch事件处理特性&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;View中的Touch事件一个是View控件的Touch事件处理,一个是ViewGroup控件的Touch事件处理,二者处理方式有所不同&lt;/li&gt;
+  &lt;li&gt;View的Touch事件处理是先有子View控件处理,子View控件没有消耗,然后有父View控件进行处理.&lt;/li&gt;
+  &lt;li&gt;对于ViewGroup控件可以通过相关的方法拦截Touch事件&lt;/li&gt;
+  &lt;li&gt;View中的Touch事件处理会先调用dispatchTouchEvent()分发,然后调用onTouch()处理,未处理会调用onTouchEvent()处理.View控件还是ViewGroup控件处理逻辑都是一致&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;view控件的touch事件处理&quot;&gt;View控件的Touch事件处理.&lt;/h4&gt;
+&lt;p&gt;View处理Touch事件时首先被调用的是dispatchTouchEvent(),此方法的主要工作是调用恰当的方法进行处理.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public boolean dispatchTouchEvent(MotionEvent event) {
+	...
+            ListenerInfo li = mListenerInfo;
+            if (li != null &amp;amp;&amp;amp; li.mOnTouchListener != null
+                    &amp;amp;&amp;amp; (mViewFlags &amp;amp; ENABLED_MASK) == ENABLED
+                    &amp;amp;&amp;amp; li.mOnTouchListener.onTouch(this, event)) {
+                result = true;
+            }
+
+            if (!result &amp;amp;&amp;amp; onTouchEvent(event)) {
+                result = true;
+            }
+        }
+	...
+	}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;从上面的代码很容易看出,先调用onTouch()进行处理,如果onTouch()(也就是setOnTouchListener()方法设置的listener的onTouch方法)没有消耗的话,就会调用onTouchEvent()进行处理.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;以ACTION_DOWN事件分析&lt;/strong&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public boolean onTouchEvent(MotionEvent event) {
+      ...
+        if (((viewFlags &amp;amp; CLICKABLE) == CLICKABLE ||
+                (viewFlags &amp;amp; LONG_CLICKABLE) == LONG_CLICKABLE)) {
+            switch (event.getAction()) {
+				...
+                case MotionEvent.ACTION_DOWN:
+                    mHasPerformedLongPress = false;
+                        setPressed(true, x, y);
+                        checkForLongClick(0);
+            }
+			...
+            return true;
+        }
+        return false;
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;把代码抽取出来,基本就是设置pressed状态,检测长按事件(从方法中分析可以看出再按下500ms之后就会触发长按)&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;分析ACTION_MOVE&lt;/strong&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    public boolean onTouchEvent(MotionEvent event) {
+	    ...
+        if (((viewFlags &amp;amp; CLICKABLE) == CLICKABLE ||
+                (viewFlags &amp;amp; LONG_CLICKABLE) == LONG_CLICKABLE)) {
+            switch (event.getAction()) {
+            ...
+
+                case MotionEvent.ACTION_MOVE:
+                    // Be lenient about moving outside of buttons
+                    if (!pointInView(x, y, mTouchSlop)) {
+                        // Outside button
+                        removeTapCallback();
+                        if ((mPrivateFlags &amp;amp; PFLAG_PRESSED) != 0) {
+                            // Remove any future long press/tap checks
+                            removeLongPressCallback();
+                            setPressed(false);
+                        }
+                    }
+                    break;
+			}
+		}
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;pointInView()是否在View内,一旦移动出View范围,就会移除长按消息,并设置pressed状态为false.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;分析ACTION_UP&lt;/strong&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public boolean onTouchEvent(MotionEvent event) {
+	    ...
+        if (((viewFlags &amp;amp; CLICKABLE) == CLICKABLE ||
+                (viewFlags &amp;amp; LONG_CLICKABLE) == LONG_CLICKABLE)) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_UP:                    
+                        if (!mHasPerformedLongPress) {
+                            removeLongPressCallback();
+                            if (!focusTaken) {
+                                if (mPerformClick == null) {
+                                    mPerformClick = new PerformClick();
+                                }
+                                if (!post(mPerformClick)) {
+                                    performClick();
+                                }
+                            }
+                        }
+					}
+				}
+		}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;如果没有触发长按事件就会mHasPerformedLongPress为false,然后移除长按事件的message,然后post(mPerformClick),如果View树已经建立联系,就会返回false,现在执行click, 否则会把mPerformClick添加进queue,等建立联系以后再执行.&lt;/p&gt;
+
+&lt;p&gt;从上面可以总结出click事件的触发的touch事件&lt;br /&gt;
+点击事件: ACTION_DOWN -&amp;gt; ACTION_UP,  ACTION_DOWN -&amp;gt; ACTION_MOVE…-&amp;gt; ACTION-&amp;gt;UP(未移动到View之外)   小于500ms or 大于500ms,长按没有被处理&lt;br /&gt;
+长按事件: ACTION_DOWN -&amp;gt; … ACTION_DOWN -&amp;gt; ACTION_MOVE…(未移动到View之外)  大于500ms&lt;/p&gt;
+
+&lt;h4 id=&quot;viewgroup控件的touch事件处理&quot;&gt;ViewGroup控件的Touch事件处理&lt;/h4&gt;
+&lt;p&gt;ViewGroup继承自View,并覆写View的dispatchTouchEvent()的方法.
+我们从很多书上都说ViewGroup的touch事件处理,先派发事件处理给子View控件处理,子View事件处理后返回false就有ViewGroup处理,从源码角度分析.到底是如何实现的.  &lt;br /&gt;
+由于代码太多,分段阅读.   &lt;br /&gt;
+&lt;strong&gt;分析ACTION_DOWN事件&lt;/strong&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public boolean dispatchTouchEvent(MotionEvent ev) {
+
+            // 1. Handle an initial down.
+            if (actionMasked == MotionEvent.ACTION_DOWN) {
+				...
+            }
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;触发了Touch的ACTION_DOWN时,会触发,清除原来状态.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; // 2. Check for interception.
+	final boolean intercepted;
+	if (actionMasked == MotionEvent.ACTION_DOWN
+			|| mFirstTouchTarget != null) {
+			final boolean disallowIntercept = (mGroupFlags &amp;amp; FLAG_DISALLOW_INTERCEPT) != 0;
+			if (!disallowIntercept) {
+				intercepted = onInterceptTouchEvent(ev);
+				ev.setAction(action);
+			} else {
+				intercepted = false;
+			}
+	} else {
+			intercepted = true;
+	}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;检测是否要拦截touch事件, 检测是否是ACTION_DOWN,是否mFirstTouchTarget(其实这个是处理事件的)为null,二者都不满足的话,会继续拦截事件.有其中一个满足就检测FLAG_DISALLOW_INTERCEPT,此flag设置,就说明,不允许ViewGroup拦截事件,没设置最后会调用onInterceptTouchEvent()来检测拦截.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;if (!canceled &amp;amp;&amp;amp; !intercepted) {
+
+                if (actionMasked == MotionEvent.ACTION_DOWN
+                        || (split &amp;amp;&amp;amp; actionMasked == MotionEvent.ACTION_POINTER_DOWN)
+                        || actionMasked == MotionEvent.ACTION_HOVER_MOVE) {
+
+                    final int childrenCount = mChildrenCount;
+                    if (newTouchTarget == null &amp;amp;&amp;amp; childrenCount != 0) {
+                        for (int i = childrenCount - 1; i &amp;gt;= 0; i--) {
+                            if (!canViewReceivePointerEvents(child)
+                                    || !isTransformedTouchPointInView(x, y, child, null)) {
+                                continue;
+                            }
+                            if (dispatchTransformedTouchEvent(ev, false, child, idBitsToAssign)) { //事件派发给子View处理
+                                ...
+                                newTouchTarget = addTouchTarget(child, idBitsToAssign);  //设置mFirstTouchTarget
+                                alreadyDispatchedToNewTouchTarget = true;
+                                break;
+                            }
+                        }
+
+                    }                 
+                }
+            }
+
+            if (mFirstTouchTarget == null) {
+                handled = dispatchTransformedTouchEvent(ev, canceled, null,
+                        TouchTarget.ALL_POINTER_IDS);   //ViewGroup自行处理                      
+            } else {
+				...
+			}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;这部分主要查找ViewGroup的子View来处理,还有并有子View来处理事件.查找是通过canViewReceivePointerEvents()(也就是通过判断可见性)和isTransformedTouchPointInView()(通过touch事件是否在View上)函数. 对于消息的处理,如果子View消耗了事件,会通过addTouchTarget()函数设置mFirstTouchTarget(后面会直接通过它来处理ACTION_UP事件), 如果没有子View处理事件, mFirstTouchTarget会为null, 那么ViewGroup自己处理.&lt;/p&gt;
+
+&lt;p&gt;下面分析一下dispatchTransformedTouchEvent()到底如何处理事件&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; private boolean dispatchTransformedTouchEvent(MotionEvent event, boolean cancel,
+            View child, int desiredPointerIdBits) {
+	if (newPointerIdBits == oldPointerIdBits) {
+	            if (child == null || child.hasIdentityMatrix()) {
+	                if (child == null) {
+	                    handled = super.dispatchTouchEvent(event);    //ViewGroup自行处理事件,
+	                } else {
+	                    handled = child.dispatchTouchEvent(event);    //子View处理事件.
+
+	                    event.offsetLocation(-offsetX, -offsetY);
+	                }
+	                return handled;
+	            }
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;如果child为null,就会调用ViewGroup的dispatchTouchEvent()函数派发处理,不为null,就是子View处理事件.dispatchTransformedTouchEvent()函数上面还有一段类似的代码没有显示,处理的是cancel.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;分析ACTION_MOVE&lt;/strong&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    public boolean dispatchTouchEvent(MotionEvent ev) {
+			...
+            if (mFirstTouchTarget == null) {
+                handled = dispatchTransformedTouchEvent(ev, canceled, null,   //ViewGroup处理
+                        TouchTarget.ALL_POINTER_IDS);
+            } else {
+                TouchTarget target = mFirstTouchTarget;
+                while (target != null) {
+                    final TouchTarget next = target.next;
+                    if (alreadyDispatchedToNewTouchTarget &amp;amp;&amp;amp; target == newTouchTarget) {  //ACTION_DOWN已经处理,就会走这里
+                        handled = true;
+                    } else {
+                        final boolean cancelChild = resetCancelNextUpFlag(target.child)
+                                || intercepted;
+                        if (dispatchTransformedTouchEvent(ev, cancelChild,
+                                target.child, target.pointerIdBits)) {     //子View处理
+                            handled = true;
+                        }  
+                    }
+                }
+            }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;对于ACTION_MOVE的事件拦截的检测跟ACTION_DOWN一致,这里就没有说明
+在ACTION_DOWN时候,如果没有子View处理时,mFirstTouchTarget会为null,对于ACTION_MOVE也就有ViewGroup处理,
+在ACTION_DOWN时候,如果有子View处理时,mFirstTouchTarget不会为null,如果没有拦截,对于ACTION_MOVE也就有子View处理,
+对于ACTION_UP的分析跟ACTION_MOVE一致.&lt;/p&gt;</content><author><name>王飞</name><email>wangfei199101@gamil.com</email></author><category term="Android事件传递机制" /><summary type="html">Touch事件处理</summary></entry><entry><title type="html">异步处理一</title><link href="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E8%BF%9B%E9%98%B6/%E5%BC%82%E6%AD%A5%E5%A4%84%E7%90%86/" rel="alternate" type="text/html" title="异步处理一" /><published>2016-07-25T00:15:00+08:00</published><updated>2016-07-25T00:15:00+08:00</updated><id>http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E8%BF%9B%E9%98%B6/%E5%BC%82%E6%AD%A5%E5%A4%84%E7%90%86</id><content type="html" xml:base="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E8%BF%9B%E9%98%B6/%E5%BC%82%E6%AD%A5%E5%A4%84%E7%90%86/">&lt;h3 id=&quot;异步处理&quot;&gt;异步处理&lt;/h3&gt;
+
+&lt;h4 id=&quot;handler&quot;&gt;Handler&lt;/h4&gt;
+
+&lt;p&gt;A Handler allows you to send and process Message and Runnable objects associated with a thread’s MessageQueue. Each Handler instance is associated with a single thread and that thread’s message queue.&lt;/p&gt;
+
+&lt;p&gt;从描述可以总结出Handler一些特性:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;每个Handler实例都会与一个线程以及线程的messageQueue关联.&lt;/li&gt;
+  &lt;li&gt;发送消息.&lt;/li&gt;
+  &lt;li&gt;处理消息,处理Runnable.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Handler的处理机制示意图  &lt;br /&gt;
+&lt;img src=&quot;https://raw.githubusercontent.com/wangfei1991/wangfei1991.github.com_raw_important/master/Handler%E6%B6%88%E6%81%AF%E5%A4%84%E7%90%86%E6%9C%BA%E5%88%B6.png&quot; alt=&quot;Handler处理机制&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;从上图可以看出其实,Handler机制就是:Looper不断从MessageQueue中获取Message,然后Hanlder处理消息&lt;br /&gt;
+从上图可以看出要分析的问题:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;looper如何从MessageQueue中获取需要处理的message&lt;/li&gt;
+  &lt;li&gt;Handler如何处理消息&lt;/li&gt;
+  &lt;li&gt;Handler如何发送消息
+&lt;!--  more  --&gt;
+再讲前面的问题之前还是要先了解一个问题,就是Handler实例如何与线程,线程的messageQueue关联的?&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h5 id=&quot;handler与线程messagequeue关联&quot;&gt;Handler与线程,MessageQueue关联&lt;/h5&gt;
+
+&lt;p&gt;下面以默认构造函数来说明.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public Handler() {
+        this(null, false);
+    }
+
+	public Handler(Callback callback, boolean async) {
+		...
+        mLooper = Looper.myLooper();  //获取looper
+        if (mLooper == null) {
+            throw new RuntimeException(
+                &quot;Can't create handler inside thread that has not called Looper.prepare()&quot;);
+        }
+        mQueue = mLooper.mQueue;   //从looper中获取MessageQueue
+        mCallback = callback;
+		...
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;从上面看能看出是looper中获取MessageQueue,并没有与什么线程关联?
+其实玄机在于Looper.myLooper()中.
+下面是Looper类用于说明原因.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public final class Looper {
+	static final ThreadLocal&amp;lt;Looper&amp;gt; sThreadLocal = new ThreadLocal&amp;lt;Looper&amp;gt;();
+
+	private static void prepare(boolean quitAllowed) {
+        if (sThreadLocal.get() != null) {
+            throw new RuntimeException(&quot;Only one Looper may be created per thread&quot;);
+        }
+        sThreadLocal.set(new Looper(quitAllowed));
+    }
+
+	public static Looper myLooper() {
+        return sThreadLocal.get();   //从sThreadLocal获取中looper,而添加是在prepare中.
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;其实每个Thread只能对应一个Looper,也可以不对应Looper,而每个Handler必须对应一个Looper.&lt;/p&gt;
+
+&lt;h5 id=&quot;looper如何从messagequeue中获取需要处理的message&quot;&gt;Looper如何从MessageQueue中获取需要处理的message&lt;/h5&gt;
+
+&lt;p&gt;对于Looper从MessageQueue是在looper类的loope()方法中,loope()函数一直从MessageQueue中获取Message,获取到了message然后调用message.target.dispatchMessage(),message.target其实就是Handler本身,message.target的设置是在发送消息时设置的.&lt;/p&gt;
+
+&lt;h5 id=&quot;handler如何处理消息&quot;&gt;Handler如何处理消息&lt;/h5&gt;
+
+&lt;p&gt;其实Handler机制图中已经很清楚了,就是dispatchMessage()分发消息,调用恰当的函数处理.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public void dispatchMessage(Message msg) {
+        if (msg.callback != null) {    //基本是通过Handler的post的相关的函数来发送的消息时调用
+            handleCallback(msg);
+        } else {
+            if (mCallback != null) {   //通过基本的Handler的构造函数
+                if (mCallback.handleMessage(msg)) {
+                    return;
+                }
+            }
+            handleMessage(msg);       //上述的都为null,最后交有handleMessage()方法处理
+        }
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h5 id=&quot;handler如何发送消息&quot;&gt;Handler如何发送消息&lt;/h5&gt;
+
+&lt;p&gt;通过两种方式post()相关的函数,sendMessage()相关的函数.而这两种方式最终都会调用到sendMessageAtTime()发送message.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;post()传入的是一个Runnable,然后有调用sendMessageAtTime()并把Runnable封装成message,message.callback为Runnable,有Handler消息处理机制可以知道,处理消息时优先调用message.callback,从而Runnable得以处理.&lt;/li&gt;
+  &lt;li&gt;sendMessage()的方法最终会调用sendMessageAtTime()方法,然后调用enqueueMessage()方法,而在enqueueMessage()方法中会设置message.target为此Handler,这样looper获取到的message可以调用message.target来处理了.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;thread&quot;&gt;Thread&lt;/h4&gt;
+
+&lt;p&gt;Thread类对于开发者并不陌生,两种实现方式,然后调用start()方法就开启了线程.而在Android中Thread经常与Looper的结合使用.下面以Android中的HandlerThread为例:&lt;br /&gt;
+主要看run()方法.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public void run() {
+		...
+        Looper.prepare();      //1. 做好准备工作 主要是创建looper,并创建MssageQueue,获取当前线程
+        synchronized (this) {
+            mLooper = Looper.myLooper();
+            notifyAll();
+        }
+        onLooperPrepared();
+        Looper.loop();  //2. 开始循环,获取MessageQueue中的message
+		...
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;在Android创建线程,如果涉及到长期处理消息,就使用HandlerThread,然后使用Handler处理消息,效果很佳,对于休眠,退出的设计都不需要自己处理.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Notices:&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;ul&gt;
+    &lt;li&gt;不需要线程时,要调用quit()相关的方法.&lt;/li&gt;
+    &lt;li&gt;一定要调用start()方法以后,再获取线程中的looper,不然获取的looper为null,因为创建looper是在run()方法中.&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;h4 id=&quot;asyncqueryhandler&quot;&gt;AsyncQueryHandler&lt;/h4&gt;
+
+&lt;p&gt;AsyncQueryHandler主要用途是使ContentProvider查询等操作更容易. &lt;br /&gt;
+AsyncQueryHandler继承自Handler,并且内部还有工作线程WorkHandler,工作原理就是AsyncQueryHandler(主线程中) 发送消息到WorkHandler(工作线程中)查询,查询完成,发送消息到AsyncQueryHandler(主线程中)从而更新界面等操作. 现在从源码分析原理. &lt;br /&gt;
+先分析构造函数&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public AsyncQueryHandler(ContentResolver cr) {
+        super();
+        synchronized (AsyncQueryHandler.class) {
+        //启动线程
+            if (sLooper == null) {
+                HandlerThread thread = new HandlerThread(&quot;AsyncQueryWorker&quot;);
+                thread.start();
+
+                sLooper = thread.getLooper();
+            }
+        }
+        mWorkerThreadHandler = createHandler(sLooper);
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;启动一个工作线程(HandlerThread上面有说过),获取looper,然后通过createHandler()创建一个Handler对象.
+分析createHandler()方法&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;protected Handler createHandler(Looper looper) {
+        return new WorkerHandler(looper);
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;只是创建了一个WorkerHandler对象,并且关联获取的looper,这样handler处理消息,就在工作线程里了.对于WorkerHandler比较简单,就不分析了.  &lt;br /&gt;
+那startQuery(),startInsert(),如何工作的呢?&lt;br /&gt;
+下面已startQuery()分析为例.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public void startQuery(int token, Object cookie, Uri uri,
+            String[] projection, String selection, String[] selectionArgs,
+            String orderBy) {
+		...
+        mWorkerThreadHandler.sendMessage(msg);
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;很简单,使用mWorkerThreadHandler发送消息.&lt;br /&gt;
+然后mWorkerThreadHandler关联的looper取出消息,交由mWorkerThreadHandler处理.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;protected class WorkerHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            WorkerArgs args = (WorkerArgs) msg.obj;
+			......
+            switch (event) {
+                case EVENT_ARG_QUERY:
+                    Cursor cursor;
+                    ......
+                    cursor = resolver.query(args.uri, args.projection,
+                            args.selection, args.selectionArgs,
+                            args.orderBy);
+					......
+                    args.result = cursor;
+                    break;
+			}
+			Message reply = args.handler.obtainMessage(token);
+            reply.obj = args;
+            reply.arg1 = msg.arg1;
+            reply.sendToTarget();
+		}
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;查询数据库,组织数据,从AsyncQueueHandler中获取message,函数中设置了message.target,然后通过sendToTarget()发送消息.这样就轮到AsyncQueueHandler处理消息了.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; public void handleMessage(Message msg) {
+        switch (event) {
+            case EVENT_ARG_QUERY:
+                onQueryComplete(token, args.cookie, (Cursor) args.result);
+                break;
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;只是调用了onQueryComplete()方法,而onQueryComplete()什么都没做.可以覆写,实现自己的逻辑.&lt;/p&gt;
+
+&lt;h4 id=&quot;asynctask&quot;&gt;AsyncTask&lt;/h4&gt;
+&lt;p&gt;对于AsyncTask也是Thread，Handler执行task，只是线程的创建方式，返回值做了修改。&lt;br /&gt;
+Thread如何获取返回值 &lt;br /&gt;
+一般我们创建线程覆写Thread的run方法，或者是通过runnable接口创建线程，这样不会获取Thread的返回值，而想要获取Thread的返回值，就需要使用Future，callable接口。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+
+public class CallableTest {
+    public static void main(String[] args){
+        FutureTask&amp;lt;String&amp;gt; futureTask = new FutureTask&amp;lt;String&amp;gt;(new Callable&amp;lt;String&amp;gt;() {
+            @Override
+            public String call() throws Exception {
+                return &quot;Test&quot;;
+            }
+        });
+        Thread thread = new Thread(futureTask);
+        thread.start();
+        try {
+            String test = futureTask.get();
+            System.out.print(test);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;FutureTask实现Future接口
+FutureTask中的get()这个方法会产生阻塞，会一直等到任务执行完毕才返回&lt;/p&gt;
+
+&lt;p&gt;使用Executor创建线程&lt;br /&gt;
+Executor只是Java1.5引入的Executor框架的一个接口。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; public interface Executor {
+	     void execute(Runnable command);
+ }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;可以在execute中构造线程池进行创建线程。&lt;/p&gt;
+
+&lt;p&gt;AsyncTask分析&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;FutureTask&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; public AsyncTask() {
+        mWorker = new WorkerRunnable&amp;lt;Params, Result&amp;gt;() {
+            public Result call() throws Exception {
+                mTaskInvoked.set(true);
+
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                //noinspection unchecked
+                return postResult(doInBackground(mParams));
+            }
+        };
+
+        mFuture = new FutureTask&amp;lt;Result&amp;gt;(mWorker) {
+            @Override
+            protected void done() {
+	           ......
+               postResultIfNotInvoked(get());
+			   ......
+        };
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;mWork是WorkerRunnable的实现的对象，WorkerRunnable实现了Callable接口，在call（）方法中，会调用
+doInBackground（）处理，然后通过postResult()通知InnerHandler处理消息。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    private void finish(Result result) {
+        if (isCancelled()) {
+            onCancelled(result);
+        } else {
+            onPostExecute(result);
+        }
+        mStatus = Status.FINISHED;
+    }
+
+    private static class InternalHandler extends Handler {
+        public InternalHandler() {
+            super(Looper.getMainLooper());
+        }
+
+        public void handleMessage(Message msg) {
+            AsyncTaskResult&amp;lt;?&amp;gt; result = (AsyncTaskResult&amp;lt;?&amp;gt;) msg.obj;
+            switch (msg.what) {
+                case MESSAGE_POST_RESULT:
+                    // There is only one result
+                    result.mTask.finish(result.mData[0]);
+                    break;
+                case MESSAGE_POST_PROGRESS:
+                    result.mTask.onProgressUpdate(result.mData);
+                    break;
+            }
+        }
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;对于&lt;strong&gt;MESSAGE_POST_RESULT&lt;/strong&gt;消息，会调用&lt;strong&gt;AsyncTask&lt;/strong&gt;的finish（）方法，在finish（）中会调用onPostExecute(result)，可以覆写此方法，来更新界面等操作。&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Executor&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;private static volatile Executor sDefaultExecutor = SERIAL_EXECUTOR;  
+
+public static final Executor SERIAL_EXECUTOR = new SerialExecutor();  
+
+private static class SerialExecutor implements Executor {
+    final ArrayDeque&amp;lt;Runnable&amp;gt; mTasks = new ArrayDeque&amp;lt;Runnable&amp;gt;();
+    Runnable mActive;
+
+    public synchronized void execute(final Runnable r) {
+        mTasks.offer(new Runnable() {
+            public void run() {
+                try {
+                    r.run();
+                } finally {
+                    scheduleNext();
+                }
+            }
+        });
+        if (mActive == null) {
+            scheduleNext();
+        }
+    }
+    protected synchronized void scheduleNext() {
+        if ((mActive = mTasks.poll()) != null) {
+            THREAD_POOL_EXECUTOR.execute(mActive);
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;默认的&lt;strong&gt;Executor&lt;/strong&gt;是&lt;strong&gt;sDefaultExecutor&lt;/strong&gt;，  &lt;strong&gt;sDefaultExecutor&lt;/strong&gt;其实是&lt;strong&gt;SERIAL_EXECUTOR&lt;/strong&gt;，而&lt;strong&gt;SERIAL_EXECUTOR&lt;/strong&gt;是&lt;strong&gt;SerialExecutor&lt;/strong&gt;对象,&lt;strong&gt;SerialExecutor&lt;/strong&gt;的executor()方法中会使用&lt;strong&gt;THREAD_POOL_EXECUTOR&lt;/strong&gt;线程池来创建线程。&lt;/p&gt;
+
+&lt;p&gt;THREAD_POOL_EXECUTOR&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    public static final Executor THREAD_POOL_EXECUTOR
+            = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE,
+                    TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;创建线程池，其中指出了最大的线程数，最大的队列数，线程工厂对象等。&lt;/p&gt;
+
+&lt;p&gt;AsyncTask运行&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public final AsyncTask&amp;lt;Params, Progress, Result&amp;gt; execute(Params... params) {
+        return executeOnExecutor(sDefaultExecutor, params);
+    }  
+
+public final AsyncTask&amp;lt;Params, Progress, Result&amp;gt; executeOnExecutor(Executor exec,
+        Params... params) {
+        .......
+        onPreExecute();
+
+        mWorker.mParams = params;
+        exec.execute(mFuture);
+
+        return this;
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;调用onPreExecute()，可以覆写此方法，然后在线程运行前做些准备，比如进度条运行等。&lt;br /&gt;
+然后调用&lt;strong&gt;Executor&lt;/strong&gt;的execute()方法来开始运行线程。&lt;/p&gt;</content><author><name>王飞</name><email>wangfei199101@gamil.com</email></author><category term="Background_jobs" /><summary type="html">异步处理</summary></entry><entry><title type="html">ContentProvider</title><link href="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/contentprovider/" rel="alternate" type="text/html" title="ContentProvider" /><published>2016-04-20T08:00:00+08:00</published><updated>2016-04-20T08:00:00+08:00</updated><id>http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/contentprovider</id><content type="html" xml:base="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/contentprovider/">&lt;h4 id=&quot;什么是android中的content-provider&quot;&gt;&lt;strong&gt;什么是Android中的Content Provider&lt;/strong&gt;&lt;/h4&gt;
+
+&lt;p&gt;Content Provider是用于管理访问结构化数据集的一种组件，最经常管理数据集是数据库。content provider会封装数据，提供数据安全的机制。content provider用于一个进程与另一个运行中的进程的数据连接。  	&lt;br /&gt;
+&lt;strong&gt;Notice:&lt;/strong&gt; &lt;br /&gt;
+当不打算共享数据给其他应用时，不需要定义自己的Content Provider.&lt;/p&gt;
+
+&lt;h4 id=&quot;content-provider如何表示数据的呢&quot;&gt;&lt;strong&gt;Content Provider如何表示数据的呢？&lt;/strong&gt;&lt;/h4&gt;
+&lt;p&gt;Content Provider呈现数据是通过一个或多个表，类似与数据库，使用Content Provider跟使用数据库相类似。&lt;/p&gt;
+
+&lt;h4 id=&quot;如何访问content-povider&quot;&gt;&lt;strong&gt;如何访问Content Povider?&lt;/strong&gt;&lt;/h4&gt;
+&lt;p&gt;Content Provider的访问很简单&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;定义Uri&lt;/li&gt;
+  &lt;li&gt;获取ContentResolver对象&lt;/li&gt;
+  &lt;li&gt;使用ContentResolver对象进行相关的操作。&lt;/li&gt;
+  &lt;li&gt;配置访问时要求的权限&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id=&quot;如何定义uri以及uri到底是做什么用的&quot;&gt;&lt;strong&gt;如何定义Uri，以及Uri到底是做什么用的？&lt;/strong&gt;&lt;/h4&gt;
+&lt;p&gt;Uri是URI的引用，URI是Uniform Resource Identifier(统一资源标识符)简称，用于标识某一资源名称的,
+组成形式：协议://authority／path。&lt;br /&gt;
+ContentResolver使用的Uri是用于标识内容提供者的数据，组成形式：content://authority/path如果使用Content Provider共享的数据是数据库，那么path就是操作的table&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/*填入要操作的数据的内容提供者的字符串*/
+Uri uri = Uri.parse(&quot; &quot;);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;contentresolver能够进行哪些相关的操作&quot;&gt;&lt;strong&gt;ContentResolver能够进行哪些相关的操作&lt;/strong&gt;&lt;/h4&gt;
+&lt;p&gt;可能（这里使用可能是因为要看Content Provider具体实现，也许访问的Content Provider只支持其中部分操作）支持的操作如下：&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;insert&lt;/li&gt;
+  &lt;li&gt;delete&lt;/li&gt;
+  &lt;li&gt;update&lt;/li&gt;
+  &lt;li&gt;query&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id=&quot;如何insert插入数据&quot;&gt;&lt;strong&gt;如何insert插入数据？&lt;/strong&gt;&lt;/h4&gt;
+
+&lt;p&gt;可以像这样：&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;sr&quot;&gt;/*1. 定义要操作的Uri（记得初始化）*/&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;Uri&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mUri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;sr&quot;&gt;/*2. 定义ContentValues对象，用于保存要插入的数据*/&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;ContentValues&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;contentValues&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ContentValues&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;contentValues&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;contentValues&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;pust&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+&lt;span class=&quot;sr&quot;&gt;/*3 获取ContentResolver对象*/&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;ContentResolver&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;resolver&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getContentResolver&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;sr&quot;&gt;/*4 插入数据*/&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;resolver&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;insert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mUri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;contentValues&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;####&lt;strong&gt;如何delete数据？&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;table class=&quot;rouge-table&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+6
+7
+8
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;sr&quot;&gt;/*1. 定义要操作的Uri（记得初始化）*/&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;Uri&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mUri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;sr&quot;&gt;/*2. 定义ContentValues对象，用于保存要插入的数据*/&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+&lt;span class=&quot;sr&quot;&gt;/*3 获取ContentResolver对象*/&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;ContentResolver&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;resolver&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getContentResolver&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;sr&quot;&gt;/*4 插入数据*/&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;resolver&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;delete&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mUri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;where&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;selectionArgs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content><author><name>王飞</name></author><summary type="html">什么是Android中的Content Provider</summary></entry><entry><title type="html">Services</title><link href="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/services/" rel="alternate" type="text/html" title="Services" /><published>2016-04-10T08:00:00+08:00</published><updated>2016-04-10T08:00:00+08:00</updated><id>http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/services</id><content type="html" xml:base="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/services/">&lt;h3 id=&quot;基础&quot;&gt;基础&lt;/h3&gt;
+
+&lt;h4 id=&quot;什么是android中的serice&quot;&gt;什么是Android中的Serice？&lt;/h4&gt;
+&lt;p&gt;Service是一个长期运行在后台不提供用户界面的组件。&lt;/p&gt;
+
+&lt;h4 id=&quot;service听起来像是一个线程它们有什么区别&quot;&gt;Service听起来像是一个线程，它们有什么区别？&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;线程独立主线程（UI线程）之外，而Service可以运行在主线程（默认情况下)中，也可以不在其中。&lt;/li&gt;
+  &lt;li&gt;线程一旦被启动，只有满足相应的条件才能停止，而Service开启，可以通过stopService()或者unbindService()来停止。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;service如何启动呢&quot;&gt;Service如何启动呢？&lt;/h4&gt;
+&lt;blockquote&gt;
+  &lt;ul&gt;
+    &lt;li&gt;started ： 在组件(例如activity)中调用startService()，一旦启动将会长时间运行在后台，通常started的服务用于执行单个操作并且不需要返回结果给开启者。例如下载，当完成下载，应该调用stopSelf()方法”自杀”。&lt;/li&gt;
+    &lt;li&gt;bound : 在组件中调用bindService()方法，bound的服务允许组件发送请求，获取结果，甚至可以进行进程间通信（IPC）,当service没有被绑定时，service对象将会被销毁。&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Notice:&lt;/strong&gt; service默认运行在主进程的主线程中，这就意味着如果service要处理耗时操作或者阻塞操作(例如Map3播放，联网，蓝牙连接），应该在服务中开启工作线程来做这些工作，通过这种方式可以减少应用无响应(Application Not Responding ANR)的发生。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;started-service&quot;&gt;Started Service&lt;/h3&gt;
+&lt;h4 id=&quot;如何定义started-service呢&quot;&gt;如何定义Started Service呢？&lt;/h4&gt;
+&lt;p&gt;继承Service或者IntentService&lt;br /&gt;
+在manifest文件中配置Service&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;manifest ... &amp;gt;
+    ...
+    &amp;lt;application ... &amp;gt;
+    &amp;lt;service android:name=&quot;....&quot; /&amp;gt;
+    ...
+    &amp;lt;/application&amp;gt;
+&amp;lt;/manifest&amp;gt;  
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;!-- more---&gt;
+
+&lt;h4 id=&quot;service和intentservice怎么选择使用哪一个呢&quot;&gt;Service和IntentService怎么选择使用哪一个呢？&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;对于单个操作可以使用IntentService，IntentService开启一个工作线程，&lt;br /&gt;
+当onHandlentent()函数执行完毕，service就会自杀，部分源码是这样的
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  private final class ServiceHandler extends Handler {
+      @Override
+      public void handleMessage(Message msg) {
+          onHandleIntent((Intent)msg.obj);  //处理完操作就会自杀，
+          stopSelf(msg.arg1);
+      }
+  }  
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;较复杂逻辑的要继承Service来完成了。&lt;/li&gt;
+  &lt;li&gt;IntentService使用比较简单只需实现onHandlentent()方法。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;继承service应该覆写哪些方法呢&quot;&gt;继承Service应该覆写哪些方法呢？&lt;/h4&gt;
+&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/wangfei1991/Blog/master/img/android/android_knowledge/startedServiceflow.png&quot; alt=&quot;activity开启service执行过程&quot; /&gt;&lt;br /&gt;
+所以要覆写三个方法。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  public class HelloService extends Service {
+
+  @Override
+  public void onCreate() {
+    /*在创建Service时执行，如果开启的服务已经再运行，不会调用这个方法*/
+  }
+
+  @Override
+  public int onStartCommand(Intent intent, int flags, int startId) {
+/**
+       *1. 在组件(例如Activity)调用了startService()就会执行此方法，一旦此方法  
+	   *   执行，service就会运行在后台，如果你想停止服务需要在组件中  
+	   *   调用stopService()，或者在service中调用stopSelf()  
+	   *2. 对于返回值必须是下面常量的其中一个：
+	   *   START_NOT_STICKY : 当系统杀死该服务,将不会重建这个service的对象。  
+	   *   START_NOT_STICKY : 当系统杀死该服务，将会重新创建service，并且调  
+	   *                      用onStartCommand()方法，但不会重新提交最后  
+	   *                      一次intent,也就是系统调用onStartCommand()  
+	   *                      但传入intent为null  
+	   *   START_REDELIVER_INTENT: 系统杀死service后，重新创建service并且  
+	   *                           调用onStartCommand()并把最后的请求的  
+	   *                           intent传入  
+	   */
+      return START_STICKY;
+  }
+
+  /*********************用于绑定服务这里可以返回null****************/
+  @Override
+  public IBinder onBind(Intent intent) {
+      // We don't provide binding, so return null
+      return null;
+  }
+
+  @Override
+  public void onDestroy() {
+/*
+        *当服务不再被使用时会调用此方法，在此方法中，应该放弃资源比如线程的  
+        *注册的监听，等等。  
+        */
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;在组件中如何启动started-service呢&quot;&gt;在组件中如何启动started service呢？&lt;/h4&gt;
+&lt;p&gt;使用startService(Intent),并且intent定义方法与开启activity的intent一样有两种方式显式（类名）与隐式（action）。&lt;/p&gt;
+
+&lt;h4 id=&quot;如何停止started-service&quot;&gt;如何停止started service?&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;stopService()： 组件来停止服务，一般用于防止耗电，避免浪费系统资源 时使用。&lt;/li&gt;
+  &lt;li&gt;stopSelf()： 一般用于在onStartCommand()执行一个请求，当执行完相应操作就使用stopSelf()自杀。&lt;/li&gt;
+  &lt;li&gt;stopSelf(int)： 当在onStartCommand()中执行多个请求时，建议使用此方法，因为这样可以避免当新的请求到来后，关闭了service的情况。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;参考文档&quot;&gt;参考文档&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&quot;http://developer.android.com/guide/components/services.html&quot;&gt;参考文档1&lt;/a&gt;&lt;/p&gt;</content><author><name>王飞</name></author><summary type="html">基础</summary></entry><entry><title type="html">menu和actionbar</title><link href="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/menuandactionbar/" rel="alternate" type="text/html" title="menu和actionbar" /><published>2016-02-26T00:15:00+08:00</published><updated>2016-02-26T00:15:00+08:00</updated><id>http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/menuandactionbar</id><content type="html" xml:base="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/menuandactionbar/">&lt;h3 id=&quot;context-menu的创建&quot;&gt;context menu的创建&lt;/h3&gt;
+
+&lt;p&gt;context menu可以使用到任意view上，但通常使用在ListView，GridView的items上，或者其他用户能够执行item操作的view集合。&lt;/p&gt;
+
+&lt;p&gt;有两种方式可以创建context menu&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;ul&gt;
+    &lt;li&gt;In a &lt;strong&gt;&lt;em&gt;floating context menu&lt;/em&gt;&lt;/strong&gt;. A menu appears as a floating list of menu items (similar to a dialog) when the user performs a long-click (press and hold) on a view that declares support for a context menu. Users can perform a contextual action on one item at a time.&lt;/li&gt;
+    &lt;li&gt;In the &lt;strong&gt;&lt;em&gt;contextual action mode&lt;/em&gt;&lt;/strong&gt;. This mode is a system implementation of ActionMode that displays a contextual action bar at the top of the screen with action items that affect the selected item(s). When this mode is active, users can perform an action on multiple items at once (if your app allows it).&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;NOTICE:&lt;/strong&gt; &lt;strong&gt;&lt;em&gt;contextual action mode&lt;/em&gt;&lt;/strong&gt;在android3.0以后才可使用。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;!-- more --&gt;
+
+&lt;h4 id=&quot;创建floating-context-menu&quot;&gt;创建&lt;strong&gt;&lt;em&gt;floating context menu&lt;/em&gt;&lt;/strong&gt;&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;注册view到context menu中&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    /*1. 注册于context menu关联的iew*/
+    registerForContextMenu(textview);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;实现onCreateContextMenu()方法在activity或者fragment中
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/*2.实现onCreateContextMenu()方法,当注册的view长按时,就会调用onCreateContextMenu()方法*/
+ @Override
+ public void onCreateContextMenu(ContextMenu menu, View v,
+                      ContextMenu.ContextMenuInfo menuInfo) {
+     super.onCreateContextMenu(menu, v, menuInfo);
+     MenuInflater inflater = getMenuInflater();
+     inflater.inflate(R.menu.menu_share_items, menu);
+ }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;实现onContextItemSelected()方法
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; /*3. 实现onContextItemSelected(),处理menu item选择的响应*/
+ @Override
+ public boolean onContextItemSelected(MenuItem item) {
+     AdapterView.AdapterContextMenuInfo menuInfo =
+         (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+     switch (item.getItemId())
+     {
+         case R.id.menu_share:
+             /*在这里作相应的处理*/
+             return true;
+         default:
+             return super.onContextItemSelected(item);
+     }
+
+ }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;创建contextual-action-mode&quot;&gt;创建&lt;strong&gt;&lt;em&gt;contextual action mode&lt;/em&gt;&lt;/strong&gt;&lt;/h4&gt;
+
+&lt;p&gt;对于android3.0及以上版本，应该使用&lt;strong&gt;&lt;em&gt;contextual action mode&lt;/em&gt;&lt;/strong&gt;代替&lt;strong&gt;&lt;em&gt;floating context menu&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;为view提供conteual操作，通常调用下面两种contextual操作中的一个或者两个：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;长按View&lt;/li&gt;
+  &lt;li&gt;选择了一个checkbox或者类似的iew。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;Tips&lt;/strong&gt;: How your application invokes the contextual action mode and defines the behavior for each action depends on your design. There are basically two designs:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;For contextual actions on individual, arbitrary views.&lt;/li&gt;
+  &lt;li&gt;For batch contextual actions on groups of items in a ListView or GridView (allowing the user to select multiple items and perform an action on them all).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;对于单个view使用Context menu&lt;/em&gt;&lt;/strong&gt;&lt;br /&gt;
+为了当用户选择一个特定的View，调用Contextual action mode,需要做下面的操作&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;实现ActionMode.Callback接口&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  private ActionMode.Callback mCallback = new ActionMode.Callback() {
+
+        /*当action mode被创建的的时候调用*/
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            mode.getMenuInflater().inflate(R.menu.menu_share_items,menu);
+            return true;
+        }
+
+        /*每次调用onCreateActionMode()之后调用此方法,当mode无效的时候会调用多次*/
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            /*这里没有相应的处理*/
+            return false;
+        }
+
+        /*当选择context item时,会调用此方法*/
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch (item.getItemId())
+            {
+                case R.id.menu_share:
+                    Toast.makeText(ContextMenuActionBarModeActivity.this,
+                            &quot;share&quot;,Toast.LENGTH_LONG).show();
+                    mode.finish();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            mCallback = null;
+        }
+    };
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;显示时调用startActionMode()方法（例如长按特定view）&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/*长按时显示action bar*/
+        textView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (mActionMode != null) {
+                    return false;
+                }
+                mActionMode = startActionMode(mCallback);
+                textView.setSelected(true);
+                return true;
+            }
+        });
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;对于listiew和GridView使用Context menu&lt;/em&gt;&lt;/strong&gt;&lt;br /&gt;
+对于批量处理listiew和GridView时需要做下面操作&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;实现AbaListView.MultiChiceModeListener接口，并调用ListView或者GridView的setMultiChioceModeListener()设置。&lt;/li&gt;
+  &lt;li&gt;ListView或者GridView调用setChoiceMode()方法，设置参数为CHOICE_MODE_MULTIPLE_MODE.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;popup-menu的创建&quot;&gt;popup menu的创建&lt;/h3&gt;
+&lt;p&gt;实现的步骤：&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;创建一个PopupMenu对象&lt;/li&gt;
+  &lt;li&gt;使用menu资源填充menu&lt;/li&gt;
+  &lt;li&gt;调用PopupMenu.show().&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;styling-the-action-bar&quot;&gt;Styling the action bar&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&quot;http://developer.android.com/guide/topics/ui/actionbar.html#Style&quot;&gt;style action bar&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;###参考文档：
+&lt;a href=&quot;http://developer.android.com/guide/topics/ui/actionbar.html&quot;&gt;参考文档1&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&quot;http://developer.android.com/guide/topics/ui/menus.html&quot;&gt;参考文档2&lt;/a&gt;&lt;/p&gt;</content><author><name>王飞</name><email>wangfei199101@gamil.com</email></author><summary type="html">context menu的创建</summary></entry><entry><title type="html">menu和action bar</title><link href="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/menuandactionbar/" rel="alternate" type="text/html" title="menu和action bar" /><published>2016-02-23T00:15:00+08:00</published><updated>2016-02-23T00:15:00+08:00</updated><id>http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/menuandactionbar</id><content type="html" xml:base="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/menuandactionbar/">&lt;p&gt;从android3.0开始传统的6-items的菜单被action bar的形式所取代，在这篇文章中，将使用action bar方式实现menu，并且使用的是支持库的方式，这样可以解决版本兼容问题。&lt;/p&gt;
+
+&lt;h3 id=&quot;三种菜单类型&quot;&gt;三种菜单类型&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;options menu&lt;/li&gt;
+  &lt;li&gt;context menu&lt;/li&gt;
+  &lt;li&gt;popup menu&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;如何定义menu&quot;&gt;如何定义menu&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;在res/menu/下使用xml中定义menu item, 代码中填充菜单&lt;/li&gt;
+  &lt;li&gt;直接在代码中创建menu，添加menu条目&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;NOTICE：&lt;/strong&gt; 最好使用menu资源来定义menu items&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;ul&gt;
+    &lt;li&gt;It’s easier to visualize the menu structure in XML.&lt;/li&gt;
+    &lt;li&gt;It separates the content for the menu from your application’s behavioral code.&lt;/li&gt;
+    &lt;li&gt;It allows you to create alternative menu configurations for different platform versions, screen sizes, and other configurations by leveraging the app resources framework.&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;!-- more --&gt;
+
+&lt;p&gt;下面就是不同类型menu的创建方式&lt;/p&gt;
+
+&lt;h3 id=&quot;创建options-menu&quot;&gt;创建options menu&lt;/h3&gt;
+&lt;p&gt;options menu既可以在activity子类中定义，又可以在fragment子类中定义，如果两个同时定义了menu，那最后的menu形式将是二者的结合。activity的menu items先出现，然后是根据fragment在activity添加的次序来添加它们的menu items。&lt;/p&gt;
+
+&lt;p&gt;源码可以查看&lt;a href=&quot;https://github.com/wangfei1991/Androidbase/tree/master/UI/app/src/main/java/cn/edu/wyu/ui/menu_actionbar&quot;&gt;Androidbase/UI/&lt;/a&gt;下OptionsMenuUsingActionbar相关的代码&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;继承v7ActionBarActivity,在activity覆写onCreateOptionsMenu（）方法（对于Fragment不仅要覆写onCreateOptionsMenu()方法,而且要在onCreate()中调用 setHasOptionsMenu(true),否则将不能显示）
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;      @Override
+ public boolean onCreateOptionsMenu(Menu menu) {  
+     // 使用menu资源来填充menu  
+     getMenuInflater().inflate(R.menu.menu_refresh_setting_menu, menu);  
+     //动态的menu item,并以action bar形式显示  
+     MenuItem locationMenuItem = menu.add(0,R.id.menu_location,0,&quot;Location&quot;);  
+     locationMenuItem.setIcon(R.drawable.ic_action_location);  
+     MenuItemCompat.setShowAsAction(locationMenuItem,  
+             MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);  
+     return true;  
+ }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;覆写onOptionsItemSelected()方法,响应item点击事件（Fragment也是覆写onOptionsItemSelected()方法）&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id)
+        {
+            case R.id.menu_refresh:
+                return true;
+            case R.id.menu_location:
+                return true;
+            case R.id.menu_settings:
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;ul&gt;
+  &lt;li&gt;使用Theme.AppCompat的主题，这里打开了action bar，有的主题把action bar关闭了，一定要注意这一点。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;与options-menu相关的内容&quot;&gt;与options menu相关的内容&lt;/h3&gt;
+&lt;p&gt;下面基本在options menu中使用，在另外两种类型中比较少使用。&lt;/p&gt;
+
+&lt;h4 id=&quot;添加tabs&quot;&gt;添加tabs&lt;/h4&gt;
+&lt;p&gt;使用场景类似于：&lt;a href=&quot;https://raw.githubusercontent.com/wangfei1991/Blog/gh-pages/img/android/android_knowledge/ui/menu_actionbar/actionbar-tabs-stacked@2x.png&quot;&gt;点击查看&lt;/a&gt; &lt;br /&gt;
+源码可以查看&lt;a href=&quot;https://github.com/wangfei1991/Androidbase/tree/master/UI/app/src/main/java/cn/edu/wyu/ui/menu_actionbar&quot;&gt;Androidbase/UI/&lt;/a&gt;的TabsAndSplitActionBar相关的代码&lt;br /&gt;
+使用步骤：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;实现ActionBar.TabListener接口，用于处理tab的事件&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    /*
+     * 实现TabListener方法
+     */
+    @Override
+    public void onTabSelected(ActionBar.Tab tab,
+	                          FragmentTransaction fragmentTransaction)
+    {
+        //tab选择时调用这个方法
+    }
+
+    @Override
+    public void onTabUnselected(ActionBar.Tab tab,
+	                            FragmentTransaction fragmentTransaction)
+    {
+        //tab没有选择后调用的方法
+    }
+
+    @Override
+    public void onTabReselected(ActionBar.Tab tab,
+	                            FragmentTransaction fragmentTransaction)
+    {
+        //重复选择时调用的方法
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;获取action bar添加tabs，并设置ActionBar.TabListener。
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; ActionBar actionBar = getSupportActionBar();
+ actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+ for (int i=1; i&amp;lt;4; i++) {
+     actionBar.addTab(actionBar.newTab()
+              .setText(&quot;TAB &quot;+i).setTabListener(this));
+ }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;添加action-view&quot;&gt;添加Action View&lt;/h4&gt;
+&lt;p&gt;使用场景类似于：&lt;a href=&quot;https://raw.githubusercontent.com/wangfei1991/Blog/gh-pages/img/android/android_knowledge/ui/menu_actionbar/actionbar-searchview@2x.png&quot;&gt;点击查看&lt;/a&gt;&lt;br /&gt;
+源码可以查看&lt;a href=&quot;https://github.com/wangfei1991/Androidbase/tree/master/UI/app/src/main/java/cn/edu/wyu/ui/menu_actionbar&quot;&gt;Androidbase/UI/&lt;/a&gt;的OptionsMenuAddActionView相关的代码&lt;br /&gt;
+实现的步骤:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;在menu资源文件中添加actionViewClass属性，用于声明action view&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &amp;lt;item android:id=&quot;@+id/action_search&quot;
+    android:title=&quot;search&quot;
+    android:icon=&quot;@android:drawable/ic_menu_search&quot;
+    android:orderInCategory=&quot;100&quot;
+    app:showAsAction=&quot;ifRoom&quot;
+    app:actionViewClass=&quot;android.support.v7.widget.SearchView&quot;
+    /&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;ul&gt;
+  &lt;li&gt;在onCreateOptionsMenu()中配置action view(例如监听事件)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+         //使用menu资源来填充menu
+         getMenuInflater().inflate(
+		                R.menu.menu_options_add_action_view,menu);
+         MenuItem menuItem = (MenuItem) menu.findItem(R.id.action_search);
+         //在android11以后，可以使用menuItem.getActionView()的方式获取action iew
+         SearchView searchView = (SearchView)
+                                  MenuItemCompat.getActionView(menuItem);
+        /*searchView事件处理*/
+        return super.onCreateOptionsMenu(menu);
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;h4 id=&quot;添加action-provider&quot;&gt;添加Action Provider&lt;/h4&gt;
+&lt;p&gt;这里以添加ShareActionProvider为例。&lt;br /&gt;
+使用场景类似于：&lt;a href=&quot;https://raw.githubusercontent.com/wangfei1991/Blog/gh-pages/img/android/android_knowledge/ui/menu_actionbar/actionbar-shareaction@2x.png&quot;&gt;点击查看&lt;/a&gt; &lt;br /&gt;
+源码可以查看&lt;a href=&quot;https://github.com/wangfei1991/Androidbase/tree/master/UI/app/src/main/java/cn/edu/wyu/ui/menu_actionbar&quot;&gt;Androidbase/UI/&lt;/a&gt;的OptionsMenuAddActionProvider相关的代码&lt;br /&gt;
+实现步骤:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;在menu资源的&amp;lt;item&amp;gt;定义actionProvider，添加&lt;strong&gt;&lt;em&gt;ShareActionProvider&lt;/em&gt;&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;item android:id=&quot;@+id/action_share&quot;
+        android:title=&quot;share&quot;
+        android:icon=&quot;@android:drawable/ic_menu_share&quot;
+        android:orderInCategory=&quot;100&quot;
+        app:showAsAction=&quot;ifRoom&quot;        
+        app:actionProviderClass=
+                 &quot;android.support.v7.widget.ShareActionProvider&quot;
+        /&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;在onCreateOptionsMenu( )中获取&lt;strong&gt;&lt;em&gt;ShareActionProvider&lt;/em&gt;&lt;/strong&gt;，并调用setShareIntent()方法来设置要分享的Intent。
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
+ public boolean onCreateOptionsMenu(Menu menu) {
+     // Inflate the menu; this adds items to the action bar if it is present.
+     getMenuInflater().inflate(
+                    R.menu.menu_options_add_action_provider, menu);
+     MenuItem menuItem = menu.findItem(R.id.action_share);
+     ShareActionProvider actionProvider;
+     /*获取ShareActionProvider*/
+     actionProvider = (ShareActionProvider)
+                  MenuItemCompat.getActionProvider(menuItem);
+     /*来设置要分享的Inte*/
+     actionProvider.setShareIntent(getDefaultInten());
+     return true;
+ }
+
+ public Intent getDefaultInten()
+ {
+     Intent intent = new Intent(Intent.ACTION_SEND);
+     intent.setType(&quot;*/*&quot;);
+     return intent;
+ }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;添加drow-down-navigation&quot;&gt;添加Drow-down Navigation&lt;/h4&gt;
+&lt;p&gt;drow-down list使用在内容重要但不频繁改变的情况，对于频繁改变的内容要使用tabs来代替。
+源码可以查看&lt;a href=&quot;https://github.com/wangfei1991/Androidbase/tree/master/UI/app/src/main/java/cn/edu/wyu/ui/menu_actionbar&quot;&gt;Androidbase/UI/&lt;/a&gt;的OptionsMeneAddDropdown相关的代码&lt;br /&gt;
+实现步骤：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;创建一个SpinnerAdapter提供drow-down的item，&lt;/li&gt;
+  &lt;li&gt;实现ActionBar.onNavigiationListener定义用户选择item的行为&lt;/li&gt;
+  &lt;li&gt;在Activity的onCreate()的方法中，开启此模式通过调用&lt;/li&gt;
+  &lt;li&gt;获取action bar，调用setListNavigationCallbacks()方法。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_options_mene_add_dropdown);
+        ActionBar actionBar = getSupportActionBar();
+
+		/*1. 创建一个SpinnerAdapter提供drow-down的item，*/
+        spinnerAdapter = new ArrayAdapter&amp;lt;String&amp;gt;(this,
+                android.R.layout.simple_spinner_dropdown_item,
+                android.R.id.text1,data);
+
+		/*3. 在Activity的onCreate()的方法中，开启此模式通过调用*/
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+
+		/*4. 获取action bar，调用setListNavigationCallbacks()方法。*/
+        actionBar.setListNavigationCallbacks(spinnerAdapter,
+                                             onNavigationListenerImp );
+    }
+
+    /*2. 实现ActionBar.onNavigiationListener定义用户选择item的行为*/
+    private ActionBar.OnNavigationListener onNavigationListenerImp =
+                              new ActionBar.OnNavigationListener() {
+        @Override
+        public boolean onNavigationItemSelected(int i, long l) {
+             /*这里做相应的选择处理*/             
+            Log.e(&quot;OptionsMeneAddDropdownActivity&quot;,&quot;选择&quot;+i+&quot;位置&quot;);
+            return true;
+        }
+    };
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;参考文档&quot;&gt;参考文档：&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&quot;http://developer.android.com/guide/topics/ui/actionbar.html&quot;&gt;参考文档1&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&quot;http://developer.android.com/guide/topics/ui/menus.html&quot;&gt;参考文档2&lt;/a&gt;&lt;/p&gt;</content><author><name>王飞</name><email>wangfei199101@gamil.com</email></author><summary type="html">从android3.0开始传统的6-items的菜单被action bar的形式所取代，在这篇文章中，将使用action bar方式实现menu，并且使用的是支持库的方式，这样可以解决版本兼容问题。</summary></entry><entry><title type="html">Bound Services</title><link href="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/boundservices/" rel="alternate" type="text/html" title="Bound Services" /><published>2015-06-20T08:00:00+08:00</published><updated>2015-06-20T08:00:00+08:00</updated><id>http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/boundservices</id><content type="html" xml:base="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/boundservices/">&lt;h3 id=&quot;基础&quot;&gt;基础&lt;/h3&gt;
+&lt;h4 id=&quot;如何绑定service&quot;&gt;如何绑定service?&lt;/h4&gt;
+&lt;ol&gt;
+  &lt;li&gt;创建一个bound service&lt;/li&gt;
+  &lt;li&gt;在组件中调用bindService()方法进行绑定&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id=&quot;如何创建一个bound-service呢&quot;&gt;如何创建一个bound Service呢？&lt;/h4&gt;
+&lt;p&gt;继承Service，用于绑定的类，首先，必须提供一个IBinder用于与客户端(例如Activity)&lt;br /&gt;
+交互,有三种方式可以提供此IBinder,每一种方式又有不同的实现方式。&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;继承Binder(实现了IBinder)类&lt;/li&gt;
+  &lt;li&gt;使用Messenger&lt;/li&gt;
+  &lt;li&gt;使用AIDL&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;其次是在onBind()中返回IBinder&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Notice:&lt;/strong&gt;多个clients连接到service时，只在第一次绑定时调用onBind()方法获取 &lt;br /&gt;
+          IBinder对象，对于其他的clients，系统直接传递一个IBinder，不会再调&lt;br /&gt;
+	            用onBind()方法.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;!--more--&gt;
+
+&lt;p&gt;#### 创建bound service三种方式可以提供此IBinder,如何选择呢？&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;继承Binder： 在servie只能在本应用中使用，并且不涉及多进程时使用（也就是与 客户端处于相同的进程中）&lt;/li&gt;
+  &lt;li&gt;使用Messenger：当想要IBinder工作于不同的进程中，并且不在意请求的同时执行，使用 此方法.这是最简单方式对于IPC，因为Messenger队列请求都是单线程的                       无需考虑线程安全问题。&lt;/li&gt;
+  &lt;li&gt;使用AIDL：首先，使用Messenger是基于AIDL，当想要同时处理多个请求时可以使用此方式，当 要自己处理多线程和线程安全问题。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Notice:&lt;/strong&gt;不是所有组件都能绑定service，广播就是个例外，但广播可以启动service。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;bound-service&quot;&gt;bound service&lt;/h3&gt;
+&lt;p&gt;#### 继承Binder如何定义bound service，组件中如何使用？&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;service定义&lt;br /&gt;
+ 1.1 在Service中Binder的对象，此对象中包含组件可以使用的共有方法，在公有方法中返回service对象，或者返回有service托管的类（类中要有public方法）。&lt;br /&gt;
+1.2：在onBind()方法中返回Binder对象。&lt;/li&gt;
+  &lt;li&gt;组件中绑定service&lt;br /&gt;
+ 2.1组件中onServiceConnected（）方法中获取IBinder并操作。
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/******继承Binder方式bound service定义的模板******/
+
+public class LocalService extends Service {
+//返回到给客户端(例如Activity)
+private final IBinder mBinder = new LocalBinder();
+/*
+ * 继承Binder
+ */
+public class LocalBinder extends Binder {
+    LocalService getService() {
+        //返回service对象客户端能调用service的public方法。
+        return LocalService.this;
+    }
+}
+
+@Override
+public IBinder onBind(Intent intent) {
+    return mBinder;
+}
+
+/*客户端（例如activity）中能够调用此方法*/
+public int getTest {
+  return 12;
+}
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;	public class BindingActivity extends Activity {
+	//保存获取service的对象
+    LocalService mService;
+	//用于标志是否service绑定了
+    boolean mBound = false;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // 绑定service
+        Intent intent = new Intent(this, LocalService.class);
+		//第二个参数Serviceonnection对象
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // 解除绑定
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+    }
+
+    //button
+    public void onButtonClick(View v) {
+        if (mBound) {
+		    int num = service.getTest();
+            Toast.makeText(this, &quot;number: &quot; + num, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /*由于bindService是立即的返回，没有值返回，而ServiceConnection用于监听  
+     *连接的当建立连接了就会调用onServiceConnected(),从而可以获取到IBinder  
+     */
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                IBinder service) {
+            LocalBinder binder = (LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;使用messenger如何定义bound-service组件中如何使用&quot;&gt;使用Messenger如何定义bound service，组件中如何使用？&lt;/h4&gt;
+&lt;ol&gt;
+  &lt;li&gt;在Service中定义一个Handler用于处理来自client的请求，&lt;/li&gt;
+  &lt;li&gt;使用Handler对象作为参数来创建一个Messenger对象&lt;/li&gt;
+  &lt;li&gt;在onBind()方法中使用Messenger对象返回一个IBinder对象，&lt;/li&gt;
+  &lt;li&gt;在clients中的ServiceConnection的onServiceConnetion()中根据IBinder 对象来实例化Messenger,
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; public class MessengerService extends Service {
+
+ static final int MSG_SAY_HELLO = 1;
+
+ /**
+  * 1. 定义一个Handler用于处理来自client的请求
+  */
+ class IncomingHandler extends Handler {
+     @Override
+     public void handleMessage(Message msg) {
+         switch (msg.what) {
+             case MSG_SAY_HELLO:
+                 Toast.makeText(getApplicationContext(), &quot;hello!&quot;,  
+                      Toast.LENGTH_SHORT).show();
+                 break;
+             default:
+                 super.handleMessage(msg);
+         }
+     }
+ }
+
+ /**
+  * 2. 使用Handler对象作为参数来创建一个Messenger对象  
+  */
+ final Messenger mMessenger = new Messenger(new IncomingHandler());
+
+ /**
+  * 3. 在onBind()方法中使用Messenger对象返回一个IBinder对象，
+  */
+ @Override
+ public IBinder onBind(Intent intent) {
+     return mMessenger.getBinder();
+ }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class ActivityMessenger extends Activity {
+    Messenger mService = null;
+
+    /**用于判断是否已连接*/
+    boolean mBound;
+
+    /**
+     * Class for interacting with the main interface of the service.
+     */
+    private ServiceConnection mConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className,   
+		       IBinder service) {
+           //4 根据IBinder对象来实例化Messenger,  
+            mService = new Messenger(service);
+            mBound = true;
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            // This is called when the connection with the service has been
+            // unexpectedly disconnected
+            mService = null;
+            mBound = false;
+        }
+    };
+
+	//Button
+    public void sayHello(View v) {
+        if (!mBound) return;
+        Message msg = Message.obtain(null,  
+		              MessengerService.MSG_SAY_HELLO, 0, 0);
+        try {
+            mService.send(msg);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to the service
+        bindService(new Intent(this, MessengerService.class),   
+		                mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Notice：&lt;/strong&gt;这里没有演示service对client的回应，一个很好的例子时APIDemo中MessengerService.java和MesengerServiceActivity的例子。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h4 id=&quot;上面对于clients绑定service很模糊究竟怎么连接&quot;&gt;上面对于clients绑定service很模糊，究竟怎么连接？&lt;/h4&gt;
+&lt;ol&gt;
+  &lt;li&gt;实现ServiceConnection&lt;br /&gt;
+1.1  onServiceConnected() client-service建立连接就会调用此函数， 传递onBind()中创建的IBinder。 &lt;br /&gt;
+1.2  onServiceDisconnected() client-service之间的连接断开时会调用这个函数。&lt;/li&gt;
+  &lt;li&gt;调用bindService时传递一个ServiceConnection实现。&lt;/li&gt;
+  &lt;li&gt;当解除绑定时调用unbindService方法。
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Intent intent = new Intent(this, LocalService.class);  
+//BIND_AUTO_CREATE:如果Service没有在运行，就自动创建。
+bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Skill:&lt;/strong&gt;  * Activity与service交互是在Activity可视时应该bindService() 在onCreate（）,unbindService()在onStop()中 ,Activity在后台也能接受service的回应，那可以在onCreate()中调用bindService，在onDestory()中调用unbindService().&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Notice:&lt;/strong&gt; 不应该绑定在onResume()，在onPause()解除定，在多个Activity来回切换的话可能导致service不断的销毁，然后在重建，&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;service生命周期&quot;&gt;service生命周期&lt;/h3&gt;
+&lt;h4 id=&quot;started-service&quot;&gt;started service&lt;/h4&gt;
+&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/wangfei1991/Blog/gh-pages/img/android/android_knowledge/startedServiceflow.png&quot; alt=&quot;started service声明周期&quot; /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;bound-service-1&quot;&gt;bound service&lt;/h4&gt;
+&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/wangfei1991/Blog/gh-pages/img/android/android_knowledge/bindserverflow.png&quot; alt=&quot;bound service生命周期&quot; /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;开启服务与绑定了服务共存&quot;&gt;开启服务与绑定了服务共存&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&quot;https://raw.githubusercontent.com/wangfei1991/Blog/gh-pages/img/android/android_knowledge/service_binding_tree_lifecycle.png&quot;&gt;查看图片&lt;/a&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Notice:&lt;/strong&gt;在开启service和绑定service都存在时，&lt;/p&gt;
+  &lt;ol&gt;
+    &lt;li&gt;先解除所有绑定，会调用onUnbind(),但不会调用onDestroy（）方法，当调用stopService（）或者stopSelf()时才会调用onDestroy()，&lt;/li&gt;
+    &lt;li&gt;先调用stopService（）或者stopSelf()时，由于service没有解除绑定, 此时不会调用onDestroy(),当所有绑定都解除，才会调用onDestroy（）。&lt;/li&gt;
+    &lt;li&gt;也就说只要servie使用中，就不会调用onDestroy().&lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;参考文档&quot;&gt;参考文档&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&quot;http://developer.android.com/guide/components/bound-services.html&quot;&gt;参考文档1&lt;/a&gt;&lt;/p&gt;</content><author><name>王飞</name><email>wangfei199101@gamil.com</email></author><summary type="html">基础 如何绑定service? 创建一个bound service 在组件中调用bindService()方法进行绑定</summary></entry><entry><title type="html">Brodcast</title><link href="http://localhost:4000/android/android%E5%9F%BA%E7%A1%80/brodcast/" rel="alternate" type="text/html" title="Brodcast" /><published>2015-06-10T08:00:00+08:00</published><updated>2015-06-10T08:00:00+08:00</updated><id>http://localhost:4000/android/android%E5%9F%BA%E7%A1%80/brodcast</id><content type="html" xml:base="http://localhost:4000/android/android%E5%9F%BA%E7%A1%80/brodcast/">&lt;h3 id=&quot;基础&quot;&gt;基础&lt;/h3&gt;
+&lt;h4 id=&quot;什么是android中的广播&quot;&gt;什么是android中的广播?&lt;/h4&gt;
+&lt;p&gt;广播就是在Android系统中发生某件事情（电量，电话的来电与去电等等），然后会向android系统中发送消息的组件&lt;/p&gt;
+
+&lt;h4 id=&quot;android系统中发生某件事情怎么向android系统中发送消息呢&quot;&gt;Android系统中发生某件事情，怎么向android系统中发送消息呢？&lt;/h4&gt;
+&lt;p&gt;有两种方式，一个通过发送正常的广播，sendBroadcast(),或者发送有序广播，sendOrderedBroadcast()。&lt;/p&gt;
+
+&lt;h4 id=&quot;发送正常的广播也可称为无序广播和发送有序广播有什么区别呢&quot;&gt;发送正常的广播（也可称为无序广播）和发送有序广播有什么区别呢？&lt;/h4&gt;
+&lt;ol&gt;
+  &lt;li&gt;正常广播(也可称为无序广播)：所有接受者都可同时接受到广播，更加的高效，但是接受者不能取消广播。&lt;/li&gt;
+  &lt;li&gt;有序广播:一次只能传递给一个接受者（根据android:priority，）上一级接收者可以传送数据给下一级，并且可以中止广播 。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;** Notice: 有序广播的接受是根据&lt;intent-filter&gt;属性中priority来判断优先级的，对于优先级越高，越较早接收到广播，相同的优先级，会根据AndroidManfiest.xml中的顺序调用。**&lt;/intent-filter&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;如何使用广播呢&quot;&gt;如何使用广播呢?&lt;/h4&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;定义广播接收器,继承自BroadcastReceiver或其子类，覆写onReceive()方法。&lt;/li&gt;
+  &lt;li&gt;注册定义的广播接收器。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id=&quot;如何注册定义的广播接收者呢&quot;&gt;如何注册定义的广播接收者呢？&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;使用代码注册&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;//监听的广播的动作
+IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+//注册广播接收者
+registerReceiver(new ScreenonReceiver(), filter);
+// 在AndroidManifest.xml中配置   
+&amp;lt;receiver android:name=&quot;com.broadcast.ScreenonReceiver&quot;  
+    android:enabled=&quot;true&quot;&amp;gt;
+    &amp;lt;intent-filter &amp;gt;
+        &amp;lt;action android:name=&quot;android.intent.action.SCREEN_ON&quot;/&amp;gt;
+    &amp;lt;/intent-filter&amp;gt;
+&amp;lt;/receiver&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Notice:&lt;/strong&gt; 使用在AndroidManifest.xml中配置的方式，必须指定android:enabled=”true”否则可能导致接收不到广播。&lt;br /&gt;
+&lt;strong&gt;Skill:&lt;/strong&gt; 最好不要使用AndroidManifest.xml中配置，一般的使用场景是开启service在Service中注册广播接收者，因为这样可以方便的取消注册，可控性比较好。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;常用广播的接受&quot;&gt;常用广播的接受&lt;/h3&gt;
+&lt;h4 id=&quot;开机启动的广播接收&quot;&gt;开机启动的广播接收&lt;/h4&gt;
+
+&lt;p&gt;** Intent.ACTION_BOOT_COMPLETED ** 监听此动作的权限：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;	RECEIVE_BOOT_COMPLETED  
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;屏幕唤醒的广播接收&quot;&gt;屏幕唤醒的广播接收&lt;/h4&gt;
+&lt;p&gt;监听的广播的动作为:Intent.ACTION_SCREEN_ON&lt;/p&gt;
+
+&lt;h4 id=&quot;屏幕关闭的广播接收&quot;&gt;屏幕关闭的广播接收&lt;/h4&gt;
+&lt;p&gt;监听的广播的动作为:Intent.ACTION_SCREEN_OFF&lt;/p&gt;
+
+&lt;h4 id=&quot;来电广播的接收&quot;&gt;来电广播的接收&lt;/h4&gt;
+&lt;p&gt;监听的广播的动作为:
+&lt;code class=&quot;highlighter-rouge&quot;&gt;android.intent.action.PHONE_STATE&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;监听此动作时要加权限，READ_PHONE_STATE&lt;/p&gt;
+
+&lt;h4 id=&quot;去电广播的接收&quot;&gt;去电广播的接收&lt;/h4&gt;
+&lt;p&gt;监听的广播的动作为:
+&lt;code class=&quot;highlighter-rouge&quot;&gt;Intent.ACTION_NEW_OUTGOING_CALL&lt;/code&gt;
+所要求的权限READ_PHONE_STATE，PROCESS_OUTGOING_CALLS&lt;/p&gt;
+
+&lt;h4 id=&quot;短信到来的广播接收&quot;&gt;短信到来的广播接收&lt;/h4&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;android.provider.Telephony.SMS_RECEIVED&lt;/code&gt;
+所需要的权限RECEIVE_SMS&lt;/p&gt;
+
+&lt;h3 id=&quot;发送广播&quot;&gt;发送广播&lt;/h3&gt;
+&lt;h4 id=&quot;发送无序广播&quot;&gt;发送无序广播&lt;/h4&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;	//action:自定义的动作，
+    Intent intent = new Intent(action);
+    sendBroadcast(intent);  
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;如果想加权限使用
+** sendBroadcast(intent，receiverPermission); **&lt;/p&gt;
+
+&lt;h4 id=&quot;发送有序广播&quot;&gt;发送有序广播&lt;/h4&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;	//action:自定义的动作，
+    Intent intent = new Intent(action);
+    sendOrderedBroadcast(intent, receiverPermission);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Skill:&lt;/strong&gt; 对于只在本应用使用的广播建议使用LocalBroadcastManager进行发送广播，接受广播，好处是：&lt;/p&gt;
+  &lt;ul&gt;
+    &lt;li&gt;更加高效，&lt;/li&gt;
+    &lt;li&gt;不必担心其他应用能够接收到广播，防止了广播中携带的数据被窃取。&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;</content><author><name>王飞</name></author><category term="[&quot;Android&quot;, &quot;Android基础&quot;]" /><summary type="html">基础 什么是android中的广播? 广播就是在Android系统中发生某件事情（电量，电话的来电与去电等等），然后会向android系统中发送消息的组件</summary></entry><entry><title type="html">Fragment Usage</title><link href="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/fragment/" rel="alternate" type="text/html" title="Fragment Usage" /><published>2015-05-30T08:00:00+08:00</published><updated>2015-05-30T08:00:00+08:00</updated><id>http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/fragment</id><content type="html" xml:base="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/fragment/">&lt;h3 id=&quot;使用fragment实现代码与布局的复用&quot;&gt;使用Fragment实现代码与布局的复用&lt;/h3&gt;
+&lt;p&gt;源码是 &lt;strong&gt;&lt;a href=&quot;https://github.com/wangfei1991/Androidbase/tree/master/Fragment/FragmentExample&quot;&gt;Androidbase / Fragment / FragmentExample /&lt;/a&gt;&lt;/strong&gt; 中的&lt;strong&gt;DynamicFragment&lt;/strong&gt;相关的代码。&lt;/p&gt;
+
+&lt;p&gt;实现的效果：在手机中处理title与content显示在不同的界面,在平板中左边显示title,右边显示content。&lt;br /&gt;
+&lt;a href=&quot;https://raw.githubusercontent.com/wangfei1991/Blog/gh-pages/img/android/android_knowledge/fragments.png&quot;&gt;查看效果图&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;实现的思路： 在手机中加载的布局和平板加载的布局肯定不同，要分别定义不同的布局。在手机中点击title，跳转到另一界面显示content，可以使用两个fragment分别让activity关联。在平板中不涉及界面的跳转，可以在布局文件中使用&lt;strong&gt;&amp;lt;fragment&amp;gt;&lt;/strong&gt;标签来定义。&lt;/p&gt;
+
+&lt;p&gt;实现的步骤：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;定义不同的布局，在本例中定义了两个布局文件activity_dynamic_fragment,一个是在layout中定义（用于手机使用）,一个是layout-large中定义(用于平板)。&lt;/li&gt;
+  &lt;li&gt;定义title的fragment和content的fragment&lt;/li&gt;
+  &lt;li&gt;在Activity的onCreate()方法中content相关的view是否存在，不存在就是手机设备要把title的fragment加到activity中。&lt;/li&gt;
+  &lt;li&gt;title点击处理使用了回调的方式，手机的处理方式是添加content的fragment,而平板的处理方式是获取content的fragment来更新。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;!--more--&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;使用fragment实现滑动的效果&quot;&gt;使用Fragment实现滑动的效果&lt;/h3&gt;
+&lt;p&gt;源码是在&lt;strong&gt;&lt;a href=&quot;https://github.com/wangfei1991/Androidbase/tree/master/Fragment/FragmentExample&quot;&gt;Androidbase / Fragment / FragmentExample /&lt;/a&gt;&lt;/strong&gt;中的&lt;strong&gt;ViewpagerFragment&lt;/strong&gt;相关的代码&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;简单实现方式
+    &lt;ol&gt;
+      &lt;li&gt;创建一个Fragment&lt;/li&gt;
+      &lt;li&gt;在activity布局文件使用V4支持包中的&lt;strong&gt;ViewPager&lt;/strong&gt;标签来定义viewpager控件。&lt;/li&gt;
+      &lt;li&gt;在activity中获取viewpager控件，并调用setAdapter()，其参数为PagerAdapter,对于使用fragment的viewpager有两个类可以继承,实现方法比较少，分别是FragmentPagerAdapter和FragmentStatePagerAdapter.&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+  &lt;li&gt;带有指示器的Viewpager
+    &lt;ol&gt;
+      &lt;li&gt;创建一个Fragment&lt;/li&gt;
+      &lt;li&gt;在activity布局文件使用V4支持包中&lt;strong&gt;ViewPager&lt;/strong&gt;标签来定义viewpager控件，并添加V4支持包中的&lt;strong&gt;PagerTabStrip&lt;/strong&gt;&lt;/li&gt;
+      &lt;li&gt;在activity中获取viewpager控件并调用setAdapter()，参数继承FragmentPagerAdapter或者FragmentStatePagerAdapter，并覆写其getPageTitle()方法的类对象 。&lt;/li&gt;
+    &lt;/ol&gt;
+
+    &lt;blockquote&gt;
+      &lt;p&gt;&lt;strong&gt;NOTICE:&lt;/strong&gt; Viewpager默认的情况下，滑动后的pager可能会被销毁，一般少量pager时使用FragmentPagerAdapt（一般3个左右）子类  而有许多pager时会使用FragmentStatePagerAda子类pt，因为它会保存状态。&lt;/p&gt;
+    &lt;/blockquote&gt;
+  &lt;/li&gt;
+  &lt;li&gt;在fragment中嵌套Viewpager
+    &lt;ol&gt;
+      &lt;li&gt;fragment的布局文件中使用&lt;strong&gt;android.support.v4.view.ViewPager&lt;/strong&gt;标签来定义Viewpager控件。&lt;/li&gt;
+      &lt;li&gt;在fragment中获取viewpager控件，并调用setAdapter()&lt;/li&gt;
+      &lt;li&gt;把fragment添加到activity的一个viewgroup中&lt;/li&gt;
+    &lt;/ol&gt;
+
+    &lt;blockquote&gt;
+      &lt;p&gt;&lt;strong&gt;NOTICE:&lt;/strong&gt;在fragment中viewpager设置fragment使用的FragmentManager要通过getChildFragmentManager()来获取&lt;/p&gt;
+    &lt;/blockquote&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;参考资料&quot;&gt;参考资料&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&quot;http://developer.android.com/guide/components/fragments.html&quot;&gt;参考文档1&lt;/a&gt;&lt;/strong&gt; &lt;br /&gt;
+&lt;strong&gt;&lt;a href=&quot;http://developer.android.com/training/implementing-navigation/lateral.html#tabs&quot;&gt;参考文档2&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;</content><author><name>王飞</name><email>wangfei199101@gamil.com</email></author><summary type="html">使用Fragment实现代码与布局的复用 源码是 Androidbase / Fragment / FragmentExample / 中的DynamicFragment相关的代码。</summary></entry><entry><title type="html">Fragment</title><link href="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/fragment/" rel="alternate" type="text/html" title="Fragment" /><published>2015-05-28T08:00:00+08:00</published><updated>2015-05-28T08:00:00+08:00</updated><id>http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/fragment</id><content type="html" xml:base="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/fragment/">&lt;h3 id=&quot;什么是fragment&quot;&gt;什么是Fragment？&lt;/h3&gt;
+&lt;p&gt;Fragment不是Activity，但是需要内嵌到Activtiy中，Fragment不是容器（viewGroup或者其子类），通常Fragment创建ViewGroup.&lt;br /&gt;
+Fragment代表的是一种行为或者Activity的用户界面的一部分。&lt;/p&gt;
+
+&lt;h3 id=&quot;为什么要使用fragment呢&quot;&gt;为什么要使用Fragment呢？&lt;/h3&gt;
+&lt;p&gt;Android是在3.0时引入的Fragment，为了更好的支持大屏幕设备（平板）。使用Fragment来封装UI和Java代码，提高了复用性。&lt;/p&gt;
+
+&lt;h3 id=&quot;什么时候使用fragment呢&quot;&gt;什么时候使用Fragment呢？&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;逻辑共享：不同设备和屏幕尺寸之间共享UI和逻辑，通常用于平板电脑&lt;/li&gt;
+  &lt;li&gt;回退导航：把fragment添加到堆栈中，当回退时，就会出栈，这种实现方式避免了activity的重建&lt;/li&gt;
+  &lt;li&gt;整体滑动的效果：与ViewPager一起使用实现整体滑动的效果&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!--more--&gt;
+&lt;h3 id=&quot;怎么使用fragment呢&quot;&gt;怎么使用Fragment呢？&lt;/h3&gt;
+
+&lt;p&gt;可以查看 &lt;strong&gt;&lt;a href=&quot;https://github.com/wangfei1991/Androidbase/tree/master/Fragment/FragmentExample&quot;&gt;Androidbase / Fragment / FragmentExample /&lt;/a&gt;&lt;/strong&gt;下的&lt;strong&gt;FirstFragment&lt;/strong&gt;相关的代码&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;在activity的布局文件中声明
+ 这种方式就好像fragment是一个View一样，但这种方式缺乏灵活性，不能动态的更改fragment，较少使用。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;LinearLayout&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;xmlns:android=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;http://schemas.android.com/apk/res/android&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;android:orientation=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;horizontal&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;android:layout_width=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;match_parent&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;android:layout_height=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;match_parent&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;fragment&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;android:name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;com.example.news.ArticleListFragment&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;android:id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@+id/list&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;android:layout_weight=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;1&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;android:layout_width=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0dp&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;android:layout_height=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;match_parent&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;fragment&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;android:name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;com.example.news.ArticleReaderFragment&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;android:id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@+id/viewer&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;android:layout_weight=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;2&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;android:layout_width=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0dp&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;android:layout_height=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;match_parent&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/LinearLayout&amp;gt;&lt;/span&gt;  
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The &lt;strong&gt;&lt;em&gt;android:name&lt;/em&gt;&lt;/strong&gt; attribute in the &lt;strong&gt;&lt;em&gt;&amp;lt;fragment&amp;gt;&lt;/em&gt;&lt;/strong&gt;specifies the Fragment class to instantiate in the layout.
+When the system creates this activity layout, it instantiates each fragment specified in the layout and calls the &lt;strong&gt;&lt;em&gt;onCreateView()&lt;/em&gt;&lt;/strong&gt; method for each one, to retrieve each fragment’s layout. The system inserts the View returned by the fragment directly in place of the &lt;strong&gt;&lt;em&gt;&amp;lt;fragment&amp;gt;&lt;/em&gt;&lt;/strong&gt; element.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;NOTICE:&lt;/strong&gt; Each fragment requires a unique identifier that the system can use to restore the fragment if the activity is restarted (and which you can use to capture the fragment to perform transactions, such as remove it). There are three ways to provide an ID for a fragment:&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;ol&gt;
+    &lt;li&gt;Supply the &lt;strong&gt;&lt;em&gt;android:id&lt;/em&gt;&lt;/strong&gt; attribute with a unique ID.&lt;/li&gt;
+    &lt;li&gt;Supply the &lt;strong&gt;&lt;em&gt;android:tag&lt;/em&gt;&lt;/strong&gt; attribute with a unique string.&lt;/li&gt;
+    &lt;li&gt;If you provide neither of the previous two, the system uses the ID of the container view.&lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;通过java代码方式添加fragment到一个ViewGroup中
+  在Activity运行时可以动态的向Activity的布局中添加fragment，只需要指定fragment位于ViewGroup
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/*1.获取FragmentManager*/
+FragmentManager fragmentManager = getFragmentManager();
+/*2.获取FragmentTransaction对象*/
+FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+/*3.创建fragment对象*/
+ExampleFragment fragment = new ExampleFragment();
+/*4.添加fragment*/
+fragmentTransaction.add(R.id.fragment_container, fragment);
+/*5.提交*/
+fragmentTransaction.commit();
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;fragment的生命周期&quot;&gt;Fragment的生命周期&lt;/h3&gt;
+&lt;p&gt;fragment生命周期与activity生命周期息息相关。&lt;br /&gt;
+代码可以查看 &lt;strong&gt;&lt;a href=&quot;https://github.com/wangfei1991/Androidbase/tree/master/Fragment/FragmentExample&quot;&gt;Androidbase / Fragment / FragmentExample /&lt;/a&gt;&lt;/strong&gt;下的&lt;strong&gt;FirstFragment&lt;/strong&gt;相关的代码进行测试&lt;br /&gt;
+一副图看懂看懂全部&lt;br /&gt;
+&lt;a href=&quot;https://raw.githubusercontent.com/wangfei1991/Blog/gh-pages/img/android/android_knowledge/fragment_lifecycle.png&quot;&gt;查看图片&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;参考文档&quot;&gt;参考文档&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&quot;http://developer.android.com/guide/components/fragments.html#Lifecycle&quot;&gt;参考文档&lt;/a&gt;&lt;/p&gt;</content><author><name>王飞</name><email>wangfei199101@gamil.com</email></author><summary type="html">什么是Fragment？ Fragment不是Activity，但是需要内嵌到Activtiy中，Fragment不是容器（viewGroup或者其子类），通常Fragment创建ViewGroup. Fragment代表的是一种行为或者Activity的用户界面的一部分。</summary></entry></feed>

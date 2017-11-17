@@ -1,0 +1,820 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.7.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="zh" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>Android事件传递机制 - 杂记</title>
+
+
+
+
+<meta name="description" content="Touch事件处理">
+
+
+
+
+<meta name="author" content="王飞">
+
+<meta property="og:locale" content="zh_CN">
+<meta property="og:site_name" content="杂记">
+<meta property="og:title" content="Android事件传递机制">
+
+
+  <link rel="canonical" href="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E8%BF%9B%E9%98%B6/Touch%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/">
+  <meta property="og:url" content="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E8%BF%9B%E9%98%B6/Touch%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/">
+
+
+
+  <meta property="og:description" content="Touch事件处理">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2016-07-29T00:40:12+08:00">
+
+
+
+
+
+
+
+
+  <script type="application/ld+json">
+    {
+      "@context" : "http://schema.org",
+      "@type" : "Person",
+      "name" : "王飞",
+      "url" : "http://localhost:4000",
+      "sameAs" : null
+    }
+  </script>
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="http://localhost:4000/feed.xml" type="application/atom+xml" rel="alternate" title="杂记 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="http://localhost:4000/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--single">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="http://localhost:4000/">杂记</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="http://localhost:4000/year-archive/">Posts</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://localhost:4000/categories/">Categories</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://localhost:4000/tags/">Tags</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://localhost:4000/search/">Search</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://google.com">External Link</a></li>
+          
+        </ul>
+        <button type="button">
+          <span class="visually-hidden">切换菜单</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="http://localhost:4000/assets/images/bio-photo.jpeg" class="author__avatar" alt="王飞" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">王飞</h3>
+    
+      <p class="author__bio" itemprop="description">
+        天行健君子以自强不息
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">关注</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">广东-深圳</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:wangfei199101@gamil.com">
+            <meta itemprop="email" content="wangfei199101@gamil.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> 电子邮箱
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/wfeii" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Android事件传递机制">
+    <meta itemprop="description" content="Touch事件处理">
+    <meta itemprop="datePublished" content="July 29, 2016">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">Android事件传递机制
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+  2 分钟读完
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <h2 id="touch事件处理">Touch事件处理</h2>
+
+<h3 id="activity中的touch事件处理函数">Activity中的Touch事件处理函数</h3>
+<p>有touch事件来的时候,会调用Activity的dispatchTouchEvent()派发事件,然后会调用getWindow().superDispatchTouchEvent(ev)派发事件,最终会调用布局中的View.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            onUserInteraction();
+        }
+        if (getWindow().superDispatchTouchEvent(ev)) {
+            return true;
+        }
+        return onTouchEvent(ev);
+    }
+</code></pre></div></div>
+
+<p>如果View中没有消耗事件,最后会调用Activity的onTouchEvent()处理.</p>
+
+<!-- more -->
+
+<h3 id="view的touch事件处理">View的Touch事件处理</h3>
+
+<h4 id="view的touch事件处理特性">View的Touch事件处理特性</h4>
+
+<ul>
+  <li>View中的Touch事件一个是View控件的Touch事件处理,一个是ViewGroup控件的Touch事件处理,二者处理方式有所不同</li>
+  <li>View的Touch事件处理是先有子View控件处理,子View控件没有消耗,然后有父View控件进行处理.</li>
+  <li>对于ViewGroup控件可以通过相关的方法拦截Touch事件</li>
+  <li>View中的Touch事件处理会先调用dispatchTouchEvent()分发,然后调用onTouch()处理,未处理会调用onTouchEvent()处理.View控件还是ViewGroup控件处理逻辑都是一致</li>
+</ul>
+
+<h4 id="view控件的touch事件处理">View控件的Touch事件处理.</h4>
+<p>View处理Touch事件时首先被调用的是dispatchTouchEvent(),此方法的主要工作是调用恰当的方法进行处理.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public boolean dispatchTouchEvent(MotionEvent event) {
+	...
+            ListenerInfo li = mListenerInfo;
+            if (li != null &amp;&amp; li.mOnTouchListener != null
+                    &amp;&amp; (mViewFlags &amp; ENABLED_MASK) == ENABLED
+                    &amp;&amp; li.mOnTouchListener.onTouch(this, event)) {
+                result = true;
+            }
+
+            if (!result &amp;&amp; onTouchEvent(event)) {
+                result = true;
+            }
+        }
+	...
+	}
+</code></pre></div></div>
+
+<p>从上面的代码很容易看出,先调用onTouch()进行处理,如果onTouch()(也就是setOnTouchListener()方法设置的listener的onTouch方法)没有消耗的话,就会调用onTouchEvent()进行处理.</p>
+
+<p><strong>以ACTION_DOWN事件分析</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public boolean onTouchEvent(MotionEvent event) {
+      ...
+        if (((viewFlags &amp; CLICKABLE) == CLICKABLE ||
+                (viewFlags &amp; LONG_CLICKABLE) == LONG_CLICKABLE)) {
+            switch (event.getAction()) {
+				...
+                case MotionEvent.ACTION_DOWN:
+                    mHasPerformedLongPress = false;
+                        setPressed(true, x, y);
+                        checkForLongClick(0);
+            }
+			...
+            return true;
+        }
+        return false;
+    }
+</code></pre></div></div>
+<p>把代码抽取出来,基本就是设置pressed状态,检测长按事件(从方法中分析可以看出再按下500ms之后就会触发长按)</p>
+
+<p><strong>分析ACTION_MOVE</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    public boolean onTouchEvent(MotionEvent event) {
+	    ...
+        if (((viewFlags &amp; CLICKABLE) == CLICKABLE ||
+                (viewFlags &amp; LONG_CLICKABLE) == LONG_CLICKABLE)) {
+            switch (event.getAction()) {
+            ...
+
+                case MotionEvent.ACTION_MOVE:
+                    // Be lenient about moving outside of buttons
+                    if (!pointInView(x, y, mTouchSlop)) {
+                        // Outside button
+                        removeTapCallback();
+                        if ((mPrivateFlags &amp; PFLAG_PRESSED) != 0) {
+                            // Remove any future long press/tap checks
+                            removeLongPressCallback();
+                            setPressed(false);
+                        }
+                    }
+                    break;
+			}
+		}
+    }
+</code></pre></div></div>
+
+<p>pointInView()是否在View内,一旦移动出View范围,就会移除长按消息,并设置pressed状态为false.</p>
+
+<p><strong>分析ACTION_UP</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public boolean onTouchEvent(MotionEvent event) {
+	    ...
+        if (((viewFlags &amp; CLICKABLE) == CLICKABLE ||
+                (viewFlags &amp; LONG_CLICKABLE) == LONG_CLICKABLE)) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_UP:                    
+                        if (!mHasPerformedLongPress) {
+                            removeLongPressCallback();
+                            if (!focusTaken) {
+                                if (mPerformClick == null) {
+                                    mPerformClick = new PerformClick();
+                                }
+                                if (!post(mPerformClick)) {
+                                    performClick();
+                                }
+                            }
+                        }
+					}
+				}
+		}
+</code></pre></div></div>
+
+<p>如果没有触发长按事件就会mHasPerformedLongPress为false,然后移除长按事件的message,然后post(mPerformClick),如果View树已经建立联系,就会返回false,现在执行click, 否则会把mPerformClick添加进queue,等建立联系以后再执行.</p>
+
+<p>从上面可以总结出click事件的触发的touch事件<br />
+点击事件: ACTION_DOWN -&gt; ACTION_UP,  ACTION_DOWN -&gt; ACTION_MOVE…-&gt; ACTION-&gt;UP(未移动到View之外)   小于500ms or 大于500ms,长按没有被处理<br />
+长按事件: ACTION_DOWN -&gt; … ACTION_DOWN -&gt; ACTION_MOVE…(未移动到View之外)  大于500ms</p>
+
+<h4 id="viewgroup控件的touch事件处理">ViewGroup控件的Touch事件处理</h4>
+<p>ViewGroup继承自View,并覆写View的dispatchTouchEvent()的方法.
+我们从很多书上都说ViewGroup的touch事件处理,先派发事件处理给子View控件处理,子View事件处理后返回false就有ViewGroup处理,从源码角度分析.到底是如何实现的.  <br />
+由于代码太多,分段阅读.   <br />
+<strong>分析ACTION_DOWN事件</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public boolean dispatchTouchEvent(MotionEvent ev) {
+
+            // 1. Handle an initial down.
+            if (actionMasked == MotionEvent.ACTION_DOWN) {
+				...
+            }
+    }
+</code></pre></div></div>
+
+<p>触发了Touch的ACTION_DOWN时,会触发,清除原来状态.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> // 2. Check for interception.
+	final boolean intercepted;
+	if (actionMasked == MotionEvent.ACTION_DOWN
+			|| mFirstTouchTarget != null) {
+			final boolean disallowIntercept = (mGroupFlags &amp; FLAG_DISALLOW_INTERCEPT) != 0;
+			if (!disallowIntercept) {
+				intercepted = onInterceptTouchEvent(ev);
+				ev.setAction(action);
+			} else {
+				intercepted = false;
+			}
+	} else {
+			intercepted = true;
+	}
+</code></pre></div></div>
+
+<p>检测是否要拦截touch事件, 检测是否是ACTION_DOWN,是否mFirstTouchTarget(其实这个是处理事件的)为null,二者都不满足的话,会继续拦截事件.有其中一个满足就检测FLAG_DISALLOW_INTERCEPT,此flag设置,就说明,不允许ViewGroup拦截事件,没设置最后会调用onInterceptTouchEvent()来检测拦截.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>if (!canceled &amp;&amp; !intercepted) {
+
+                if (actionMasked == MotionEvent.ACTION_DOWN
+                        || (split &amp;&amp; actionMasked == MotionEvent.ACTION_POINTER_DOWN)
+                        || actionMasked == MotionEvent.ACTION_HOVER_MOVE) {
+
+                    final int childrenCount = mChildrenCount;
+                    if (newTouchTarget == null &amp;&amp; childrenCount != 0) {
+                        for (int i = childrenCount - 1; i &gt;= 0; i--) {
+                            if (!canViewReceivePointerEvents(child)
+                                    || !isTransformedTouchPointInView(x, y, child, null)) {
+                                continue;
+                            }
+                            if (dispatchTransformedTouchEvent(ev, false, child, idBitsToAssign)) { //事件派发给子View处理
+                                ...
+                                newTouchTarget = addTouchTarget(child, idBitsToAssign);  //设置mFirstTouchTarget
+                                alreadyDispatchedToNewTouchTarget = true;
+                                break;
+                            }
+                        }
+
+                    }                 
+                }
+            }
+
+            if (mFirstTouchTarget == null) {
+                handled = dispatchTransformedTouchEvent(ev, canceled, null,
+                        TouchTarget.ALL_POINTER_IDS);   //ViewGroup自行处理                      
+            } else {
+				...
+			}
+</code></pre></div></div>
+
+<p>这部分主要查找ViewGroup的子View来处理,还有并有子View来处理事件.查找是通过canViewReceivePointerEvents()(也就是通过判断可见性)和isTransformedTouchPointInView()(通过touch事件是否在View上)函数. 对于消息的处理,如果子View消耗了事件,会通过addTouchTarget()函数设置mFirstTouchTarget(后面会直接通过它来处理ACTION_UP事件), 如果没有子View处理事件, mFirstTouchTarget会为null, 那么ViewGroup自己处理.</p>
+
+<p>下面分析一下dispatchTransformedTouchEvent()到底如何处理事件</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> private boolean dispatchTransformedTouchEvent(MotionEvent event, boolean cancel,
+            View child, int desiredPointerIdBits) {
+	if (newPointerIdBits == oldPointerIdBits) {
+	            if (child == null || child.hasIdentityMatrix()) {
+	                if (child == null) {
+	                    handled = super.dispatchTouchEvent(event);    //ViewGroup自行处理事件,
+	                } else {
+	                    handled = child.dispatchTouchEvent(event);    //子View处理事件.
+
+	                    event.offsetLocation(-offsetX, -offsetY);
+	                }
+	                return handled;
+	            }
+	}
+}
+</code></pre></div></div>
+
+<p>如果child为null,就会调用ViewGroup的dispatchTouchEvent()函数派发处理,不为null,就是子View处理事件.dispatchTransformedTouchEvent()函数上面还有一段类似的代码没有显示,处理的是cancel.</p>
+
+<p><strong>分析ACTION_MOVE</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    public boolean dispatchTouchEvent(MotionEvent ev) {
+			...
+            if (mFirstTouchTarget == null) {
+                handled = dispatchTransformedTouchEvent(ev, canceled, null,   //ViewGroup处理
+                        TouchTarget.ALL_POINTER_IDS);
+            } else {
+                TouchTarget target = mFirstTouchTarget;
+                while (target != null) {
+                    final TouchTarget next = target.next;
+                    if (alreadyDispatchedToNewTouchTarget &amp;&amp; target == newTouchTarget) {  //ACTION_DOWN已经处理,就会走这里
+                        handled = true;
+                    } else {
+                        final boolean cancelChild = resetCancelNextUpFlag(target.child)
+                                || intercepted;
+                        if (dispatchTransformedTouchEvent(ev, cancelChild,
+                                target.child, target.pointerIdBits)) {     //子View处理
+                            handled = true;
+                        }  
+                    }
+                }
+            }
+</code></pre></div></div>
+
+<p>对于ACTION_MOVE的事件拦截的检测跟ACTION_DOWN一致,这里就没有说明
+在ACTION_DOWN时候,如果没有子View处理时,mFirstTouchTarget会为null,对于ACTION_MOVE也就有ViewGroup处理,
+在ACTION_DOWN时候,如果有子View处理时,mFirstTouchTarget不会为null,如果没有拦截,对于ACTION_MOVE也就有子View处理,
+对于ACTION_UP的分析跟ACTION_MOVE一致.</p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> 标签: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="http://localhost:4000/tags/#android%E4%BA%8B%E4%BB%B6%E4%BC%A0%E9%80%92%E6%9C%BA%E5%88%B6" class="page__taxonomy-item" rel="tag">Android事件传递机制</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> 分类: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="http://localhost:4000/categories/#android" class="page__taxonomy-item" rel="tag">Android</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://localhost:4000/categories/#android%E8%BF%9B%E9%98%B6" class="page__taxonomy-item" rel="tag">Android进阶</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://localhost:4000/categories/#%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F" class="page__taxonomy-item" rel="tag">外功招式</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> 更新时间:</strong> <time datetime="2016-07-29T00:40:12+08:00">July 29, 2016</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">分享</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?text=Android%E4%BA%8B%E4%BB%B6%E4%BC%A0%E9%80%92%E6%9C%BA%E5%88%B6%20http%3A%2F%2Flocalhost%3A4000%2F%25E5%25A4%2596%25E5%258A%259F%25E6%258B%259B%25E5%25BC%258F%2Fandroid%2Fandroid%25E8%25BF%259B%25E9%2598%25B6%2FTouch%25E4%25BA%258B%25E4%25BB%25B6%25E5%25A4%2584%25E7%2590%2586%2F" class="btn btn--twitter" title="分享 Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flocalhost%3A4000%2F%25E5%25A4%2596%25E5%258A%259F%25E6%258B%259B%25E5%25BC%258F%2Fandroid%2Fandroid%25E8%25BF%259B%25E9%2598%25B6%2FTouch%25E4%25BA%258B%25E4%25BB%25B6%25E5%25A4%2584%25E7%2590%2586%2F" class="btn btn--facebook" title="分享 Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=http%3A%2F%2Flocalhost%3A4000%2F%25E5%25A4%2596%25E5%258A%259F%25E6%258B%259B%25E5%25BC%258F%2Fandroid%2Fandroid%25E8%25BF%259B%25E9%2598%25B6%2FTouch%25E4%25BA%258B%25E4%25BB%25B6%25E5%25A4%2584%25E7%2590%2586%2F" class="btn btn--google-plus" title="分享 Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flocalhost%3A4000%2F%25E5%25A4%2596%25E5%258A%259F%25E6%258B%259B%25E5%25BC%258F%2Fandroid%2Fandroid%25E8%25BF%259B%25E9%2598%25B6%2FTouch%25E4%25BA%258B%25E4%25BB%25B6%25E5%25A4%2584%25E7%2590%2586%2F" class="btn btn--linkedin" title="分享 LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E8%BF%9B%E9%98%B6/%E5%BC%82%E6%AD%A5%E5%A4%84%E7%90%86/" class="pagination--pager" title="异步处理一
+">向前</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">向后</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">猜您还喜欢</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="http://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E8%BF%9B%E9%98%B6/%E5%BC%82%E6%AD%A5%E5%A4%84%E7%90%86/" rel="permalink">异步处理一
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+  3 分钟读完
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">异步处理
+
+</p>
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="http://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/contentprovider/" rel="permalink">ContentProvider
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+  少于 1 分钟读完
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">什么是Android中的Content Provider
+
+</p>
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="http://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/services/" rel="permalink">Services
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+  少于 1 分钟读完
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">基础
+
+</p>
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="http://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/menuandactionbar/" rel="permalink">menu和actionbar
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+  1 分钟读完
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">context menu的创建
+
+</p>
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>关注:</strong></li>
+    
+    
+    
+    
+      <li><a href="https://github.com/wfeii"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    
+    <li><a href="http://localhost:4000/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2017 王飞. 技术来自于 <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="http://localhost:4000/assets/js/main.min.js"></script>
+
+
+
+
+
+
+
+
+  </body>
+</html>
