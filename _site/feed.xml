@@ -1,4 +1,350 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.6.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2017-11-17T18:49:25+08:00</updated><id>http://localhost:4000/</id><title type="html">杂记</title><subtitle>An amazing website.</subtitle><author><name>王飞</name><email>wangfei199101@gamil.com</email></author><entry><title type="html">Android事件传递机制</title><link href="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E8%BF%9B%E9%98%B6/Touch%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/" rel="alternate" type="text/html" title="Android事件传递机制" /><published>2016-07-29T00:40:12+08:00</published><updated>2016-07-29T00:40:12+08:00</updated><id>http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E8%BF%9B%E9%98%B6/Touch%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86</id><content type="html" xml:base="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E8%BF%9B%E9%98%B6/Touch%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/">&lt;h2 id=&quot;touch事件处理&quot;&gt;Touch事件处理&lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.6.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2017-11-22T16:00:45+08:00</updated><id>http://localhost:4000/</id><title type="html">杂记</title><subtitle>An amazing website.</subtitle><author><name>王飞</name><email>wangfei199101@gamil.com</email></author><entry><title type="html">升级Gradle3.0</title><link href="http://localhost:4000/gradle/%E5%8D%87%E7%BA%A7Gradle3.0/" rel="alternate" type="text/html" title="升级Gradle3.0" /><published>2017-11-21T00:00:00+08:00</published><updated>2017-11-21T00:00:00+08:00</updated><id>http://localhost:4000/gradle/%E5%8D%87%E7%BA%A7Gradle3.0</id><content type="html" xml:base="http://localhost:4000/gradle/%E5%8D%87%E7%BA%A7Gradle3.0/">&lt;p&gt;&lt;img src=&quot;/assets/images/Gradle/Gradle_title.jpeg&quot; alt=&quot;title&quot; class=&quot;align-center&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;概述&quot;&gt;概述&lt;/h2&gt;
+
+&lt;p&gt;Android Gradle 3.0.0插件是一个大版本的升级，对多个module带来了显著的性能提升。但同时也改变了一些此插件的行为，DSL和APIS。&lt;/p&gt;
+
+&lt;p&gt;升级到Gradle3.0.0会带来以下的性能提升：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;由于构建per-call dexing提高了构建速度，每个类编译成独立的DEX文件，并且仅仅被修改的类重新编译。为了提高构建APK的速度，需要设置minSdkVersion到20，或者更低但使用 &lt;a href=&quot;https://developer.android.com/studio/build/multidex.html#mdex-pre-l&quot;&gt;legacy multi-dex&lt;/a&gt;。&lt;/li&gt;
+  &lt;li&gt;当改变依赖项时，Gradle通过不访问依赖项的API的module不重新编译的方式来提高构建速度。通过使用Gradle的新的依赖项的配置(implementation, api, compileOnly, and runtimeOnly)，可以严格的控制依赖项的API的暴露。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;升级&quot;&gt;升级&lt;/h2&gt;
+
+&lt;h3 id=&quot;配置gradle版本&quot;&gt;配置Gradle版本&lt;/h3&gt;
+
+&lt;p&gt;Android plugin 3.0.0 要求Gradle4.1或者更高的版本。&lt;/p&gt;
+
+&lt;p&gt;需要在&lt;strong&gt;gradle-wrapper.properties&lt;/strong&gt;文件中配置下列的内容：&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;distributionUrl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;\&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;https&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//services.gradle.org/distributions/gradle-4.1-all.zip&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;配置android-gradle-plugin&quot;&gt;配置Android Gradle Plugin&lt;/h3&gt;
+
+&lt;p&gt;如果使用Android Studio 3.0或者更新版本，会提示自动更新到最新版本的Android plugin。对于手动更新工程，在工程级下的 &lt;code class=&quot;highlighter-rouge&quot;&gt;build.gradle&lt;/code&gt; 配置如下的内容。&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;buildscript&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;repositories&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;// You need to add the following repository to download the&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;// new plugin.&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;google&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;dependencies&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;classpath&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;com&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;android&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;tools&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;gradle:&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;3.0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;NOTICE:&lt;/p&gt;
+
+  &lt;p&gt;对于多模块和复合构建，如果Android插件每次构建不止一次加载，则可能会出现构建错误，可以查看&lt;strong&gt;常见错误&lt;/strong&gt;进行修复。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;新的依赖配置接口&quot;&gt;新的依赖配置接口&lt;/h2&gt;
+
+&lt;h3 id=&quot;问题描述&quot;&gt;问题描述&lt;/h3&gt;
+
+&lt;p&gt;要理解旧的Gradle插件2.0构建系统的局限性，请考虑以下具有多层模块的项目：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://github.com/wfeii/wfeii.github.io_raw_important/blob/master/Gradle/gradle_project_mul_modle.png?raw=true/&quot; alt=&quot;多模块&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;看最底层的模块，基本上可以做出两种不同的改变：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Implementation change: 内部实现改变，不修改模块的外部接口&lt;/li&gt;
+  &lt;li&gt;Application binary interface (ABI) change: 修改模块的外部接口&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Note: 在下面的图形中，重新编译的模块将会以红色高亮&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h4 id=&quot;implementation-change&quot;&gt;Implementation change&lt;/h4&gt;
+
+&lt;p&gt;由于模块的外部接口不变，Gradle将只重新编译该模块。所有的引用的模块都将保持不变。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://github.com/wfeii/wfeii.github.io_raw_important/blob/master/Gradle/gradle_project_mul_module_implementation_change.png?raw=true/&quot; alt=&quot;多模块&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;在这种情况下没问题。&lt;/p&gt;
+
+&lt;h4 id=&quot;abi-change&quot;&gt;ABI change&lt;/h4&gt;
+
+&lt;p&gt;当外部模块的接口改变，那引用此模块的module也需要重新编译。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://github.com/wfeii/wfeii.github.io_raw_important/blob/master/Gradle/gradle_project_mul_modult_two_layout.png?raw=true/&quot; alt=&quot;two_layout&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;但是这些模块可能直接通过自己的接口暴露底层模块的一部分！所以为了完全安全，还需要重新编译。&lt;/p&gt;
+
+&lt;p&gt;因此，Gradle将有效地需要重新编译所有模块。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://github.com/wfeii/wfeii.github.io_raw_important/blob/master/Gradle/gradle_project_mul_modult_final.png?raw=true&quot; alt=&quot;final state&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;现在我们遇到了一个很大的问题：一个代码更改导致所有模块被重新编译。造成这种情况的根本原因是Gradle不知道是否通过另一个模块泄漏了此模块的接口。&lt;/p&gt;
+
+&lt;h3 id=&quot;android-gradle插件30的修改&quot;&gt;Android Gradle插件3.0的修改&lt;/h3&gt;
+
+&lt;p&gt;最新的Android Gradle 3.0插件要求您明确定义是否泄漏模块的接口。基于此来判断是否重新编译。&lt;/p&gt;
+
+&lt;p&gt;因此 &lt;code class=&quot;highlighter-rouge&quot;&gt;compile&lt;/code&gt; 相关的接口被弃用了，引入了如下的接口：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;api&lt;/code&gt;: 可以通过自己的接口泄漏了这个模块的接口，这意味着和旧版本的&lt;code class=&quot;highlighter-rouge&quot;&gt;compile&lt;/code&gt;完全一致。&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;implementation&lt;/code&gt;: 模块的接口只能自己使用，不能泄露给更上层的module中。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;api配置依赖&quot;&gt;api配置依赖&lt;/h4&gt;
+
+&lt;p&gt;从理论上讲，你可以简单地用api依赖替换所有的编译依赖，但是仍然会导致所有的module都被重新编译。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://github.com/wfeii/wfeii.github.io_raw_important/blob/master/Gradle/gradle_project_mul_modult_final.png?raw=true&quot; alt=&quot;final state&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;最好的方式是使用&lt;code class=&quot;highlighter-rouge&quot;&gt;implementation&lt;/code&gt;代替所有的&lt;code class=&quot;highlighter-rouge&quot;&gt;compile&lt;/code&gt;。&lt;/p&gt;
+
+&lt;h4 id=&quot;implementation配置依赖&quot;&gt;implementation配置依赖&lt;/h4&gt;
+
+&lt;p&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;implementation&lt;/code&gt;会减少module重新编译。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://github.com/wfeii/wfeii.github.io_raw_important/blob/master/Gradle/gradle_project_mul_modult_two_layout.png?raw=true/&quot; alt=&quot;implementation&quot; /&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Notice: 当想要泄漏底层的module接口给更上层的接口使用&lt;code class=&quot;highlighter-rouge&quot;&gt;api&lt;/code&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h4 id=&quot;其他依赖配置&quot;&gt;其他依赖配置&lt;/h4&gt;
+
+&lt;p&gt;由于已经接口都已变化，团队也利用这个机会最终给予其他配置适当的名称：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;provided&lt;/code&gt; 修改为&lt;code class=&quot;highlighter-rouge&quot;&gt;compileOnly&lt;/code&gt;。&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;apk&lt;/code&gt; 修改为 &lt;code class=&quot;highlighter-rouge&quot;&gt;runtimeOnly&lt;/code&gt;。&lt;/li&gt;
+  &lt;li&gt;其他的比如testCompile都已重新修改。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;常见错误&quot;&gt;常见错误&lt;/h2&gt;
+
+&lt;h3 id=&quot;flavor相关的错误&quot;&gt;Flavor相关的错误&lt;/h3&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nl&quot;&gt;Error:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;All&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;flavors&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;must&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;now&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;belong&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;named&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;flavor&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dimension&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;The&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;flavor&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;flavor_name&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;assigned&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;flavor&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dimension&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;现在插件要求flavors必须属于一个flavor dimension，即使是只有一个flover。&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// Specifies two flavor dimensions.&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;flavorDimensions&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;tier&quot;&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;productFlavors&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+     &lt;span class=&quot;n&quot;&gt;free&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;dimension&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;tier&quot;&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;paid&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;dimension&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;tier&quot;&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;依赖相关的配置错误&quot;&gt;依赖相关的配置错误&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;​&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nl&quot;&gt;Error:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Unable&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;resolve&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dependency&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@debug&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;compileClasspath&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;Could&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;resolve&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;project&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;nl&quot;&gt;Error:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Unable&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;resolve&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dependency&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@release&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;compileClasspath&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;Could&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;resolve&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;project&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;使用变体的依赖关系解决方案，您不再需要使用特定于变体的配置（例如freeDebugImplementation）来获取本地模块依赖关系 - 插件会自动提供配置。&lt;/p&gt;
+
+&lt;p&gt;应该使用下面的配置：&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;dependencies&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// This is the old method and no longer works for local&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// library modules:&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// debugImplementation project(path: ':library', configuration: 'debug')&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// releaseImplementation project(path: ':library', configuration: 'release')&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// Instead, simply use the following to take advantage of&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// variant-aware dependency resolution. You can learn more about&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// the 'implementation' configuration in the section about&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// new dependency configurations.&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;implementation&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;project&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// You can, however, keep using variant-specific configurations when&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// targeting external dependencies. The following line adds 'app-magic'&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// as a dependency to only the &quot;debug&quot; version of your module.&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;debugImplementation&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;com&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;example&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;android&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;magic:&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;12.3&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;​&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Process&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;finished&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;with&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;exit&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;code&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;Class&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;found:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;com.meitu.gradle.eva.EvaChannelInfoPluginTest&quot;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Empty&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;suite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;是因为Android Studio没有把build/classes/groovy/test添加到 JUnitStarter的classpath中，具体问题以及临时解决方案看此链接&lt;a href=&quot;https://issuetracker.google.com/issues/65712492&quot;&gt; IDE didn’t add &lt;code class=&quot;highlighter-rouge&quot;&gt;build/classes/groovy/test&lt;/code&gt; to JUnitStarter classpath&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;​&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nl&quot;&gt;Error:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Failed&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;resolve:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Could&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;resolve&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;project&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mylibrary&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Required&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;by:&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;project&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;考虑一下应用程序配置了一个名为“staging”的build type，但是它的一个依赖库不存在此build type。 当编译应用程序的“staging”版本时，它将不知道要使用依赖库的哪个版本，并且会看到上述类似的错误。&lt;/p&gt;
+
+&lt;p&gt;Android Gradle Plugin包含DSL元素，可帮助控制Gradle解决应用程序和依赖项之间的变体匹配不可行的情况。 请参阅下表以确定应使用哪个DSL属性来解决与变体依赖关系匹配相关的某些构建错误。&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;app包含，但依赖库不包含&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;错误原因：&lt;/p&gt;
+
+&lt;p&gt;app包含一个依赖库不包含的build type， 比如，app包含“staging”的build type，但依赖库包含“debug”和“release”的build Type。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Notice: 当依赖库包含app不包含的build type时，不存在问题。这是因为根本不需要依赖库构建 build Type。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;解决方案：
+ 使用matchingFallbacks为给定的build type指定替代匹配，如下：&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;android&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;buildTypes&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;debug&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;release&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;staging&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// Specifies a sorted list of fallback build types that the&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// plugin should try to use when a dependency does not include a&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// &quot;staging&quot; build type. You may specify as many fallbacks as you&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// like, and the plugin selects the first build type that's&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// available in the dependency.&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;matchingFallbacks&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;debug&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;qa&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;release&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;特定flavor dimension，app存在而依赖库不存在的flover&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;错误原因：&lt;/p&gt;
+
+&lt;p&gt;对于app及其依赖库中存在的特定flavor dimension，但app包含库不包含的flavor。&lt;/p&gt;
+
+&lt;p&gt;比如，app和依赖都包含一个 “tier” 的flavor dimension。然而app中”tier” 包含 “free”和”paid”，但依赖库仅仅包含”demo” and “paid”。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Notice: 对于存在于app及其依赖库的给定flavor dimension，当库包含app所不具备的flavor时，不存在任何问题。 那是因为android gradle plun根本就不会从依赖中请求app不包含的flavor。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;解决方案：&lt;/p&gt;
+
+&lt;p&gt;使用matchingFallbacks为app的“free”的flavor指定替代匹配，如下所示：&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// In the app's build.gradle file.&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;android&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;defaultConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// Do not configure matchingFallbacks in the defaultConfig block.&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// Instead, you must specify fallbacks for a given product flavor in the&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// productFlavors block, as shown below.&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;flavorDimensions&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tier&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;productFlavors&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;paid&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;dimension&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tier&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// Because the dependency already includes a &quot;paid&quot; flavor in its&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// &quot;tier&quot; dimension, you don't need to provide a list of fallbacks&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// for the &quot;paid&quot; flavor.&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;free&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;dimension&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tier&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// Specifies a sorted list of fallback flavors that the plugin&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// should try to use when a dependency's matching dimension does&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// not include a &quot;free&quot; flavor. You may specify as many&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// fallbacks as you like, and the plugin selects the first flavor&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// that's available in the dependency's &quot;tier&quot; dimension.&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;matchingFallbacks&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;demo&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;trial&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;依赖库包含app不支持的flavor dimension&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;错误原因：&lt;/p&gt;
+
+&lt;p&gt;依赖库包含app不支持的flavor dimension。&lt;/p&gt;
+
+&lt;p&gt;比如，依赖库包含“minApi”的flavor dimension，但是app不包含，当构建“freeDebug”版本的时候，插件不知道是使用“minApi23Debug”还是“minApi18Debug”的版本的依赖库&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Notice: 当app包含一个flavor dimension，但依赖库不存在这是没问题的。这是因为插件仅仅匹配存在于依赖库里的flavor dimension，比如依赖库不包含ABIs的dimension，app的”freeX86Debug” 仅仅配置依赖库的“freeDebug”版本。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;解决方案：&lt;/p&gt;
+
+&lt;p&gt;在&lt;code class=&quot;highlighter-rouge&quot;&gt;defaultConfig&lt;/code&gt;的配置中使用&lt;code class=&quot;highlighter-rouge&quot;&gt;missingDimensionStrategy&lt;/code&gt;指定遗失的dimension。也可以在&lt;code class=&quot;highlighter-rouge&quot;&gt;productFlavors&lt;/code&gt;来复写默认配置。&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;gradle&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;android&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;defaultConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// Specifies a sorted list of flavors that the plugin should try to use from&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// a given dimension. The following tells the plugin that, when encountering&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// a dependency that includes a &quot;minApi&quot; dimension, it should select the&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// &quot;minApi18&quot; flavor. You can include additional flavor names to provide a&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// sorted list of fallbacks for the dimension.&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;missingDimensionStrategy&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;minApi&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;minApi18&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;minApi23&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// You should specify a missingDimensionStrategy property for each&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// dimension that exists in a local dependency but not in your app.&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;missingDimensionStrategy&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;abi&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x86&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arm64&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;flavorDimensions&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tier&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;productFlavors&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;free&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;dimension&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tier&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// You can override the default selection at the product flavor&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// level by configuring another missingDimensionStrategy property&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// for the &quot;minApi&quot; dimension.&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;missingDimensionStrategy&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;minApi&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;minApi23&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;minApi18&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;paid&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{}&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;参考资料&quot;&gt;参考资料&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;a href=&quot;https://developer.android.com/studio/build/gradle-plugin-3-0-0-migration.html&quot;&gt;迁移到Gradle3.0&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://developer.android.com/studio/build/build-variants.html&quot;&gt;配置构建变体&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://jeroenmols.com/blog/2017/06/14/androidstudio3/&quot;&gt;Implementation vs API dependency&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://developer.android.com/studio/releases/gradle-plugin.html#3-0-0&quot;&gt;Android Plugin for Gradle Release Notes&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://google.github.io/android-gradle-dsl/current/index.html&quot;&gt;Android Plugin DSL Reference&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://gradle.org/&quot;&gt;Gradle官网&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://groovy-lang.org/&quot;&gt;Groovy官网&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;</content><author><name>王飞</name><email>wangfei199101@gamil.com</email></author><category term="Gradle" /><category term="3.0" /><summary type="html"></summary></entry><entry><title type="html">Android事件传递机制</title><link href="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E8%BF%9B%E9%98%B6/Touch%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/" rel="alternate" type="text/html" title="Android事件传递机制" /><published>2016-07-29T00:40:12+08:00</published><updated>2016-07-29T00:40:12+08:00</updated><id>http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E8%BF%9B%E9%98%B6/Touch%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86</id><content type="html" xml:base="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E8%BF%9B%E9%98%B6/Touch%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/">&lt;h2 id=&quot;touch事件处理&quot;&gt;Touch事件处理&lt;/h2&gt;
 
 &lt;h3 id=&quot;activity中的touch事件处理函数&quot;&gt;Activity中的Touch事件处理函数&lt;/h3&gt;
 &lt;p&gt;有touch事件来的时候,会调用Activity的dispatchTouchEvent()派发事件,然后会调用getWindow().superDispatchTouchEvent(ev)派发事件,最终会调用布局中的View.&lt;/p&gt;
@@ -1663,87 +2009,4 @@ registerReceiver(new ScreenonReceiver(), filter);
 
 &lt;h3 id=&quot;参考资料&quot;&gt;参考资料&lt;/h3&gt;
 &lt;p&gt;&lt;strong&gt;&lt;a href=&quot;http://developer.android.com/guide/components/fragments.html&quot;&gt;参考文档1&lt;/a&gt;&lt;/strong&gt; &lt;br /&gt;
-&lt;strong&gt;&lt;a href=&quot;http://developer.android.com/training/implementing-navigation/lateral.html#tabs&quot;&gt;参考文档2&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;</content><author><name>王飞</name><email>wangfei199101@gamil.com</email></author><summary type="html">使用Fragment实现代码与布局的复用 源码是 Androidbase / Fragment / FragmentExample / 中的DynamicFragment相关的代码。</summary></entry><entry><title type="html">Fragment</title><link href="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/fragment/" rel="alternate" type="text/html" title="Fragment" /><published>2015-05-28T08:00:00+08:00</published><updated>2015-05-28T08:00:00+08:00</updated><id>http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/fragment</id><content type="html" xml:base="http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E5%9F%BA%E7%A1%80/fragment/">&lt;h3 id=&quot;什么是fragment&quot;&gt;什么是Fragment？&lt;/h3&gt;
-&lt;p&gt;Fragment不是Activity，但是需要内嵌到Activtiy中，Fragment不是容器（viewGroup或者其子类），通常Fragment创建ViewGroup.&lt;br /&gt;
-Fragment代表的是一种行为或者Activity的用户界面的一部分。&lt;/p&gt;
-
-&lt;h3 id=&quot;为什么要使用fragment呢&quot;&gt;为什么要使用Fragment呢？&lt;/h3&gt;
-&lt;p&gt;Android是在3.0时引入的Fragment，为了更好的支持大屏幕设备（平板）。使用Fragment来封装UI和Java代码，提高了复用性。&lt;/p&gt;
-
-&lt;h3 id=&quot;什么时候使用fragment呢&quot;&gt;什么时候使用Fragment呢？&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;逻辑共享：不同设备和屏幕尺寸之间共享UI和逻辑，通常用于平板电脑&lt;/li&gt;
-  &lt;li&gt;回退导航：把fragment添加到堆栈中，当回退时，就会出栈，这种实现方式避免了activity的重建&lt;/li&gt;
-  &lt;li&gt;整体滑动的效果：与ViewPager一起使用实现整体滑动的效果&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;!--more--&gt;
-&lt;h3 id=&quot;怎么使用fragment呢&quot;&gt;怎么使用Fragment呢？&lt;/h3&gt;
-
-&lt;p&gt;可以查看 &lt;strong&gt;&lt;a href=&quot;https://github.com/wangfei1991/Androidbase/tree/master/Fragment/FragmentExample&quot;&gt;Androidbase / Fragment / FragmentExample /&lt;/a&gt;&lt;/strong&gt;下的&lt;strong&gt;FirstFragment&lt;/strong&gt;相关的代码&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;在activity的布局文件中声明
- 这种方式就好像fragment是一个View一样，但这种方式缺乏灵活性，不能动态的更改fragment，较少使用。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;LinearLayout&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;xmlns:android=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;http://schemas.android.com/apk/res/android&quot;&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;android:orientation=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;horizontal&quot;&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;android:layout_width=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;match_parent&quot;&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;android:layout_height=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;match_parent&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;nt&quot;&gt;&amp;lt;fragment&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;android:name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;com.example.news.ArticleListFragment&quot;&lt;/span&gt;
-            &lt;span class=&quot;na&quot;&gt;android:id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@+id/list&quot;&lt;/span&gt;
-            &lt;span class=&quot;na&quot;&gt;android:layout_weight=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;1&quot;&lt;/span&gt;
-            &lt;span class=&quot;na&quot;&gt;android:layout_width=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0dp&quot;&lt;/span&gt;
-            &lt;span class=&quot;na&quot;&gt;android:layout_height=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;match_parent&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;nt&quot;&gt;&amp;lt;fragment&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;android:name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;com.example.news.ArticleReaderFragment&quot;&lt;/span&gt;
-            &lt;span class=&quot;na&quot;&gt;android:id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@+id/viewer&quot;&lt;/span&gt;
-            &lt;span class=&quot;na&quot;&gt;android:layout_weight=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;2&quot;&lt;/span&gt;
-            &lt;span class=&quot;na&quot;&gt;android:layout_width=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0dp&quot;&lt;/span&gt;
-            &lt;span class=&quot;na&quot;&gt;android:layout_height=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;match_parent&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;/LinearLayout&amp;gt;&lt;/span&gt;  
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;The &lt;strong&gt;&lt;em&gt;android:name&lt;/em&gt;&lt;/strong&gt; attribute in the &lt;strong&gt;&lt;em&gt;&amp;lt;fragment&amp;gt;&lt;/em&gt;&lt;/strong&gt;specifies the Fragment class to instantiate in the layout.
-When the system creates this activity layout, it instantiates each fragment specified in the layout and calls the &lt;strong&gt;&lt;em&gt;onCreateView()&lt;/em&gt;&lt;/strong&gt; method for each one, to retrieve each fragment’s layout. The system inserts the View returned by the fragment directly in place of the &lt;strong&gt;&lt;em&gt;&amp;lt;fragment&amp;gt;&lt;/em&gt;&lt;/strong&gt; element.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;&lt;strong&gt;NOTICE:&lt;/strong&gt; Each fragment requires a unique identifier that the system can use to restore the fragment if the activity is restarted (and which you can use to capture the fragment to perform transactions, such as remove it). There are three ways to provide an ID for a fragment:&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;blockquote&gt;
-  &lt;ol&gt;
-    &lt;li&gt;Supply the &lt;strong&gt;&lt;em&gt;android:id&lt;/em&gt;&lt;/strong&gt; attribute with a unique ID.&lt;/li&gt;
-    &lt;li&gt;Supply the &lt;strong&gt;&lt;em&gt;android:tag&lt;/em&gt;&lt;/strong&gt; attribute with a unique string.&lt;/li&gt;
-    &lt;li&gt;If you provide neither of the previous two, the system uses the ID of the container view.&lt;/li&gt;
-  &lt;/ol&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;通过java代码方式添加fragment到一个ViewGroup中
-  在Activity运行时可以动态的向Activity的布局中添加fragment，只需要指定fragment位于ViewGroup
-    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/*1.获取FragmentManager*/
-FragmentManager fragmentManager = getFragmentManager();
-/*2.获取FragmentTransaction对象*/
-FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-/*3.创建fragment对象*/
-ExampleFragment fragment = new ExampleFragment();
-/*4.添加fragment*/
-fragmentTransaction.add(R.id.fragment_container, fragment);
-/*5.提交*/
-fragmentTransaction.commit();
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;fragment的生命周期&quot;&gt;Fragment的生命周期&lt;/h3&gt;
-&lt;p&gt;fragment生命周期与activity生命周期息息相关。&lt;br /&gt;
-代码可以查看 &lt;strong&gt;&lt;a href=&quot;https://github.com/wangfei1991/Androidbase/tree/master/Fragment/FragmentExample&quot;&gt;Androidbase / Fragment / FragmentExample /&lt;/a&gt;&lt;/strong&gt;下的&lt;strong&gt;FirstFragment&lt;/strong&gt;相关的代码进行测试&lt;br /&gt;
-一副图看懂看懂全部&lt;br /&gt;
-&lt;a href=&quot;https://raw.githubusercontent.com/wangfei1991/Blog/gh-pages/img/android/android_knowledge/fragment_lifecycle.png&quot;&gt;查看图片&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;参考文档&quot;&gt;参考文档&lt;/h3&gt;
-&lt;p&gt;&lt;a href=&quot;http://developer.android.com/guide/components/fragments.html#Lifecycle&quot;&gt;参考文档&lt;/a&gt;&lt;/p&gt;</content><author><name>王飞</name><email>wangfei199101@gamil.com</email></author><summary type="html">什么是Fragment？ Fragment不是Activity，但是需要内嵌到Activtiy中，Fragment不是容器（viewGroup或者其子类），通常Fragment创建ViewGroup. Fragment代表的是一种行为或者Activity的用户界面的一部分。</summary></entry></feed>
+&lt;strong&gt;&lt;a href=&quot;http://developer.android.com/training/implementing-navigation/lateral.html#tabs&quot;&gt;参考文档2&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;</content><author><name>王飞</name><email>wangfei199101@gamil.com</email></author><summary type="html">使用Fragment实现代码与布局的复用 源码是 Androidbase / Fragment / FragmentExample / 中的DynamicFragment相关的代码。</summary></entry></feed>

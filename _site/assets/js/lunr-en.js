@@ -109,6 +109,15 @@ var idx = lunr(function () {
     });
     
   
+    idx.add({
+      title: "升级Gradle3.0",
+      excerpt: "\n\n",
+      categories: ["Gradle"],
+      tags: ["Gradle",3.0],
+      id: 11
+    });
+    
+  
 
 
 console.log( jQuery.type(idx) );
@@ -233,6 +242,17 @@ var store = [
         "title": "Android事件传递机制",
         "url": "http://localhost:4000/%E5%A4%96%E5%8A%9F%E6%8B%9B%E5%BC%8F/android/android%E8%BF%9B%E9%98%B6/Touch%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/",
         "excerpt": "Touch事件处理 Activity中的Touch事件处理函数 有touch事件来的时候,会调用Activity的dispatchTouchEvent()派发事件,然后会调用getWindow().superDispatchTouchEvent(ev)派发事件,最终会调用布局中的View. public boolean dispatchTouchEvent(MotionEvent ev) { if (ev.getAction() == MotionEvent.ACTION_DOWN) { onUserInteraction(); } if (getWindow().superDispatchTouchEvent(ev)) { return true;...",
+        "teaser":
+          
+            null
+          
+      },
+    
+      
+      {
+        "title": "升级Gradle3.0",
+        "url": "http://localhost:4000/gradle/%E5%8D%87%E7%BA%A7Gradle3.0/",
+        "excerpt": "概述 Android Gradle 3.0.0插件是一个大版本的升级，对多个module带来了显著的性能提升。但同时也改变了一些此插件的行为，DSL和APIS。 升级到Gradle3.0.0会带来以下的性能提升： 由于构建per-call dexing提高了构建速度，每个类编译成独立的DEX文件，并且仅仅被修改的类重新编译。为了提高构建APK的速度，需要设置minSdkVersion到20，或者更低但使用 legacy multi-dex。 当改变依赖项时，Gradle通过不访问依赖项的API的module不重新编译的方式来提高构建速度。通过使用Gradle的新的依赖项的配置(implementation, api, compileOnly, and runtimeOnly)，可以严格的控制依赖项的API的暴露。 升级 配置Gradle版本 Android plugin 3.0.0 要求Gradle4.1或者更高的版本。...",
         "teaser":
           
             null
