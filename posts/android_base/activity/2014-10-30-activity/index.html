@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Activity | 音视频技术部</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="generator" content="Hugo 0.72.0" />
+    
+    
+      <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
+    
+
+    
+    
+      <link href="/dist/css/app.4fc0b62e4b82c997bb0041217cd6b979.css" rel="stylesheet">
+    
+
+    
+
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="Activity" />
+<meta property="og:description" content="创建Activity
+什么是Android中的Activity？
+
+一个activity是提供一个界面，用于与用户交互（打电话，发邮件等）的应用组件。
+
+如何创建一个Activity呢？
+
+
+在layout中定义个布局文件
+定义一个Activity（或者已存在的Activity子类）的子类，并实现相关的方法.
+在AndroidManifest.xml中配置Activity
+
+
+定义一个Activity子类时，要实现哪些方法呢
+
+onCreate(): 你必须实现这个方法，系统会在创建activity时，调用此方法，在这个方法中初始化的activity重要部分，尤其是调用setContentView()使用资源资源来设置activity的界面。
+onPause(): 当用户将要离开activity时，系统调用的第一方法就是此方法，通常保存在当前会话中的变化的信息。
+更多的activity信息请看管理生命周期
+" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://wfeii.github.io/posts/android_base/activity/2014-10-30-activity/" />
+<meta property="article:published_time" content="2015-05-07T00:00:00+00:00" />
+<meta property="article:modified_time" content="2015-05-07T00:00:00+00:00" />
+<meta itemprop="name" content="Activity">
+<meta itemprop="description" content="创建Activity
+什么是Android中的Activity？
+
+一个activity是提供一个界面，用于与用户交互（打电话，发邮件等）的应用组件。
+
+如何创建一个Activity呢？
+
+
+在layout中定义个布局文件
+定义一个Activity（或者已存在的Activity子类）的子类，并实现相关的方法.
+在AndroidManifest.xml中配置Activity
+
+
+定义一个Activity子类时，要实现哪些方法呢
+
+onCreate(): 你必须实现这个方法，系统会在创建activity时，调用此方法，在这个方法中初始化的activity重要部分，尤其是调用setContentView()使用资源资源来设置activity的界面。
+onPause(): 当用户将要离开activity时，系统调用的第一方法就是此方法，通常保存在当前会话中的变化的信息。
+更多的activity信息请看管理生命周期
+">
+<meta itemprop="datePublished" content="2015-05-07T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2015-05-07T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="234">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Activity"/>
+<meta name="twitter:description" content="创建Activity
+什么是Android中的Activity？
+
+一个activity是提供一个界面，用于与用户交互（打电话，发邮件等）的应用组件。
+
+如何创建一个Activity呢？
+
+
+在layout中定义个布局文件
+定义一个Activity（或者已存在的Activity子类）的子类，并实现相关的方法.
+在AndroidManifest.xml中配置Activity
+
+
+定义一个Activity子类时，要实现哪些方法呢
+
+onCreate(): 你必须实现这个方法，系统会在创建activity时，调用此方法，在这个方法中初始化的activity重要部分，尤其是调用setContentView()使用资源资源来设置activity的界面。
+onPause(): 当用户将要离开activity时，系统调用的第一方法就是此方法，通常保存在当前会话中的变化的信息。
+更多的activity信息请看管理生命周期
+"/>
+
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        音视频技术部
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/about/" title="关于 page">
+              关于
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/posts/" title="文章 page">
+              文章
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        文章
+      </aside>
+      
+
+
+
+
+  <div id="sharing" class="mt3">
+
+    
+    <a href="https://www.facebook.com/sharer.php?u=https://wfeii.github.io/posts/android_base/activity/2014-10-30-activity/" class="facebook no-underline" aria-label="share on Facebook">
+      <svg height="32px"  style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M28.765,50.32h6.744V33.998h4.499l0.596-5.624h-5.095  l0.007-2.816c0-1.466,0.14-2.253,2.244-2.253h2.812V17.68h-4.5c-5.405,0-7.307,2.729-7.307,7.317v3.377h-3.369v5.625h3.369V50.32z   M33,64C16.432,64,3,50.569,3,34S16.432,4,33,4s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;"/></svg>
+
+    </a>
+
+    
+    
+    <a href="https://twitter.com/share?url=https://wfeii.github.io/posts/android_base/activity/2014-10-30-activity/&amp;text=Activity" class="twitter no-underline" aria-label="share on Twitter">
+      <svg height="32px"  style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M37.167,22.283c-2.619,0.953-4.274,3.411-4.086,6.101  l0.063,1.038l-1.048-0.127c-3.813-0.487-7.145-2.139-9.974-4.915l-1.383-1.377l-0.356,1.017c-0.754,2.267-0.272,4.661,1.299,6.271  c0.838,0.89,0.649,1.017-0.796,0.487c-0.503-0.169-0.943-0.296-0.985-0.233c-0.146,0.149,0.356,2.076,0.754,2.839  c0.545,1.06,1.655,2.097,2.871,2.712l1.027,0.487l-1.215,0.021c-1.173,0-1.215,0.021-1.089,0.467  c0.419,1.377,2.074,2.839,3.918,3.475l1.299,0.444l-1.131,0.678c-1.676,0.976-3.646,1.526-5.616,1.568  C19.775,43.256,19,43.341,19,43.405c0,0.211,2.557,1.397,4.044,1.864c4.463,1.377,9.765,0.783,13.746-1.568  c2.829-1.673,5.657-5,6.978-8.221c0.713-1.716,1.425-4.851,1.425-6.354c0-0.975,0.063-1.102,1.236-2.267  c0.692-0.678,1.341-1.419,1.467-1.631c0.21-0.403,0.188-0.403-0.88-0.043c-1.781,0.636-2.033,0.551-1.152-0.402  c0.649-0.678,1.425-1.907,1.425-2.267c0-0.063-0.314,0.042-0.671,0.233c-0.377,0.212-1.215,0.53-1.844,0.72l-1.131,0.361l-1.027-0.7  c-0.566-0.381-1.361-0.805-1.781-0.932C39.766,21.902,38.131,21.944,37.167,22.283z M33,64C16.432,64,3,50.569,3,34S16.432,4,33,4  s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/></svg>
+
+    </a>
+
+    
+    <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https://wfeii.github.io/posts/android_base/activity/2014-10-30-activity/&amp;title=Activity" class="linkedin no-underline" aria-label="share on LinkedIn">
+      <svg  height="32px"  style="enable-background:new 0 0 65 65;" version="1.1" viewBox="0 0 65 65" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <path d="M50.837,48.137V36.425c0-6.275-3.35-9.195-7.816-9.195  c-3.604,0-5.219,1.983-6.119,3.374V27.71h-6.79c0.09,1.917,0,20.427,0,20.427h6.79V36.729c0-0.609,0.044-1.219,0.224-1.655  c0.49-1.22,1.607-2.483,3.482-2.483c2.458,0,3.44,1.873,3.44,4.618v10.929H50.837z M22.959,24.922c2.367,0,3.842-1.57,3.842-3.531  c-0.044-2.003-1.475-3.528-3.797-3.528s-3.841,1.524-3.841,3.528c0,1.961,1.474,3.531,3.753,3.531H22.959z M34,64  C17.432,64,4,50.568,4,34C4,17.431,17.432,4,34,4s30,13.431,30,30C64,50.568,50.568,64,34,64z M26.354,48.137V27.71h-6.789v20.427  H26.354z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/>
+</svg>
+
+    </a>
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">Activity</h1>
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2015-05-07T00:00:00Z">May 7, 2015</time>
+
+      
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links nested-img mid-gray pr4-l w-two-thirds-l"><h3 id="创建activity">创建Activity</h3>
+<h4 id="什么是android中的activity">什么是Android中的Activity？</h4>
+<blockquote>
+<p>一个activity是提供一个界面，用于与用户交互（打电话，发邮件等）的应用组件。</p>
+</blockquote>
+<h4 id="如何创建一个activity呢">如何创建一个Activity呢？</h4>
+<blockquote>
+<ul>
+<li>在layout中定义个布局文件</li>
+<li>定义一个Activity（或者已存在的Activity子类）的子类，并实现相关的方法.</li>
+<li>在AndroidManifest.xml中配置Activity</li>
+</ul>
+</blockquote>
+<h4 id="定义一个activity子类时要实现哪些方法呢">定义一个Activity子类时，要实现哪些方法呢</h4>
+<ul>
+<li>onCreate(): 你必须实现这个方法，系统会在创建activity时，调用此方法，在这个方法中初始化的activity重要部分，尤其是调用setContentView()使用资源资源来设置activity的界面。</li>
+<li>onPause(): 当用户将要离开activity时，系统调用的第一方法就是此方法，通常保存在当前会话中的变化的信息。</li>
+<li><a href="http://wangfei1991.github.io/Blog/android%E5%9F%BA%E7%A1%80/2014/10/30/activity/#activity-7">更多的activity信息请看管理生命周期</a></li>
+</ul>
+<h4 id="如何在在androidmanifestxml中配置呢">如何在在AndroidManifest.xml中配置呢？</h4>
+<pre><code>&lt;manifest ... &gt;
+    &lt;application ... &gt;
+        &lt;activity  android:name=&quot;ExampleActivity&quot;  &gt;
+            &lt;intent-filter&gt;
+			....
+            &lt;/intent-filter&gt;
+
+         &lt;/activity&gt;
+           ...
+    &lt;/application&gt;
+    ...
+&lt;/manifest &gt;
+</code></pre><blockquote>
+<p>android:name属性唯一必须指定的，它指定到一个特定的actiivty的类名（包含包名） <br>
+如果actiivty能被其他应用访问就要定intent filter <br>
+如果是入口的activity，必须指定如下的intent filter</p>
+</blockquote>
+<pre><code>&lt;activity  android:name=&quot;...&quot;&gt;
+   &lt;intent-filter&gt;
+       &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
+       &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
+   &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</code></pre><h3 id="启动activity">启动Activity</h3>
+<h4 id="启动activiy的方法有哪些">启动Activiy的方法有哪些？</h4>
+<blockquote>
+<ul>
+<li>startActivity()</li>
+<li>startActivityForResult()</li>
+</ul>
+</blockquote>
+<h4 id="启动activity的方法有哪些异同">启动Activity的方法有哪些异同？</h4>
+<blockquote>
+<ul>
+<li>相同点：均需要Intent对象作为参数，均可通过Intent传递少量数据。</li>
+<li>不同点：如果想从启动的activity获取数据，使用startActivityForResult().</li>
+</ul>
+</blockquote>
+<h4 id="启动activity的intent如何定义">启动Activity的Intent如何定义？</h4>
+<blockquote>
+<ul>
+<li>显式启动，只能启动本应用的Activity</li>
+</ul>
+</blockquote>
+<blockquote>
+<pre><code></code></pre></blockquote>
+<p>Intent intent = new Intent(this, SignInActivity.class);
+startActivity(intent);</p>
+<pre><code>
+&gt; * 隐式启动，只要知道Activity的\&lt;action\&gt;就可以启动Ativity  
+&gt; ```
+Intent intent = new Intent(Intent.ACTION_SEND);  
+intent.putExtra(Intent.EXTRA_EMAIL, recipientArray);  
+startActivity(intent);  
+</code></pre><h3 id="关闭activity">关闭Activity</h3>
+<h4 id="怎么关闭一个activity呢">怎么关闭一个Activity呢？</h4>
+<blockquote>
+<ul>
+<li>关闭自身可以调用finish()</li>
+<li>关闭由startActivityForResult()启动的Activity可以使用finishActivity()<br>
+<strong>Notice：</strong><br>
+尽量不要显式的结束Activity，因为这样会破坏Activity的生命周期，降低用户体验。</li>
+</ul>
+</blockquote>
+<h3 id="activity的生命周期">Activity的生命周期</h3>
+<h4 id="什么是activity的生命周期">什么是Activity的生命周期？</h4>
+<blockquote>
+<p>Activity的创建，运行，销毁等所经历的过程</p>
+</blockquote>
+<h4 id="activity的生命周期怎样的形式表现的">Activity的生命周期怎样的形式表现的？</h4>
+<blockquote>
+<p>系统调用Activity的回调函数来表现的，共有六个主要的回调函数和其他的辅助函数<br>
+onCreate() onStart() onResume() onPause() onStop() onDestory()</p>
+</blockquote>
+<h4 id="activity的六大回调函数都有什么作用呢">Activity的六大回调函数都有什么作用呢？</h4>
+<pre><code>   public class ExampleActivity extends Activity {
+
+   @Override
+   /**********第一次创建Activity调用此方法***************/
+   public void onCreate(Bundle savedInstanceState) {
+       super.onCreate(savedInstanceState);
+       /*
+        * 1. 创建视图(基本使用setContentView()方法来加载视图)
+        * 2. Bundle对象中保存了Activity的以前状态，进行一些必要的复原。
+        * 3. 相关数据获取，比如数据库数据的获取。
+        */
+   }
+
+   @Override
+   /***************在Activity可视之前调用***************/
+   protected void onStart() {
+       super.onStart();
+       /*
+        *1. Followed by onResume() Activtiy将会可见（正常）
+        *2. Followed by onStop() Activity将会隐藏（不正常）
+        */
+   }
+
+   @Override
+   /************在Activity可以交互之前执行**************/
+   protected void onResume() {
+       super.onResume();
+       /*
+        *在此刻activity已位于回退栈的top  
+        *此方法执行完之后，Activity就会处于运行状态。  
+        */
+   }
+
+   @Override
+   /*********当前Activity失去了焦点，但仍可见***********/
+   protected void onPause() {
+       super.onPause();
+       /*
+        *1. 保存数据，停止动画，或者其他消耗CPU的操作等等。
+        *2. 这个方法不要执行耗时操作。
+        */
+   }
+
+   @Override
+   /********当Activity不再可视时，会调用此方法*********/
+   protected void onStop() {
+       super.onStop();
+       /*
+        *1. 意味着被Activity被销毁，
+        *2. 或着其他的Activity运行覆盖了此方法
+        */
+   }
+
+   @Override
+   /*************在Activity销毁时执行***************/
+   protected void onDestroy() {
+       super.onDestroy();
+   }
+}
+</code></pre><blockquote>
+<p><strong>Notice:</strong> 在重写Activity的回调函数时，必须先调用父类的相应的回调函数，再添加自己的逻辑。</p>
+</blockquote>
+<h4 id="如果activity-a启动activity-b-那回调方法是如何被调用的呢">如果Activity A启动Activity B 那回调方法是如何被调用的呢？</h4>
+<blockquote>
+<ul>
+<li>A的onPause()执行</li>
+<li>B的执行顺序 onCreate(), onStart(), onResume().</li>
+<li>如果A不可见，A的onStop()方法执行。</li>
+</ul>
+</blockquote>
+<pre><code>&gt;**Notice:** 当两个Activity共享的数据，最好在A的onPause()中执行，例如：A必须写                   入数据到数据库以便B可以读取时，要在A的onPause()中执行。  
+</code></pre>
+<h4 id="activity生命周期都有哪些状态呢">Activity生命周期都有哪些状态呢？</h4>
+<blockquote>
+<ul>
+<li>Resumed：Activity可视，并且获取焦点。</li>
+<li>Paused : 另一个Activity可视的，并获取了焦点，但paused的Activity仍然是可视。也就是说另一个Activity在paused的Activtiy之上，另一个Activity是通明的或者是没有覆盖整个屏幕。paused的Activity是存活的（activity对象仍然保存在内存，维持着所有状态，仍然附着在window上  ）</li>
+<li>Stopped : stoped的Activity不可见的，但仍然存活（activity对象仍然保存在内存，维持着所有状态，仍然附着在window）</li>
+<li><a href="https://raw.githubusercontent.com/wangfei1991/Blog/master/img/android/android_knowledge/activity_lifecycle.png">activity生命周期图</a></li>
+</ul>
+</blockquote>
+<h3 id="保存activity的状态">保存Activity的状态</h3>
+<h4 id="为什么要保存activity的状态呢正常情况下不是挺好吗">为什么要保存Activity的状态呢，正常情况下不是挺好吗？</h4>
+<blockquote>
+<ul>
+<li>在正常情况下paused和stopped的activity对象会保存在内存中，activity状态也会保留，当activity可见时，也能够正常恢复。但是当系统为了获取内存，销毁了activity对象，当activity要Resumed时，必须重新创建Activity对象，用户的改变的状态将不复存在，所以要保存activity的状态。可以使用onSaveInstanceState()来保存信息</li>
+</ul>
+</blockquote>
+<h4 id="那如何保存activity的状态呢">那如何保存Activity的状态呢？</h4>
+<blockquote>
+<ul>
+<li>保存临时数据（通常是UI的状态时）可以使用用onSaveInstanceState（）</li>
+<li>保存持久的数据就需要在onPause()中进行了</li>
+</ul>
+</blockquote>
+<h4 id="onsaveinstancestate如何保存临时数据的又是如何恢复数据的呢">onSaveInstanceState()如何保存临时数据的，又是如何恢复数据的呢？</h4>
+<blockquote>
+<p><a href="https://raw.githubusercontent.com/wangfei1991/Blog/master/img/android/android_knowledge/restore_instance.png">临时数据保存与恢复图</a></p>
+</blockquote>
+<blockquote>
+<p><strong>Notice:</strong></p>
+</blockquote>
+<blockquote>
+<ul>
+<li>不能保证onSaveInstanceState()一定会被执行，例如当用户使用back button关闭         时，当系统调用了此函数，可能是在onStop()之前调用，或者onPause()之前。</li>
+<li>onSaveInstanceState()提供了默认的实现，即对于view只要提供了ID，就会保存其状         态，因此在覆写时，首先要调用父类的onSaveInstanceState().</li>
+</ul>
+</blockquote>
+<blockquote>
+<p><strong>Skill:</strong> 测试状态保存是否正确可以旋转屏幕，因为旋转屏幕默认情况会销毁Activity，     重新创建Activity。</p>
+</blockquote>
+<h3 id="参考文档">参考文档：</h3>
+<p><a href="http://developer.android.com/guide/components/activities.html">参考文档1</a></p><ul class="pa0">
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div>
+    </div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://wfeii.github.io/" >
+    &copy;  音视频技术部 2020 
+  </a>
+    <div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+  </div>
+</footer>
+
+    
+
+  <script src="/dist/js/app.3fc0f988d21662902933.js"></script>
+
+
+  </body>
+</html>

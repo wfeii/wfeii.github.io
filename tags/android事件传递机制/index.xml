@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Android事件传递机制 on 音视频技术部</title>
+    <link>https://wfeii.github.io/tags/android%E4%BA%8B%E4%BB%B6%E4%BC%A0%E9%80%92%E6%9C%BA%E5%88%B6/</link>
+    <description>Recent content in Android事件传递机制 on 音视频技术部</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Thu, 28 Jul 2016 16:40:12 +0000</lastBuildDate>
+    
+	<atom:link href="https://wfeii.github.io/tags/android%E4%BA%8B%E4%BB%B6%E4%BC%A0%E9%80%92%E6%9C%BA%E5%88%B6/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Android事件传递机制</title>
+      <link>https://wfeii.github.io/posts/2015-11-15-touch%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/</link>
+      <pubDate>Thu, 28 Jul 2016 16:40:12 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/2015-11-15-touch%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/</guid>
+      <description>Touch事件处理 Activity中的Touch事件处理函数 有touch事件来的时候,会调用Activity的dispatchTouchEvent()派发事件,然后会调用getWindow().superDispatchTouchEvent(ev)派发事件,最终会调用布局中的View.
+public boolean dispatchTouchEvent(MotionEvent ev) { if (ev.getAction() == MotionEvent.ACTION_DOWN) { onUserInteraction(); } if (getWindow().superDispatchTouchEvent(ev)) { return true; } return onTouchEvent(ev); } 如果View中没有消耗事件,最后会调用Activity的onTouchEvent()处理.
+View的Touch事件处理 View的Touch事件处理特性  View中的Touch事件一个是View控件的Touch事件处理,一个是ViewGroup控件的Touch事件处理,二者处理方式有所不同 View的Touch事件处理是先有子View控件处理,子View控件没有消耗,然后有父View控件进行处理. 对于ViewGroup控件可以通过相关的方法拦截Touch事件 View中的Touch事件处理会先调用dispatchTouchEvent()分发,然后调用onTouch()处理,未处理会调用onTouchEvent()处理.View控件还是ViewGroup控件处理逻辑都是一致  View控件的Touch事件处理. View处理Touch事件时首先被调用的是dispatchTouchEvent(),此方法的主要工作是调用恰当的方法进行处理.
+public boolean dispatchTouchEvent(MotionEvent event) { ... ListenerInfo li = mListenerInfo; if (li != null &amp;amp;&amp;amp; li.mOnTouchListener != null &amp;amp;&amp;amp; (mViewFlags &amp;amp; ENABLED_MASK) == ENABLED &amp;amp;&amp;amp; li.mOnTouchListener.onTouch(this, event)) { result = true; } if (!result &amp;amp;&amp;amp; onTouchEvent(event)) { result = true; } } .</description>
+    </item>
+    
+    <item>
+      <title>Android事件传递机制</title>
+      <link>https://wfeii.github.io/posts/_posts/2015-11-15-touch%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/</link>
+      <pubDate>Thu, 28 Jul 2016 16:40:12 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/_posts/2015-11-15-touch%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/</guid>
+      <description>Touch事件处理 Activity中的Touch事件处理函数 有touch事件来的时候,会调用Activity的dispatchTouchEvent()派发事件,然后会调用getWindow().superDispatchTouchEvent(ev)派发事件,最终会调用布局中的View.
+public boolean dispatchTouchEvent(MotionEvent ev) { if (ev.getAction() == MotionEvent.ACTION_DOWN) { onUserInteraction(); } if (getWindow().superDispatchTouchEvent(ev)) { return true; } return onTouchEvent(ev); } 如果View中没有消耗事件,最后会调用Activity的onTouchEvent()处理.
+View的Touch事件处理 View的Touch事件处理特性  View中的Touch事件一个是View控件的Touch事件处理,一个是ViewGroup控件的Touch事件处理,二者处理方式有所不同 View的Touch事件处理是先有子View控件处理,子View控件没有消耗,然后有父View控件进行处理. 对于ViewGroup控件可以通过相关的方法拦截Touch事件 View中的Touch事件处理会先调用dispatchTouchEvent()分发,然后调用onTouch()处理,未处理会调用onTouchEvent()处理.View控件还是ViewGroup控件处理逻辑都是一致  View控件的Touch事件处理. View处理Touch事件时首先被调用的是dispatchTouchEvent(),此方法的主要工作是调用恰当的方法进行处理.
+public boolean dispatchTouchEvent(MotionEvent event) { ... ListenerInfo li = mListenerInfo; if (li != null &amp;amp;&amp;amp; li.mOnTouchListener != null &amp;amp;&amp;amp; (mViewFlags &amp;amp; ENABLED_MASK) == ENABLED &amp;amp;&amp;amp; li.mOnTouchListener.onTouch(this, event)) { result = true; } if (!result &amp;amp;&amp;amp; onTouchEvent(event)) { result = true; } } .</description>
+    </item>
+    
+  </channel>
+</rss>

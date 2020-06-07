@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>GC可达性实践-内存泄露分析 | 音视频技术部</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="generator" content="Hugo 0.72.0" />
+    
+    
+      <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
+    
+
+    
+    
+      <link href="/dist/css/app.4fc0b62e4b82c997bb0041217cd6b979.css" rel="stylesheet">
+    
+
+    
+
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="GC可达性实践-内存泄露分析" />
+<meta property="og:description" content="概述 Java中的对象回收是通过GC，但是在回收之前需要知道哪些对象是可回收的，哪些对象是不可回收的。
+常见的回收机制 引用计数算法 引用算法是在对象中添加引用计数器，每当有地方引用了此对象时候，引用计数加1，当引用失效时候引用计数器减1。没有任何地方引用此对象时候，说明此对象不再使用，可以被回收。常见的是C&#43;&#43;中的智能指针使用了此算法。而Java中并未使用此算法，为什么呢？后面再回答吧。
+可达性分析算法 在Java中判断是否可回收是通过可达性来判断的。可达性分析的基本思路是通过一系列的称为“GC ROOT”的对象作为起点，从这些节点开始向下搜索，搜索所走过的路径称为引用链。当一个对象到GC ROOT没有任何引用链时说明此对象可被回收。 例如： 由于A，B对象没有引用链，因此可以被回收。
+ 注 GC模型中的均为对象，而不是类。
+ Java中的引用 现在Java语言中，引用分为强引用，软引用，弱引用，虚引用。
+强引用在代码中普遍存在， 类似于“Object object = new Object”，只要强引用存在，GC不会回收被引用的对象。
+软引用在代码中不常见，用于描述一些还有用但并非必需的对象。对于软引用关联的对象，Java中用SoftReference来实现的。
+弱引用描述非必需的对象，只被弱引用关联的对象只能生存到下一次GC发生之前，一旦GC被触发，只被弱引用引用的对象都会被回收。Java中用WeakReference来实现。
+Java中GC ROOT简易模型分析 A对象释放了C的引用后，C，D对象无引用链可以到达,因此C，D对象可以被回收。
+ A对象释放对C对象的引用，然而GC ROOT -&gt; A -&gt; B -&gt; C -&gt; D，到C对象有引用链可达,到D对象有引用链子可达，所有没有对象可以被回收。
+ A释放对B，C的引用，根据引用链到B，C，D都不可达，因此B，C，D对象均可回收。 如果使用的是引用计数算法呢？ 由于B，C，D相互引用，导致了各个对象的引用计数器都不为0，从而均不可回收，对于相互循环引用的对象，引用计数算法不能很好的解决.
+ 包含弱引用情况，如下图B弱引用C 当A释放C的引用，由于B是弱引用C，弱引用只会存在到GC发生之前，相当于无引用链可达，因此C，D对象会可被回收。
+ Android内存泄露 AsyncTask的使用中会经常的直接Activity或者Fragment中创建匿名内部类来使用，这样很容易导致Activity或者Fragment的泄露。
+ public class TaskLeakActivity extends AppCompatActivity { @Override public void onCreate(Bundle savedInstanceState) { super.onCreate(savedInstanceState); TextView textView = new TextView(this); textView.setText(&quot;Task&quot;); setContentView(textView); new AsyncTask&lt;Void, Void, Void&gt;() { @Override protected Void doInBackground(Void." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://wfeii.github.io/posts/_posts/2017-11-04-gc%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90-%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E5%88%86%E6%9E%90/" />
+<meta property="article:published_time" content="2017-11-04T00:00:00+00:00" />
+<meta property="article:modified_time" content="2017-11-04T00:00:00+00:00" />
+<meta itemprop="name" content="GC可达性实践-内存泄露分析">
+<meta itemprop="description" content="概述 Java中的对象回收是通过GC，但是在回收之前需要知道哪些对象是可回收的，哪些对象是不可回收的。
+常见的回收机制 引用计数算法 引用算法是在对象中添加引用计数器，每当有地方引用了此对象时候，引用计数加1，当引用失效时候引用计数器减1。没有任何地方引用此对象时候，说明此对象不再使用，可以被回收。常见的是C&#43;&#43;中的智能指针使用了此算法。而Java中并未使用此算法，为什么呢？后面再回答吧。
+可达性分析算法 在Java中判断是否可回收是通过可达性来判断的。可达性分析的基本思路是通过一系列的称为“GC ROOT”的对象作为起点，从这些节点开始向下搜索，搜索所走过的路径称为引用链。当一个对象到GC ROOT没有任何引用链时说明此对象可被回收。 例如： 由于A，B对象没有引用链，因此可以被回收。
+ 注 GC模型中的均为对象，而不是类。
+ Java中的引用 现在Java语言中，引用分为强引用，软引用，弱引用，虚引用。
+强引用在代码中普遍存在， 类似于“Object object = new Object”，只要强引用存在，GC不会回收被引用的对象。
+软引用在代码中不常见，用于描述一些还有用但并非必需的对象。对于软引用关联的对象，Java中用SoftReference来实现的。
+弱引用描述非必需的对象，只被弱引用关联的对象只能生存到下一次GC发生之前，一旦GC被触发，只被弱引用引用的对象都会被回收。Java中用WeakReference来实现。
+Java中GC ROOT简易模型分析 A对象释放了C的引用后，C，D对象无引用链可以到达,因此C，D对象可以被回收。
+ A对象释放对C对象的引用，然而GC ROOT -&gt; A -&gt; B -&gt; C -&gt; D，到C对象有引用链可达,到D对象有引用链子可达，所有没有对象可以被回收。
+ A释放对B，C的引用，根据引用链到B，C，D都不可达，因此B，C，D对象均可回收。 如果使用的是引用计数算法呢？ 由于B，C，D相互引用，导致了各个对象的引用计数器都不为0，从而均不可回收，对于相互循环引用的对象，引用计数算法不能很好的解决.
+ 包含弱引用情况，如下图B弱引用C 当A释放C的引用，由于B是弱引用C，弱引用只会存在到GC发生之前，相当于无引用链可达，因此C，D对象会可被回收。
+ Android内存泄露 AsyncTask的使用中会经常的直接Activity或者Fragment中创建匿名内部类来使用，这样很容易导致Activity或者Fragment的泄露。
+ public class TaskLeakActivity extends AppCompatActivity { @Override public void onCreate(Bundle savedInstanceState) { super.onCreate(savedInstanceState); TextView textView = new TextView(this); textView.setText(&quot;Task&quot;); setContentView(textView); new AsyncTask&lt;Void, Void, Void&gt;() { @Override protected Void doInBackground(Void.">
+<meta itemprop="datePublished" content="2017-11-04T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2017-11-04T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="115">
+
+
+
+<meta itemprop="keywords" content="GC," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="GC可达性实践-内存泄露分析"/>
+<meta name="twitter:description" content="概述 Java中的对象回收是通过GC，但是在回收之前需要知道哪些对象是可回收的，哪些对象是不可回收的。
+常见的回收机制 引用计数算法 引用算法是在对象中添加引用计数器，每当有地方引用了此对象时候，引用计数加1，当引用失效时候引用计数器减1。没有任何地方引用此对象时候，说明此对象不再使用，可以被回收。常见的是C&#43;&#43;中的智能指针使用了此算法。而Java中并未使用此算法，为什么呢？后面再回答吧。
+可达性分析算法 在Java中判断是否可回收是通过可达性来判断的。可达性分析的基本思路是通过一系列的称为“GC ROOT”的对象作为起点，从这些节点开始向下搜索，搜索所走过的路径称为引用链。当一个对象到GC ROOT没有任何引用链时说明此对象可被回收。 例如： 由于A，B对象没有引用链，因此可以被回收。
+ 注 GC模型中的均为对象，而不是类。
+ Java中的引用 现在Java语言中，引用分为强引用，软引用，弱引用，虚引用。
+强引用在代码中普遍存在， 类似于“Object object = new Object”，只要强引用存在，GC不会回收被引用的对象。
+软引用在代码中不常见，用于描述一些还有用但并非必需的对象。对于软引用关联的对象，Java中用SoftReference来实现的。
+弱引用描述非必需的对象，只被弱引用关联的对象只能生存到下一次GC发生之前，一旦GC被触发，只被弱引用引用的对象都会被回收。Java中用WeakReference来实现。
+Java中GC ROOT简易模型分析 A对象释放了C的引用后，C，D对象无引用链可以到达,因此C，D对象可以被回收。
+ A对象释放对C对象的引用，然而GC ROOT -&gt; A -&gt; B -&gt; C -&gt; D，到C对象有引用链可达,到D对象有引用链子可达，所有没有对象可以被回收。
+ A释放对B，C的引用，根据引用链到B，C，D都不可达，因此B，C，D对象均可回收。 如果使用的是引用计数算法呢？ 由于B，C，D相互引用，导致了各个对象的引用计数器都不为0，从而均不可回收，对于相互循环引用的对象，引用计数算法不能很好的解决.
+ 包含弱引用情况，如下图B弱引用C 当A释放C的引用，由于B是弱引用C，弱引用只会存在到GC发生之前，相当于无引用链可达，因此C，D对象会可被回收。
+ Android内存泄露 AsyncTask的使用中会经常的直接Activity或者Fragment中创建匿名内部类来使用，这样很容易导致Activity或者Fragment的泄露。
+ public class TaskLeakActivity extends AppCompatActivity { @Override public void onCreate(Bundle savedInstanceState) { super.onCreate(savedInstanceState); TextView textView = new TextView(this); textView.setText(&quot;Task&quot;); setContentView(textView); new AsyncTask&lt;Void, Void, Void&gt;() { @Override protected Void doInBackground(Void."/>
+
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        音视频技术部
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/about/" title="关于 page">
+              关于
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/posts/" title="文章 page">
+              文章
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        文章
+      </aside>
+      
+
+
+
+
+  <div id="sharing" class="mt3">
+
+    
+    <a href="https://www.facebook.com/sharer.php?u=https://wfeii.github.io/posts/_posts/2017-11-04-gc%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90-%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E5%88%86%E6%9E%90/" class="facebook no-underline" aria-label="share on Facebook">
+      <svg height="32px"  style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M28.765,50.32h6.744V33.998h4.499l0.596-5.624h-5.095  l0.007-2.816c0-1.466,0.14-2.253,2.244-2.253h2.812V17.68h-4.5c-5.405,0-7.307,2.729-7.307,7.317v3.377h-3.369v5.625h3.369V50.32z   M33,64C16.432,64,3,50.569,3,34S16.432,4,33,4s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;"/></svg>
+
+    </a>
+
+    
+    
+    <a href="https://twitter.com/share?url=https://wfeii.github.io/posts/_posts/2017-11-04-gc%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90-%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E5%88%86%E6%9E%90/&amp;text=GC%e5%8f%af%e8%be%be%e6%80%a7%e5%ae%9e%e8%b7%b5-%e5%86%85%e5%ad%98%e6%b3%84%e9%9c%b2%e5%88%86%e6%9e%90" class="twitter no-underline" aria-label="share on Twitter">
+      <svg height="32px"  style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M37.167,22.283c-2.619,0.953-4.274,3.411-4.086,6.101  l0.063,1.038l-1.048-0.127c-3.813-0.487-7.145-2.139-9.974-4.915l-1.383-1.377l-0.356,1.017c-0.754,2.267-0.272,4.661,1.299,6.271  c0.838,0.89,0.649,1.017-0.796,0.487c-0.503-0.169-0.943-0.296-0.985-0.233c-0.146,0.149,0.356,2.076,0.754,2.839  c0.545,1.06,1.655,2.097,2.871,2.712l1.027,0.487l-1.215,0.021c-1.173,0-1.215,0.021-1.089,0.467  c0.419,1.377,2.074,2.839,3.918,3.475l1.299,0.444l-1.131,0.678c-1.676,0.976-3.646,1.526-5.616,1.568  C19.775,43.256,19,43.341,19,43.405c0,0.211,2.557,1.397,4.044,1.864c4.463,1.377,9.765,0.783,13.746-1.568  c2.829-1.673,5.657-5,6.978-8.221c0.713-1.716,1.425-4.851,1.425-6.354c0-0.975,0.063-1.102,1.236-2.267  c0.692-0.678,1.341-1.419,1.467-1.631c0.21-0.403,0.188-0.403-0.88-0.043c-1.781,0.636-2.033,0.551-1.152-0.402  c0.649-0.678,1.425-1.907,1.425-2.267c0-0.063-0.314,0.042-0.671,0.233c-0.377,0.212-1.215,0.53-1.844,0.72l-1.131,0.361l-1.027-0.7  c-0.566-0.381-1.361-0.805-1.781-0.932C39.766,21.902,38.131,21.944,37.167,22.283z M33,64C16.432,64,3,50.569,3,34S16.432,4,33,4  s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/></svg>
+
+    </a>
+
+    
+    <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https://wfeii.github.io/posts/_posts/2017-11-04-gc%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90-%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E5%88%86%E6%9E%90/&amp;title=GC%e5%8f%af%e8%be%be%e6%80%a7%e5%ae%9e%e8%b7%b5-%e5%86%85%e5%ad%98%e6%b3%84%e9%9c%b2%e5%88%86%e6%9e%90" class="linkedin no-underline" aria-label="share on LinkedIn">
+      <svg  height="32px"  style="enable-background:new 0 0 65 65;" version="1.1" viewBox="0 0 65 65" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <path d="M50.837,48.137V36.425c0-6.275-3.35-9.195-7.816-9.195  c-3.604,0-5.219,1.983-6.119,3.374V27.71h-6.79c0.09,1.917,0,20.427,0,20.427h6.79V36.729c0-0.609,0.044-1.219,0.224-1.655  c0.49-1.22,1.607-2.483,3.482-2.483c2.458,0,3.44,1.873,3.44,4.618v10.929H50.837z M22.959,24.922c2.367,0,3.842-1.57,3.842-3.531  c-0.044-2.003-1.475-3.528-3.797-3.528s-3.841,1.524-3.841,3.528c0,1.961,1.474,3.531,3.753,3.531H22.959z M34,64  C17.432,64,4,50.568,4,34C4,17.431,17.432,4,34,4s30,13.431,30,30C64,50.568,50.568,64,34,64z M26.354,48.137V27.71h-6.789v20.427  H26.354z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/>
+</svg>
+
+    </a>
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">GC可达性实践-内存泄露分析</h1>
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2017-11-04T00:00:00Z">November 4, 2017</time>
+
+      
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links nested-img mid-gray pr4-l w-two-thirds-l"><h2 id="概述">概述</h2>
+<p>Java中的对象回收是通过GC，但是在回收之前需要知道哪些对象是可回收的，哪些对象是不可回收的。</p>
+<h2 id="常见的回收机制">常见的回收机制</h2>
+<h3 id="引用计数算法">引用计数算法</h3>
+<p>引用算法是在对象中添加引用计数器，每当有地方引用了此对象时候，引用计数加1，当引用失效时候引用计数器减1。没有任何地方引用此对象时候，说明此对象不再使用，可以被回收。常见的是C++中的智能指针使用了此算法。而Java中并未使用此算法，为什么呢？后面再回答吧。</p>
+<h3 id="可达性分析算法">可达性分析算法</h3>
+<p>在Java中判断是否可回收是通过可达性来判断的。可达性分析的基本思路是通过一系列的称为“GC ROOT”的对象作为起点，从这些节点开始向下搜索，搜索所走过的路径称为引用链。当一个对象到GC ROOT没有任何引用链时说明此对象可被回收。
+例如：
+<img src="http://img.blog.csdn.net/20170308125242116?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvd2ZlaWk=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="GC-1">
+由于A，B对象没有引用链，因此可以被回收。</p>
+<blockquote>
+<p>注 GC模型中的均为对象，而不是类。</p>
+</blockquote>
+<h3 id="java中的引用">Java中的引用</h3>
+<p>现在Java语言中，引用分为强引用，软引用，弱引用，虚引用。</p>
+<p>强引用在代码中普遍存在， 类似于“Object object = new Object”，只要强引用存在，GC不会回收被引用的对象。</p>
+<p>软引用在代码中不常见，用于描述一些还有用但并非必需的对象。对于软引用关联的对象，Java中用SoftReference来实现的。</p>
+<p>弱引用描述非必需的对象，只被弱引用关联的对象只能生存到下一次GC发生之前，一旦GC被触发，只被弱引用引用的对象都会被回收。Java中用WeakReference来实现。</p>
+<h3 id="java中gc-root简易模型分析">Java中GC ROOT简易模型分析</h3>
+<p><img src="http://img.blog.csdn.net/20170308125448643?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvd2ZlaWk=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="GC-2">
+A对象释放了C的引用后，C，D对象无引用链可以到达,因此C，D对象可以被回收。</p>
+<hr>
+<p><img src="http://img.blog.csdn.net/20170308125555777?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvd2ZlaWk=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="GC-3">
+A对象释放对C对象的引用，然而GC ROOT -&gt; A -&gt; B -&gt; C -&gt; D，到C对象有引用链可达,到D对象有引用链子可达，所有没有对象可以被回收。</p>
+<hr>
+<p><img src="http://img.blog.csdn.net/20170308125704176?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvd2ZlaWk=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="GC-4">
+A释放对B，C的引用，根据引用链到B，C，D都不可达，因此B，C，D对象均可回收。
+<strong>如果使用的是引用计数算法呢？</strong>
+由于B，C，D相互引用，导致了各个对象的引用计数器都不为0，从而均不可回收，对于相互循环引用的对象，引用计数算法不能很好的解决.</p>
+<hr>
+<p>包含弱引用情况，如下图B弱引用C
+<img src="http://img.blog.csdn.net/20170308125838921?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvd2ZlaWk=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="GC-5">
+当A释放C的引用，由于B是弱引用C，弱引用只会存在到GC发生之前，相当于无引用链可达，因此C，D对象会可被回收。</p>
+<hr>
+<h2 id="android内存泄露">Android内存泄露</h2>
+<p>AsyncTask的使用中会经常的直接Activity或者Fragment中创建匿名内部类来使用，这样很容易导致Activity或者Fragment的泄露。</p>
+<pre><code>  public class TaskLeakActivity extends AppCompatActivity {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        TextView textView = new TextView(this);
+        textView.setText(&quot;Task&quot;);
+        setContentView(textView);
+        new AsyncTask&lt;Void, Void, Void&gt;() {
+            @Override protected Void doInBackground(Void... params) {
+                SystemClock.sleep(20000);
+                return null;
+            }
+        }.execute();
+    }
+}
+</code></pre><p>LeakCanary检测 ：
+<img src="http://img.blog.csdn.net/20170308130200097?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvd2ZlaWk=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="LeakCanary"></p>
+<p>MAT检测：
+<img src="http://img.blog.csdn.net/20170308130229819?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvd2ZlaWk=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="MAT"></p>
+<h3 id="gc-root简易模型">GC ROOT简易模型</h3>
+<p>这个例子中虽然剪断GC ROOT到Activity的部分引用链，由于存在 GC ROOT -&gt; Thead -&gt; anonymous AsyncTask -&gt; TaskLeakActivity引用链到TaskLeakActivity可达。因此导致了TaskLeakActivity不可回收，导致了泄露。</p>
+<blockquote>
+<p>注：这里GC ROOT不正规，只是为了分析泄露引入的，其实GC ROOT是具体的类对象。对于哪些类的对象可作为GC ROOT可。
+Google。</p>
+</blockquote>
+<p><strong>经常的会听到这样一句话： 长周期的对象持有了短周期的对象导致内存泄露，为什么呢?</strong>
+<strong>这是因为长周期的对象，到短周期的对象的引用链可达，导致短周期的对象泄露。就像上述的Thread的对象到TaskLeakActivity的引用链可达。</strong></p>
+<p><strong>如何修复内存泄露</strong></p>
+<ul>
+<li>修复内存泄露，我们就是剪断到对象引用链，使得引用链到对象不可达。</li>
+<li>避免不必要的引用，比如含有耗时操作匿名内部类改为静态内部类，查询数据库时只是需要ContentResolve，没必要传入Activity等等。</li>
+<li>使用长周期的对象替换短周期对象，比如需要Context对象，避免使用Activity，而是使用ApplicationContext等等。</li>
+<li>引入弱引用，弱引用可以只能存在到引用GC触发之前，不会影响内存的回收。</li>
+</ul>
+<blockquote>
+<p>GC ROOT简易模型有哪些好处</p>
+</blockquote>
+<blockquote>
+<ul>
+<li>更好的使用常用的内存泄露的工具比如MAT，LeakCannary，这些工具根据引用链作为原理。</li>
+<li>更好的查找内存泄露。</li>
+<li>写代码时候更好的明白持有关系，避免从源头避免内存泄露。</li>
+</ul>
+</blockquote>
+<ul class="pa0">
+  
+   <li class="list">
+     <a href="/tags/gc" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">GC</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div>
+    </div>
+
+    <aside class="w-30-l mt6-l"><div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">这是什么 posts</p>
+      <nav id="TableOfContents">
+  <ul>
+    <li><a href="#概述">概述</a></li>
+    <li><a href="#常见的回收机制">常见的回收机制</a>
+      <ul>
+        <li><a href="#引用计数算法">引用计数算法</a></li>
+        <li><a href="#可达性分析算法">可达性分析算法</a></li>
+        <li><a href="#java中的引用">Java中的引用</a></li>
+        <li><a href="#java中gc-root简易模型分析">Java中GC ROOT简易模型分析</a></li>
+      </ul>
+    </li>
+    <li><a href="#android内存泄露">Android内存泄露</a>
+      <ul>
+        <li><a href="#gc-root简易模型">GC ROOT简易模型</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">相关內容</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/posts/2017-11-04-gc%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90-%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E5%88%86%E6%9E%90/">GC可达性实践-内存泄露分析</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://wfeii.github.io/" >
+    &copy;  音视频技术部 2020 
+  </a>
+    <div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+  </div>
+</footer>
+
+    
+
+  <script src="/dist/js/app.3fc0f988d21662902933.js"></script>
+
+
+  </body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>文章 | 音视频技术部</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="generator" content="Hugo 0.72.0" />
+    
+    
+      <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
+    
+
+    
+    
+      <link href="/dist/css/app.4fc0b62e4b82c997bb0041217cd6b979.css" rel="stylesheet">
+    
+
+    
+
+    
+      
+
+    
+
+    
+    
+      <link href="/posts/index.xml" rel="alternate" type="application/rss+xml" title="音视频技术部" />
+      <link href="/posts/index.xml" rel="feed" type="application/rss+xml" title="音视频技术部" />
+      
+    
+    
+    <meta property="og:title" content="文章" />
+<meta property="og:description" content="专注于音视频技术输出" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://wfeii.github.io/posts/" />
+<meta property="og:updated_time" content="2017-03-02T12:00:00-05:00" />
+<meta itemprop="name" content="文章">
+<meta itemprop="description" content="专注于音视频技术输出"><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="文章"/>
+<meta name="twitter:description" content="专注于音视频技术输出"/>
+
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+
+  
+  
+  <header class="cover bg-top" style="background-image: url('https://wfeii.github.io/images/top.jpg');">
+    <div class="bg-black-60">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        音视频技术部
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/about/" title="关于 page">
+              关于
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/posts/" title="文章 page">
+              文章
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+  </div>
+</nav>
+
+      <div class="tc-l pv4 pv6-l ph3 ph4-ns">
+        <h1 class="f2 f-subheadline-l fw2 white-90 mb0 lh-title">
+          文章
+        </h1>
+        
+      </div>
+    </div>
+  </header>
+
+
+    <main class="pb7" role="main">
+      
+  <article class="pa3 pa4-ns nested-copy-line-height nested-img">
+    <section class="cf ph3 ph5-l pv3 pv4-l f4 tc-l center measure-wide lh-copy mid-gray"><p>发布的文章</p>
+</section>
+    <section class="flex-ns flex-wrap justify-around mt5">
+      
+        <div class="relative w-100 w-30-l mb4 bg-white"><div class="relative w-100 mb4 bg-white nested-copy-line-height">
+  <div class="bg-white mb3 pa4 gray overflow-hidden">
+    <span class="f6 db">Posts</span>
+    <h1 class="f3 near-black">
+      <a href="https://wfeii.github.io/posts/android_base/server/2014-11-01-boundservices/" class="link black dim">
+        Bound Services
+      </a>
+    </h1>
+    <div class="nested-links f5 lh-copy nested-copy-line-height">
+      <h3 id="基础">基础</h3>
+<h4 id="如何绑定service">如何绑定service?</h4>
+<ol>
+<li>创建一个bound service</li>
+<li>在组件中调用bindService()方法进行绑定</li>
+</ol>
+<h4 id="如何创建一个bound-service呢">如何创建一个bound Service呢？</h4>
+<p>继承Service，用于绑定的类，首先，必须提供一个IBinder用于与客户端(例如Activity)<br>
+交互,有三种方式可以提供此IBinder,每一种方式又有不同的实现方式。</p>
+<ol>
+<li>继承Binder(实现了IBinder)类</li>
+<li>使用Messenger</li>
+<li>使用AIDL</li>
+</ol>
+<p>其次是在onBind()中返回IBinder</p>
+<blockquote>
+<p>**Notice:**多个clients连接到service时，只在第一次绑定时调用onBind()方法获取<br>
+IBinder对象，对于其他的clients，系统直接传递一个IBinder，不会再调<br>
+用onBind()方法.</p>
+</blockquote>
+    </div>
+  </div>
+</div>
+</div>
+      
+        <div class="relative w-100 w-30-l mb4 bg-white"><div class="relative w-100 mb4 bg-white nested-copy-line-height">
+  <div class="bg-white mb3 pa4 gray overflow-hidden">
+    <span class="f6 db">Posts</span>
+    <h1 class="f3 near-black">
+      <a href="https://wfeii.github.io/posts/_posts/android_base/broadcast/2014-11-03-brodcast/" class="link black dim">
+        Brodcast
+      </a>
+    </h1>
+    <div class="nested-links f5 lh-copy nested-copy-line-height">
+      基础 什么是android中的广播? 广播就是在Android系统中发生某件事情（电量，电话的来电与去电等等），然后会向android系统中发送消息的组件
+Android系统中发生某件事情，怎么向android系统中发送消息呢？ 有两种方式，一个通过发送正常的广播，sendBroadcast(),或者发送有序广播，sendOrderedBroadcast()。
+发送正常的广播（也可称为无序广播）和发送有序广播有什么区别呢？  正常广播(也可称为无序广播)：所有接受者都可同时接受到广播，更加的高效，但是接受者不能取消广播。 有序广播:一次只能传递给一个接受者（根据android:priority，）上一级接收者可以传送数据给下一级，并且可以中止广播 。  ** Notice: 有序广播的接受是根据属性中priority来判断优先级的，对于优先级越高，越较早接收到广播，相同的优先级，会根据AndroidManfiest.xml中的顺序调用。**
+如何使用广播呢?  定义广播接收器,继承自BroadcastReceiver或其子类，覆写onReceive()方法。 注册定义的广播接收器。  如何注册定义的广播接收者呢？  使用代码注册  //监听的广播的动作 IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON); //注册广播接收者 registerReceiver(new ScreenonReceiver(), filter); // 在AndroidManifest.xml中配置 &lt;receiver android:name=&quot;com.broadcast.ScreenonReceiver&quot; android:enabled=&quot;true&quot;&gt; &lt;intent-filter &gt; &lt;action android:name=&quot;android.intent.action.SCREEN_ON&quot;/&gt; &lt;/intent-filter&gt; &lt;/receiver&gt;  Notice: 使用在AndroidManifest.xml中配置的方式，必须指定android:enabled=&quot;true&quot;否则可能导致接收不到广播。
+Skill: 最好不要使用AndroidManifest.xml中配置，一般的使用场景是开启service在Service中注册广播接收者，因为这样可以方便的取消注册，可控性比较好。
+ 常用广播的接受 开机启动的广播接收 ** Intent.ACTION_BOOT_COMPLETED ** 监听此动作的权限：
+	RECEIVE_BOOT_COMPLETED 屏幕唤醒的广播接收 监听的广播的动作为:Intent.ACTION_SCREEN_ON
+屏幕关闭的广播接收 监听的广播的动作为:Intent.ACTION_SCREEN_OFF
+来电广播的接收 监听的广播的动作为: android.intent.action.PHONE_STATE
+监听此动作时要加权限，READ_PHONE_STATE
+去电广播的接收 监听的广播的动作为: Intent.ACTION_NEW_OUTGOING_CALL 所要求的权限READ_PHONE_STATE，PROCESS_OUTGOING_CALLS
+    </div>
+  </div>
+</div>
+</div>
+      
+        <div class="relative w-100 w-30-l mb4 bg-white"><div class="relative w-100 mb4 bg-white nested-copy-line-height">
+  <div class="bg-white mb3 pa4 gray overflow-hidden">
+    <span class="f6 db">Posts</span>
+    <h1 class="f3 near-black">
+      <a href="https://wfeii.github.io/posts/android_base/broadcast/2014-11-03-brodcast/" class="link black dim">
+        Brodcast
+      </a>
+    </h1>
+    <div class="nested-links f5 lh-copy nested-copy-line-height">
+      基础 什么是android中的广播? 广播就是在Android系统中发生某件事情（电量，电话的来电与去电等等），然后会向android系统中发送消息的组件
+Android系统中发生某件事情，怎么向android系统中发送消息呢？ 有两种方式，一个通过发送正常的广播，sendBroadcast(),或者发送有序广播，sendOrderedBroadcast()。
+发送正常的广播（也可称为无序广播）和发送有序广播有什么区别呢？  正常广播(也可称为无序广播)：所有接受者都可同时接受到广播，更加的高效，但是接受者不能取消广播。 有序广播:一次只能传递给一个接受者（根据android:priority，）上一级接收者可以传送数据给下一级，并且可以中止广播 。  ** Notice: 有序广播的接受是根据属性中priority来判断优先级的，对于优先级越高，越较早接收到广播，相同的优先级，会根据AndroidManfiest.xml中的顺序调用。**
+如何使用广播呢?  定义广播接收器,继承自BroadcastReceiver或其子类，覆写onReceive()方法。 注册定义的广播接收器。  如何注册定义的广播接收者呢？  使用代码注册  //监听的广播的动作 IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON); //注册广播接收者 registerReceiver(new ScreenonReceiver(), filter); // 在AndroidManifest.xml中配置 &lt;receiver android:name=&quot;com.broadcast.ScreenonReceiver&quot; android:enabled=&quot;true&quot;&gt; &lt;intent-filter &gt; &lt;action android:name=&quot;android.intent.action.SCREEN_ON&quot;/&gt; &lt;/intent-filter&gt; &lt;/receiver&gt;  Notice: 使用在AndroidManifest.xml中配置的方式，必须指定android:enabled=&quot;true&quot;否则可能导致接收不到广播。
+Skill: 最好不要使用AndroidManifest.xml中配置，一般的使用场景是开启service在Service中注册广播接收者，因为这样可以方便的取消注册，可控性比较好。
+ 常用广播的接受 开机启动的广播接收 ** Intent.ACTION_BOOT_COMPLETED ** 监听此动作的权限：
+	RECEIVE_BOOT_COMPLETED 屏幕唤醒的广播接收 监听的广播的动作为:Intent.ACTION_SCREEN_ON
+屏幕关闭的广播接收 监听的广播的动作为:Intent.ACTION_SCREEN_OFF
+来电广播的接收 监听的广播的动作为: android.intent.action.PHONE_STATE
+监听此动作时要加权限，READ_PHONE_STATE
+去电广播的接收 监听的广播的动作为: Intent.ACTION_NEW_OUTGOING_CALL 所要求的权限READ_PHONE_STATE，PROCESS_OUTGOING_CALLS
+    </div>
+  </div>
+</div>
+</div>
+      
+    </section>
+
+<ul class="pagination">
+    
+    <li class="page-item">
+        <a href="/posts/" class="page-link" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
+    </li>
+    
+    <li class="page-item">
+    <a href="/posts/page/9/" class="page-link" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+    </li>
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/posts/">1</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/posts/page/2/">2</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/posts/page/3/">3</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item disabled"><span aria-hidden="true">&nbsp;&hellip;&nbsp;</span></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/posts/page/9/">9</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item active"><a class="page-link" href="/posts/page/10/">10</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/posts/page/11/">11</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item disabled"><span aria-hidden="true">&nbsp;&hellip;&nbsp;</span></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/posts/page/14/">14</a></li>
+    
+    
+    <li class="page-item">
+    <a href="/posts/page/11/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+    </li>
+    
+    <li class="page-item">
+        <a href="/posts/page/14/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    </li>
+    
+</ul>
+
+</article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://wfeii.github.io/" >
+    &copy;  音视频技术部 2020 
+  </a>
+    <div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+  </div>
+</footer>
+
+    
+
+  <script src="/dist/js/app.3fc0f988d21662902933.js"></script>
+
+
+  </body>
+</html>

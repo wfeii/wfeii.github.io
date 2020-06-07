@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Android性能 on 音视频技术部</title>
+    <link>https://wfeii.github.io/tags/android%E6%80%A7%E8%83%BD/</link>
+    <description>Recent content in Android性能 on 音视频技术部</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sat, 06 Aug 2016 16:40:12 +0000</lastBuildDate>
+    
+	<atom:link href="https://wfeii.github.io/tags/android%E6%80%A7%E8%83%BD/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>UI优化</title>
+      <link>https://wfeii.github.io/posts/_posts/android_optimize/2016-08-06-ui%E4%BC%98%E5%8C%96/</link>
+      <pubDate>Sat, 06 Aug 2016 16:40:12 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/_posts/android_optimize/2016-08-06-ui%E4%BC%98%E5%8C%96/</guid>
+      <description>概述 总结来源与Google发布的性能优化的视频 Android Performance Patterns 和 Android Performance Optimizing Apps for Speed and Usability 对于用户感到卡顿,不流畅的原因有很多,比如Layout层级结构过深,动画过多,界面刷新,等等导致了CPU或者GPU的负担过重,16ms内无法完成一帧的绘制,导致了掉帧,从而表现出卡顿,不流畅.
+绘制原理 为了更好的理解UI优化,在此之前先要说明一下硬件的基础.
+VSYNC 两个概念 :
+ Refresh Rate：代表了屏幕在一秒内刷新屏幕的次数，这取决于硬件的参数，例如60Hz。 Frame Rate：代表了GPU在一秒内绘制的帧数,例如60fps。  GPU获取图形数据绘制,然后硬件负责把绘制的内容显示再屏幕上,二者协调正常.
+如果帧速率高于屏幕刷新速率,就会出现撕裂的现象,一部分显示当前的帧,一部分显示现在的帧,这种解决的方案就是双缓冲机制,GPU将帧写进存储器被成为back buffer,而存储器的次级区域成为frame buffer,当写入一帧时,它会开始填充back buffer,而framen buffer保持不变,现在刷新屏幕,使用frame buffer进行绘制,刷新屏幕,vsync触发,也会把back buffer复制到fragme buffer. 更具体的内容参考: Graphics
+如果屏幕刷新速率高于帧速率时,就会导致屏幕显示还是上一帧的内容,从而出现卡顿,动画不流畅等现象
+一帧画面绘制过程 了解了VSYNC的原理,下面该考虑应用程序是如何把画面绘制到屏幕上的了?或者是如何把XML文件转换成用户能够看到并理解的图像的?
+其实这个过程的核心就是进行光栅化(rasterization)的处理过程.这个过程就是把一些高级的对象,比如字符串,形状等转换成屏幕上纹理中的像素点.光栅化是一个非常耗时的过程.正因如此,手机硬件上有一个特殊的部分用于提高光栅化的过程,叫做图像处理器,或者说GPU. 图像绘制到屏幕上首先在CPU上转换成多边形或者纹理,然后再传递到GPU进行光栅化处理,处理UI对象并转化成多边形和纹理并不是很快的操作,同样从CPU传递给GPU也不是那么快,这行就想办法较少UI对象转换的数量,和提交到GPU的数量,OpenGL ES API允许你将内容传递到GPU,并保存到GPU中,当以后再次绘制一个按钮的时候,只需要参考GPU内存中的已经存在的纹理.
+渲染优化,尽可能多且快的将更多的数据上传到GPU,然后留在GPU中,尽可能长的时间里不去修改.每次更新GPU中的资源,你将会失去宝贵的处理时间.
+下面说明什么时候会导致GPU资源更新. Android把xml语言转化成GPU能够识别的资源从而渲染到屏幕上,是通过Display List来实现的,一个Display List对象中基本上包含了所有GPU需要的渲染信息,Display List中包含了GPU可能需要的常用的资源列表,同时也包含了Open GL命令列表.
+在某个视图第一次需要被渲染时,Display List就会被创建,当视图需要显示在屏幕时,会执行GPU的相关指令来进行渲染.
+从上图可以看出
+ 只是View属性改变时,只是参考GPU内存中的已经存在,然后执行相关Open GL进行渲染, InvaliDated View也不会重新创建Display List View 布局改变,比如可见性,大小等  优化点 概述 渲染操作通常依赖于两个核心组件：CPU与GPU。CPU负责包括Measure，Layout，Record，Execute的计算操作，GPU负责Rasterization(栅格化)操作。CPU通常存在的问题的原因是存在非必需的视图组件，它不仅仅会带来重复的计算操作，而且还会占用额外的GPU资源。 对于CPU,应该尽量减少布局的层级深度,CPU减少measure等操作的时间,而对于GPU主要是减少不必要的过度绘制.
+过度绘制 过度绘制是指同一帧内一个像素点绘制了多次,通过查看overdraw(开发者选项-&amp;gt; 调试GPU过度绘制) 颜色代表了像素点过度绘制的次数:</description>
+    </item>
+    
+    <item>
+      <title>UI优化</title>
+      <link>https://wfeii.github.io/posts/android_optimize/2016-08-06-ui%E4%BC%98%E5%8C%96/</link>
+      <pubDate>Sat, 06 Aug 2016 16:40:12 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/android_optimize/2016-08-06-ui%E4%BC%98%E5%8C%96/</guid>
+      <description>概述 总结来源与Google发布的性能优化的视频 Android Performance Patterns 和 Android Performance Optimizing Apps for Speed and Usability 对于用户感到卡顿,不流畅的原因有很多,比如Layout层级结构过深,动画过多,界面刷新,等等导致了CPU或者GPU的负担过重,16ms内无法完成一帧的绘制,导致了掉帧,从而表现出卡顿,不流畅.
+绘制原理 为了更好的理解UI优化,在此之前先要说明一下硬件的基础.
+VSYNC 两个概念 :
+ Refresh Rate：代表了屏幕在一秒内刷新屏幕的次数，这取决于硬件的参数，例如60Hz。 Frame Rate：代表了GPU在一秒内绘制的帧数,例如60fps。  GPU获取图形数据绘制,然后硬件负责把绘制的内容显示再屏幕上,二者协调正常.
+如果帧速率高于屏幕刷新速率,就会出现撕裂的现象,一部分显示当前的帧,一部分显示现在的帧,这种解决的方案就是双缓冲机制,GPU将帧写进存储器被成为back buffer,而存储器的次级区域成为frame buffer,当写入一帧时,它会开始填充back buffer,而framen buffer保持不变,现在刷新屏幕,使用frame buffer进行绘制,刷新屏幕,vsync触发,也会把back buffer复制到fragme buffer. 更具体的内容参考: Graphics
+如果屏幕刷新速率高于帧速率时,就会导致屏幕显示还是上一帧的内容,从而出现卡顿,动画不流畅等现象
+一帧画面绘制过程 了解了VSYNC的原理,下面该考虑应用程序是如何把画面绘制到屏幕上的了?或者是如何把XML文件转换成用户能够看到并理解的图像的?
+其实这个过程的核心就是进行光栅化(rasterization)的处理过程.这个过程就是把一些高级的对象,比如字符串,形状等转换成屏幕上纹理中的像素点.光栅化是一个非常耗时的过程.正因如此,手机硬件上有一个特殊的部分用于提高光栅化的过程,叫做图像处理器,或者说GPU. 图像绘制到屏幕上首先在CPU上转换成多边形或者纹理,然后再传递到GPU进行光栅化处理,处理UI对象并转化成多边形和纹理并不是很快的操作,同样从CPU传递给GPU也不是那么快,这行就想办法较少UI对象转换的数量,和提交到GPU的数量,OpenGL ES API允许你将内容传递到GPU,并保存到GPU中,当以后再次绘制一个按钮的时候,只需要参考GPU内存中的已经存在的纹理.
+渲染优化,尽可能多且快的将更多的数据上传到GPU,然后留在GPU中,尽可能长的时间里不去修改.每次更新GPU中的资源,你将会失去宝贵的处理时间.
+下面说明什么时候会导致GPU资源更新. Android把xml语言转化成GPU能够识别的资源从而渲染到屏幕上,是通过Display List来实现的,一个Display List对象中基本上包含了所有GPU需要的渲染信息,Display List中包含了GPU可能需要的常用的资源列表,同时也包含了Open GL命令列表.
+在某个视图第一次需要被渲染时,Display List就会被创建,当视图需要显示在屏幕时,会执行GPU的相关指令来进行渲染.
+从上图可以看出
+ 只是View属性改变时,只是参考GPU内存中的已经存在,然后执行相关Open GL进行渲染, InvaliDated View也不会重新创建Display List View 布局改变,比如可见性,大小等  优化点 概述 渲染操作通常依赖于两个核心组件：CPU与GPU。CPU负责包括Measure，Layout，Record，Execute的计算操作，GPU负责Rasterization(栅格化)操作。CPU通常存在的问题的原因是存在非必需的视图组件，它不仅仅会带来重复的计算操作，而且还会占用额外的GPU资源。 对于CPU,应该尽量减少布局的层级深度,CPU减少measure等操作的时间,而对于GPU主要是减少不必要的过度绘制.
+过度绘制 过度绘制是指同一帧内一个像素点绘制了多次,通过查看overdraw(开发者选项-&amp;gt; 调试GPU过度绘制) 颜色代表了像素点过度绘制的次数:</description>
+    </item>
+    
+  </channel>
+</rss>

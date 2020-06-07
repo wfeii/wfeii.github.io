@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Android性能 | 音视频技术部</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="generator" content="Hugo 0.72.0" />
+    
+    
+      <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
+    
+
+    
+    
+      <link href="/dist/css/app.4fc0b62e4b82c997bb0041217cd6b979.css" rel="stylesheet">
+    
+
+    
+
+    
+      
+
+    
+
+    
+    
+      <link href="/tags/android%E6%80%A7%E8%83%BD/index.xml" rel="alternate" type="application/rss+xml" title="音视频技术部" />
+      <link href="/tags/android%E6%80%A7%E8%83%BD/index.xml" rel="feed" type="application/rss+xml" title="音视频技术部" />
+      
+    
+    
+    <meta property="og:title" content="Android性能" />
+<meta property="og:description" content="专注于音视频技术输出" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://wfeii.github.io/tags/android%E6%80%A7%E8%83%BD/" />
+<meta property="og:updated_time" content="2016-08-06T16:40:12+00:00" />
+<meta itemprop="name" content="Android性能">
+<meta itemprop="description" content="专注于音视频技术输出"><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Android性能"/>
+<meta name="twitter:description" content="专注于音视频技术输出"/>
+
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+
+  
+  
+  <header class="cover bg-top" style="background-image: url('https://wfeii.github.io/images/gohugo-default-sample-hero-image.jpg');">
+    <div class="bg-black-60">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        音视频技术部
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/about/" title="关于 page">
+              关于
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/posts/" title="文章 page">
+              文章
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+  </div>
+</nav>
+
+      <div class="tc-l pv4 pv6-l ph3 ph4-ns">
+        <h1 class="f2 f-subheadline-l fw2 white-90 mb0 lh-title">
+          Android性能
+        </h1>
+        
+      </div>
+    </div>
+  </header>
+
+
+    <main class="pb7" role="main">
+      
+  <article class="cf pa3 pa4-m pa4-l">
+    <div class="measure-wide-l center f4 lh-copy nested-copy-line-height nested-links nested-img mid-gray">
+      <p>Below you will find pages that utilize the taxonomy term “Android性能”</p>
+    </div>
+  </article>
+  <div class="mw8 center">    
+    <section class="flex-ns flex-wrap justify-around mt5">
+      
+        <div class="relative w-100  mb4 bg-white">
+          <div class="relative w-100 mb4 bg-white nested-copy-line-height">
+  <div class="bg-white mb3 pa4 gray overflow-hidden">
+    <span class="f6 db">Posts</span>
+    <h1 class="f3 near-black">
+      <a href="https://wfeii.github.io/posts/_posts/android_optimize/2016-08-06-ui%E4%BC%98%E5%8C%96/" class="link black dim">
+        UI优化
+      </a>
+    </h1>
+    <div class="nested-links f5 lh-copy nested-copy-line-height">
+      概述 总结来源与Google发布的性能优化的视频 Android Performance Patterns 和 Android Performance Optimizing Apps for Speed and Usability 对于用户感到卡顿,不流畅的原因有很多,比如Layout层级结构过深,动画过多,界面刷新,等等导致了CPU或者GPU的负担过重,16ms内无法完成一帧的绘制,导致了掉帧,从而表现出卡顿,不流畅.
+绘制原理 为了更好的理解UI优化,在此之前先要说明一下硬件的基础.
+VSYNC 两个概念 :
+ Refresh Rate：代表了屏幕在一秒内刷新屏幕的次数，这取决于硬件的参数，例如60Hz。 Frame Rate：代表了GPU在一秒内绘制的帧数,例如60fps。  GPU获取图形数据绘制,然后硬件负责把绘制的内容显示再屏幕上,二者协调正常.
+如果帧速率高于屏幕刷新速率,就会出现撕裂的现象,一部分显示当前的帧,一部分显示现在的帧,这种解决的方案就是双缓冲机制,GPU将帧写进存储器被成为back buffer,而存储器的次级区域成为frame buffer,当写入一帧时,它会开始填充back buffer,而framen buffer保持不变,现在刷新屏幕,使用frame buffer进行绘制,刷新屏幕,vsync触发,也会把back buffer复制到fragme buffer. 更具体的内容参考: Graphics
+如果屏幕刷新速率高于帧速率时,就会导致屏幕显示还是上一帧的内容,从而出现卡顿,动画不流畅等现象
+一帧画面绘制过程 了解了VSYNC的原理,下面该考虑应用程序是如何把画面绘制到屏幕上的了?或者是如何把XML文件转换成用户能够看到并理解的图像的?
+其实这个过程的核心就是进行光栅化(rasterization)的处理过程.这个过程就是把一些高级的对象,比如字符串,形状等转换成屏幕上纹理中的像素点.光栅化是一个非常耗时的过程.正因如此,手机硬件上有一个特殊的部分用于提高光栅化的过程,叫做图像处理器,或者说GPU. 图像绘制到屏幕上首先在CPU上转换成多边形或者纹理,然后再传递到GPU进行光栅化处理,处理UI对象并转化成多边形和纹理并不是很快的操作,同样从CPU传递给GPU也不是那么快,这行就想办法较少UI对象转换的数量,和提交到GPU的数量,OpenGL ES API允许你将内容传递到GPU,并保存到GPU中,当以后再次绘制一个按钮的时候,只需要参考GPU内存中的已经存在的纹理.
+渲染优化,尽可能多且快的将更多的数据上传到GPU,然后留在GPU中,尽可能长的时间里不去修改.每次更新GPU中的资源,你将会失去宝贵的处理时间.
+下面说明什么时候会导致GPU资源更新. Android把xml语言转化成GPU能够识别的资源从而渲染到屏幕上,是通过Display List来实现的,一个Display List对象中基本上包含了所有GPU需要的渲染信息,Display List中包含了GPU可能需要的常用的资源列表,同时也包含了Open GL命令列表.
+在某个视图第一次需要被渲染时,Display List就会被创建,当视图需要显示在屏幕时,会执行GPU的相关指令来进行渲染.
+从上图可以看出
+ 只是View属性改变时,只是参考GPU内存中的已经存在,然后执行相关Open GL进行渲染, InvaliDated View也不会重新创建Display List View 布局改变,比如可见性,大小等  优化点 概述 渲染操作通常依赖于两个核心组件：CPU与GPU。CPU负责包括Measure，Layout，Record，Execute的计算操作，GPU负责Rasterization(栅格化)操作。CPU通常存在的问题的原因是存在非必需的视图组件，它不仅仅会带来重复的计算操作，而且还会占用额外的GPU资源。 对于CPU,应该尽量减少布局的层级深度,CPU减少measure等操作的时间,而对于GPU主要是减少不必要的过度绘制.
+过度绘制 过度绘制是指同一帧内一个像素点绘制了多次,通过查看overdraw(开发者选项-&gt; 调试GPU过度绘制) 颜色代表了像素点过度绘制的次数:
+    </div>
+  </div>
+</div>
+
+        </div>
+      
+        <div class="relative w-100  mb4 bg-white">
+          <div class="relative w-100 mb4 bg-white nested-copy-line-height">
+  <div class="bg-white mb3 pa4 gray overflow-hidden">
+    <span class="f6 db">Posts</span>
+    <h1 class="f3 near-black">
+      <a href="https://wfeii.github.io/posts/android_optimize/2016-08-06-ui%E4%BC%98%E5%8C%96/" class="link black dim">
+        UI优化
+      </a>
+    </h1>
+    <div class="nested-links f5 lh-copy nested-copy-line-height">
+      概述 总结来源与Google发布的性能优化的视频 Android Performance Patterns 和 Android Performance Optimizing Apps for Speed and Usability 对于用户感到卡顿,不流畅的原因有很多,比如Layout层级结构过深,动画过多,界面刷新,等等导致了CPU或者GPU的负担过重,16ms内无法完成一帧的绘制,导致了掉帧,从而表现出卡顿,不流畅.
+绘制原理 为了更好的理解UI优化,在此之前先要说明一下硬件的基础.
+VSYNC 两个概念 :
+ Refresh Rate：代表了屏幕在一秒内刷新屏幕的次数，这取决于硬件的参数，例如60Hz。 Frame Rate：代表了GPU在一秒内绘制的帧数,例如60fps。  GPU获取图形数据绘制,然后硬件负责把绘制的内容显示再屏幕上,二者协调正常.
+如果帧速率高于屏幕刷新速率,就会出现撕裂的现象,一部分显示当前的帧,一部分显示现在的帧,这种解决的方案就是双缓冲机制,GPU将帧写进存储器被成为back buffer,而存储器的次级区域成为frame buffer,当写入一帧时,它会开始填充back buffer,而framen buffer保持不变,现在刷新屏幕,使用frame buffer进行绘制,刷新屏幕,vsync触发,也会把back buffer复制到fragme buffer. 更具体的内容参考: Graphics
+如果屏幕刷新速率高于帧速率时,就会导致屏幕显示还是上一帧的内容,从而出现卡顿,动画不流畅等现象
+一帧画面绘制过程 了解了VSYNC的原理,下面该考虑应用程序是如何把画面绘制到屏幕上的了?或者是如何把XML文件转换成用户能够看到并理解的图像的?
+其实这个过程的核心就是进行光栅化(rasterization)的处理过程.这个过程就是把一些高级的对象,比如字符串,形状等转换成屏幕上纹理中的像素点.光栅化是一个非常耗时的过程.正因如此,手机硬件上有一个特殊的部分用于提高光栅化的过程,叫做图像处理器,或者说GPU. 图像绘制到屏幕上首先在CPU上转换成多边形或者纹理,然后再传递到GPU进行光栅化处理,处理UI对象并转化成多边形和纹理并不是很快的操作,同样从CPU传递给GPU也不是那么快,这行就想办法较少UI对象转换的数量,和提交到GPU的数量,OpenGL ES API允许你将内容传递到GPU,并保存到GPU中,当以后再次绘制一个按钮的时候,只需要参考GPU内存中的已经存在的纹理.
+渲染优化,尽可能多且快的将更多的数据上传到GPU,然后留在GPU中,尽可能长的时间里不去修改.每次更新GPU中的资源,你将会失去宝贵的处理时间.
+下面说明什么时候会导致GPU资源更新. Android把xml语言转化成GPU能够识别的资源从而渲染到屏幕上,是通过Display List来实现的,一个Display List对象中基本上包含了所有GPU需要的渲染信息,Display List中包含了GPU可能需要的常用的资源列表,同时也包含了Open GL命令列表.
+在某个视图第一次需要被渲染时,Display List就会被创建,当视图需要显示在屏幕时,会执行GPU的相关指令来进行渲染.
+从上图可以看出
+ 只是View属性改变时,只是参考GPU内存中的已经存在,然后执行相关Open GL进行渲染, InvaliDated View也不会重新创建Display List View 布局改变,比如可见性,大小等  优化点 概述 渲染操作通常依赖于两个核心组件：CPU与GPU。CPU负责包括Measure，Layout，Record，Execute的计算操作，GPU负责Rasterization(栅格化)操作。CPU通常存在的问题的原因是存在非必需的视图组件，它不仅仅会带来重复的计算操作，而且还会占用额外的GPU资源。 对于CPU,应该尽量减少布局的层级深度,CPU减少measure等操作的时间,而对于GPU主要是减少不必要的过度绘制.
+过度绘制 过度绘制是指同一帧内一个像素点绘制了多次,通过查看overdraw(开发者选项-&gt; 调试GPU过度绘制) 颜色代表了像素点过度绘制的次数:
+    </div>
+  </div>
+</div>
+
+        </div>
+      
+    </section>
+  </div>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://wfeii.github.io/" >
+    &copy;  音视频技术部 2020 
+  </a>
+    <div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+  </div>
+</footer>
+
+    
+
+  <script src="/dist/js/app.3fc0f988d21662902933.js"></script>
+
+
+  </body>
+</html>
