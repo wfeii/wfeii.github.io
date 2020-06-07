@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>数据库 on 音视频技术部</title>
+    <link>https://wfeii.github.io/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/</link>
+    <description>Recent content in 数据库 on 音视频技术部</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sat, 07 May 2016 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://wfeii.github.io/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>事务</title>
+      <link>https://wfeii.github.io/posts/_posts/database/2016-05-07-%E4%BA%8B%E5%8A%A1/</link>
+      <pubDate>Sat, 07 May 2016 00:00:00 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/_posts/database/2016-05-07-%E4%BA%8B%E5%8A%A1/</guid>
+      <description>&lt;h2 id=&#34;概述&#34;&gt;概述&lt;/h2&gt;
+&lt;p&gt;事务定义了一组SQL命令的边界, 这组命令作为一个整体被全部执行,或者都不执行,这被称为数据库完整性的原子性原则.事务和锁在数据库操作中密切相关,数据操作总是在事务中执行,事务又涉及到锁,如果控制不当,会导致很多问题.所以我们应该看懂自己写的代码并能指出事务的状态,或者至少能够发现潜在问题.&lt;/p&gt;
+&lt;h2 id=&#34;事务的范围&#34;&gt;事务的范围&lt;/h2&gt;
+&lt;p&gt;事务由3个命令控制:begin, commit和rollback, begin开始一个事务, begin之后的所有操作都可以被取消. commit提交事务开始后的所有执行的操作, rollback 还原begin之后的所有操作.
+默认情况下, SQLite中每条语句自成事务. 也就是SQLite默认每条单独的SQLu\语句就是begin &amp;hellip; commit/rollback的事务.这种情况下, 所有成功完成的命令自动提交.同样遇到错误命令都会回滚.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>事务</title>
+      <link>https://wfeii.github.io/posts/database/2016-05-07-%E4%BA%8B%E5%8A%A1/</link>
+      <pubDate>Sat, 07 May 2016 00:00:00 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/database/2016-05-07-%E4%BA%8B%E5%8A%A1/</guid>
+      <description>&lt;h2 id=&#34;概述&#34;&gt;概述&lt;/h2&gt;
+&lt;p&gt;事务定义了一组SQL命令的边界, 这组命令作为一个整体被全部执行,或者都不执行,这被称为数据库完整性的原子性原则.事务和锁在数据库操作中密切相关,数据操作总是在事务中执行,事务又涉及到锁,如果控制不当,会导致很多问题.所以我们应该看懂自己写的代码并能指出事务的状态,或者至少能够发现潜在问题.&lt;/p&gt;
+&lt;h2 id=&#34;事务的范围&#34;&gt;事务的范围&lt;/h2&gt;
+&lt;p&gt;事务由3个命令控制:begin, commit和rollback, begin开始一个事务, begin之后的所有操作都可以被取消. commit提交事务开始后的所有执行的操作, rollback 还原begin之后的所有操作.
+默认情况下, SQLite中每条语句自成事务. 也就是SQLite默认每条单独的SQLu\语句就是begin &amp;hellip; commit/rollback的事务.这种情况下, 所有成功完成的命令自动提交.同样遇到错误命令都会回滚.&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

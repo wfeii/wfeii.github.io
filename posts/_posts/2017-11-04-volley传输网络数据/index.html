@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Volley传输网络数据 | 音视频技术部</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="generator" content="Hugo 0.72.0" />
+    
+    
+      <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
+    
+
+    
+    
+      <link href="/dist/css/app.4fc0b62e4b82c997bb0041217cd6b979.css" rel="stylesheet">
+    
+
+    
+
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="Volley传输网络数据" />
+<meta property="og:description" content="概述 Volley是一个HTTP的库，能够让Android Apps的网络请求更容易，更迅速。Vollery在github可以获取到。
+Volley有以下优点：
+ 自动调度网络请求 多个并发的网络连接 标准的Http cache coherence 支持请求优先级 取消请求的API，可以取消简单的请求，也可以取消一组网络请求 可定制性，比如重试，重定向等 强大的排序，可以轻松地使用网络请求的数据正确的填充到UI上。 调试和跟踪的工具  Volley的优点在于使用RPC-type的操作来填充UI，比如获取到一页的搜索结果作为结构化的数据。它可以轻松地与任何协议集成，Volley自带了字符串，图片和JSON的支持。通过内嵌一些特性，Volley可以让你从模板的代码中摆脱出来，而只需关注App的特定的逻辑。
+Volley不适合大型的下载或者流操作。因为Volley在解析的时候会把所有的响应保存到内存中，对于大型的下载操作，可以考虑使用DownloadManager。
+Vollery核心库是在github上开发的，主要有请求分发以及一系列的通用的工具类，可以在Volley的工具箱中获取到。在项目中添加Volley最容易的方式是在gradle文件中添加以下内容。
+dependencies { ... compile &#39;com.android.volley:volley:1.0.0&#39; } 你也可以克隆Volley仓库并且设置它作为一个library工程
+  通过下列的命令来克隆Volley的仓库
+git clone https://github.com/google/volley
+  导入源码到你的app工程里作为Android library，在Create an Android Library查看如何创建Android library库。
+  发送简单请求 更高层次上，可以创建一个RequestQueue传递给它Request对象。RequestQueue管理工作线程，这些工作线程用于运行网络请求，读写缓存和解析网络响应。Request解析原始的响应并且Volley分派解析后的响应返回到主线程中。
+这节描述如何使用Volley.newRequestQueue方法发送请求，此方法设置一个RequestQueue供我们使用。看设置RequestQueue一节也可以了解如何自己设置RequestQueue。
+这节描述如何使用RequestQueue去添加请求和取消请求。
+添加网络权限 使用Volley，必须在manifest文件中添加android.permission.INTERNET权限。
+使用newRequestQueue Volley提供了方便的方法Volley.newRequestQueue去创建RequestQueue，使用默认行为启动队列。例如：
+final TextView mTextView = (TextView) findViewById(R.id.text); ... // Instantiate the RequestQueue. RequestQueue queue = Volley.newRequestQueue(this); String url =&#34;http://www.google.com&#34;; // Request a string response from the provided URL." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://wfeii.github.io/posts/_posts/2017-11-04-volley%E4%BC%A0%E8%BE%93%E7%BD%91%E7%BB%9C%E6%95%B0%E6%8D%AE/" />
+<meta property="article:published_time" content="2017-11-04T00:00:00+00:00" />
+<meta property="article:modified_time" content="2017-11-04T00:00:00+00:00" />
+<meta itemprop="name" content="Volley传输网络数据">
+<meta itemprop="description" content="概述 Volley是一个HTTP的库，能够让Android Apps的网络请求更容易，更迅速。Vollery在github可以获取到。
+Volley有以下优点：
+ 自动调度网络请求 多个并发的网络连接 标准的Http cache coherence 支持请求优先级 取消请求的API，可以取消简单的请求，也可以取消一组网络请求 可定制性，比如重试，重定向等 强大的排序，可以轻松地使用网络请求的数据正确的填充到UI上。 调试和跟踪的工具  Volley的优点在于使用RPC-type的操作来填充UI，比如获取到一页的搜索结果作为结构化的数据。它可以轻松地与任何协议集成，Volley自带了字符串，图片和JSON的支持。通过内嵌一些特性，Volley可以让你从模板的代码中摆脱出来，而只需关注App的特定的逻辑。
+Volley不适合大型的下载或者流操作。因为Volley在解析的时候会把所有的响应保存到内存中，对于大型的下载操作，可以考虑使用DownloadManager。
+Vollery核心库是在github上开发的，主要有请求分发以及一系列的通用的工具类，可以在Volley的工具箱中获取到。在项目中添加Volley最容易的方式是在gradle文件中添加以下内容。
+dependencies { ... compile &#39;com.android.volley:volley:1.0.0&#39; } 你也可以克隆Volley仓库并且设置它作为一个library工程
+  通过下列的命令来克隆Volley的仓库
+git clone https://github.com/google/volley
+  导入源码到你的app工程里作为Android library，在Create an Android Library查看如何创建Android library库。
+  发送简单请求 更高层次上，可以创建一个RequestQueue传递给它Request对象。RequestQueue管理工作线程，这些工作线程用于运行网络请求，读写缓存和解析网络响应。Request解析原始的响应并且Volley分派解析后的响应返回到主线程中。
+这节描述如何使用Volley.newRequestQueue方法发送请求，此方法设置一个RequestQueue供我们使用。看设置RequestQueue一节也可以了解如何自己设置RequestQueue。
+这节描述如何使用RequestQueue去添加请求和取消请求。
+添加网络权限 使用Volley，必须在manifest文件中添加android.permission.INTERNET权限。
+使用newRequestQueue Volley提供了方便的方法Volley.newRequestQueue去创建RequestQueue，使用默认行为启动队列。例如：
+final TextView mTextView = (TextView) findViewById(R.id.text); ... // Instantiate the RequestQueue. RequestQueue queue = Volley.newRequestQueue(this); String url =&#34;http://www.google.com&#34;; // Request a string response from the provided URL.">
+<meta itemprop="datePublished" content="2017-11-04T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2017-11-04T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="763">
+
+
+
+<meta itemprop="keywords" content="Volley," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Volley传输网络数据"/>
+<meta name="twitter:description" content="概述 Volley是一个HTTP的库，能够让Android Apps的网络请求更容易，更迅速。Vollery在github可以获取到。
+Volley有以下优点：
+ 自动调度网络请求 多个并发的网络连接 标准的Http cache coherence 支持请求优先级 取消请求的API，可以取消简单的请求，也可以取消一组网络请求 可定制性，比如重试，重定向等 强大的排序，可以轻松地使用网络请求的数据正确的填充到UI上。 调试和跟踪的工具  Volley的优点在于使用RPC-type的操作来填充UI，比如获取到一页的搜索结果作为结构化的数据。它可以轻松地与任何协议集成，Volley自带了字符串，图片和JSON的支持。通过内嵌一些特性，Volley可以让你从模板的代码中摆脱出来，而只需关注App的特定的逻辑。
+Volley不适合大型的下载或者流操作。因为Volley在解析的时候会把所有的响应保存到内存中，对于大型的下载操作，可以考虑使用DownloadManager。
+Vollery核心库是在github上开发的，主要有请求分发以及一系列的通用的工具类，可以在Volley的工具箱中获取到。在项目中添加Volley最容易的方式是在gradle文件中添加以下内容。
+dependencies { ... compile &#39;com.android.volley:volley:1.0.0&#39; } 你也可以克隆Volley仓库并且设置它作为一个library工程
+  通过下列的命令来克隆Volley的仓库
+git clone https://github.com/google/volley
+  导入源码到你的app工程里作为Android library，在Create an Android Library查看如何创建Android library库。
+  发送简单请求 更高层次上，可以创建一个RequestQueue传递给它Request对象。RequestQueue管理工作线程，这些工作线程用于运行网络请求，读写缓存和解析网络响应。Request解析原始的响应并且Volley分派解析后的响应返回到主线程中。
+这节描述如何使用Volley.newRequestQueue方法发送请求，此方法设置一个RequestQueue供我们使用。看设置RequestQueue一节也可以了解如何自己设置RequestQueue。
+这节描述如何使用RequestQueue去添加请求和取消请求。
+添加网络权限 使用Volley，必须在manifest文件中添加android.permission.INTERNET权限。
+使用newRequestQueue Volley提供了方便的方法Volley.newRequestQueue去创建RequestQueue，使用默认行为启动队列。例如：
+final TextView mTextView = (TextView) findViewById(R.id.text); ... // Instantiate the RequestQueue. RequestQueue queue = Volley.newRequestQueue(this); String url =&#34;http://www.google.com&#34;; // Request a string response from the provided URL."/>
+
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        音视频技术部
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/about/" title="关于 page">
+              关于
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/posts/" title="文章 page">
+              文章
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        文章
+      </aside>
+      
+
+
+
+
+  <div id="sharing" class="mt3">
+
+    
+    <a href="https://www.facebook.com/sharer.php?u=https://wfeii.github.io/posts/_posts/2017-11-04-volley%E4%BC%A0%E8%BE%93%E7%BD%91%E7%BB%9C%E6%95%B0%E6%8D%AE/" class="facebook no-underline" aria-label="share on Facebook">
+      <svg height="32px"  style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M28.765,50.32h6.744V33.998h4.499l0.596-5.624h-5.095  l0.007-2.816c0-1.466,0.14-2.253,2.244-2.253h2.812V17.68h-4.5c-5.405,0-7.307,2.729-7.307,7.317v3.377h-3.369v5.625h3.369V50.32z   M33,64C16.432,64,3,50.569,3,34S16.432,4,33,4s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;"/></svg>
+
+    </a>
+
+    
+    
+    <a href="https://twitter.com/share?url=https://wfeii.github.io/posts/_posts/2017-11-04-volley%E4%BC%A0%E8%BE%93%E7%BD%91%E7%BB%9C%E6%95%B0%E6%8D%AE/&amp;text=Volley%e4%bc%a0%e8%be%93%e7%bd%91%e7%bb%9c%e6%95%b0%e6%8d%ae" class="twitter no-underline" aria-label="share on Twitter">
+      <svg height="32px"  style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M37.167,22.283c-2.619,0.953-4.274,3.411-4.086,6.101  l0.063,1.038l-1.048-0.127c-3.813-0.487-7.145-2.139-9.974-4.915l-1.383-1.377l-0.356,1.017c-0.754,2.267-0.272,4.661,1.299,6.271  c0.838,0.89,0.649,1.017-0.796,0.487c-0.503-0.169-0.943-0.296-0.985-0.233c-0.146,0.149,0.356,2.076,0.754,2.839  c0.545,1.06,1.655,2.097,2.871,2.712l1.027,0.487l-1.215,0.021c-1.173,0-1.215,0.021-1.089,0.467  c0.419,1.377,2.074,2.839,3.918,3.475l1.299,0.444l-1.131,0.678c-1.676,0.976-3.646,1.526-5.616,1.568  C19.775,43.256,19,43.341,19,43.405c0,0.211,2.557,1.397,4.044,1.864c4.463,1.377,9.765,0.783,13.746-1.568  c2.829-1.673,5.657-5,6.978-8.221c0.713-1.716,1.425-4.851,1.425-6.354c0-0.975,0.063-1.102,1.236-2.267  c0.692-0.678,1.341-1.419,1.467-1.631c0.21-0.403,0.188-0.403-0.88-0.043c-1.781,0.636-2.033,0.551-1.152-0.402  c0.649-0.678,1.425-1.907,1.425-2.267c0-0.063-0.314,0.042-0.671,0.233c-0.377,0.212-1.215,0.53-1.844,0.72l-1.131,0.361l-1.027-0.7  c-0.566-0.381-1.361-0.805-1.781-0.932C39.766,21.902,38.131,21.944,37.167,22.283z M33,64C16.432,64,3,50.569,3,34S16.432,4,33,4  s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/></svg>
+
+    </a>
+
+    
+    <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https://wfeii.github.io/posts/_posts/2017-11-04-volley%E4%BC%A0%E8%BE%93%E7%BD%91%E7%BB%9C%E6%95%B0%E6%8D%AE/&amp;title=Volley%e4%bc%a0%e8%be%93%e7%bd%91%e7%bb%9c%e6%95%b0%e6%8d%ae" class="linkedin no-underline" aria-label="share on LinkedIn">
+      <svg  height="32px"  style="enable-background:new 0 0 65 65;" version="1.1" viewBox="0 0 65 65" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <path d="M50.837,48.137V36.425c0-6.275-3.35-9.195-7.816-9.195  c-3.604,0-5.219,1.983-6.119,3.374V27.71h-6.79c0.09,1.917,0,20.427,0,20.427h6.79V36.729c0-0.609,0.044-1.219,0.224-1.655  c0.49-1.22,1.607-2.483,3.482-2.483c2.458,0,3.44,1.873,3.44,4.618v10.929H50.837z M22.959,24.922c2.367,0,3.842-1.57,3.842-3.531  c-0.044-2.003-1.475-3.528-3.797-3.528s-3.841,1.524-3.841,3.528c0,1.961,1.474,3.531,3.753,3.531H22.959z M34,64  C17.432,64,4,50.568,4,34C4,17.431,17.432,4,34,4s30,13.431,30,30C64,50.568,50.568,64,34,64z M26.354,48.137V27.71h-6.789v20.427  H26.354z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/>
+</svg>
+
+    </a>
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">Volley传输网络数据</h1>
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2017-11-04T00:00:00Z">November 4, 2017</time>
+
+      
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links nested-img mid-gray pr4-l w-two-thirds-l"><h2 id="概述">概述</h2>
+<p>Volley是一个HTTP的库，能够让Android Apps的网络请求更容易，更迅速。Vollery在<a href="https://github.com/google/volley">github</a>可以获取到。</p>
+<p>Volley有以下优点：</p>
+<ul>
+<li>自动调度网络请求</li>
+<li>多个并发的网络连接</li>
+<li>标准的Http <a href="https://en.wikipedia.org/wiki/Cache_coherence">cache coherence</a></li>
+<li>支持请求优先级</li>
+<li>取消请求的API，可以取消简单的请求，也可以取消一组网络请求</li>
+<li>可定制性，比如重试，重定向等</li>
+<li>强大的排序，可以轻松地使用网络请求的数据正确的填充到UI上。</li>
+<li>调试和跟踪的工具</li>
+</ul>
+<p>Volley的优点在于使用RPC-type的操作来填充UI，比如获取到一页的搜索结果作为结构化的数据。它可以轻松地与任何协议集成，Volley自带了字符串，图片和JSON的支持。通过内嵌一些特性，Volley可以让你从模板的代码中摆脱出来，而只需关注App的特定的逻辑。</p>
+<p>Volley不适合大型的下载或者流操作。因为Volley在解析的时候会把所有的响应保存到内存中，对于大型的下载操作，可以考虑使用<a href="https://developer.android.com/reference/android/app/DownloadManager.html">DownloadManager</a>。</p>
+<p>Vollery核心库是在<a href="https://github.com/google/volley">github</a>上开发的，主要有请求分发以及一系列的通用的工具类，可以在Volley的工具箱中获取到。在项目中添加Volley最容易的方式是在gradle文件中添加以下内容。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">dependencies <span style="color:#f92672">{</span>
+    <span style="color:#f92672">...</span>
+    compile <span style="color:#960050;background-color:#1e0010">&#39;</span>com<span style="color:#f92672">.</span><span style="color:#a6e22e">android</span><span style="color:#f92672">.</span><span style="color:#a6e22e">volley</span><span style="color:#f92672">:</span>volley<span style="color:#f92672">:</span>1<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#960050;background-color:#1e0010">&#39;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>你也可以克隆Volley仓库并且设置它作为一个library工程</p>
+<ol>
+<li>
+<p>通过下列的命令来克隆Volley的仓库</p>
+<p><code>git clone https://github.com/google/volley</code></p>
+</li>
+<li>
+<p>导入源码到你的app工程里作为Android library，在<a href="https://developer.android.com/studio/projects/android-library.html">Create an Android Library</a>查看如何创建Android library库。</p>
+</li>
+</ol>
+<h2 id="发送简单请求">发送简单请求</h2>
+<p>更高层次上，可以创建一个<strong>RequestQueue</strong>传递给它<strong>Request</strong>对象。<strong>RequestQueue</strong>管理工作线程，这些工作线程用于运行网络请求，读写缓存和解析网络响应。Request解析原始的响应并且Volley分派解析后的响应返回到主线程中。</p>
+<p>这节描述如何使用<strong>Volley.newRequestQueue</strong>方法发送请求，此方法设置一个<strong>RequestQueue</strong>供我们使用。看<strong>设置RequestQueue</strong>一节也可以了解如何自己设置<strong>RequestQueue</strong>。</p>
+<p>这节描述如何使用<strong>RequestQueue</strong>去添加请求和取消请求。</p>
+<h3 id="添加网络权限">添加网络权限</h3>
+<p>使用Volley，必须在manifest文件中添加<code>android.permission.INTERNET</code>权限。</p>
+<h3 id="使用newrequestqueue">使用newRequestQueue</h3>
+<p>Volley提供了方便的方法<strong>Volley.newRequestQueue</strong>去创建<strong>RequestQueue</strong>，使用默认行为启动队列。例如：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">final</span> TextView mTextView <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>TextView<span style="color:#f92672">)</span> findViewById<span style="color:#f92672">(</span>R<span style="color:#f92672">.</span><span style="color:#a6e22e">id</span><span style="color:#f92672">.</span><span style="color:#a6e22e">text</span><span style="color:#f92672">);</span>
+<span style="color:#f92672">...</span>
+
+<span style="color:#75715e">// Instantiate the RequestQueue.
+</span><span style="color:#75715e"></span>RequestQueue queue <span style="color:#f92672">=</span> Volley<span style="color:#f92672">.</span><span style="color:#a6e22e">newRequestQueue</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">);</span>
+String url <span style="color:#f92672">=</span><span style="color:#e6db74">&#34;http://www.google.com&#34;</span><span style="color:#f92672">;</span>
+
+<span style="color:#75715e">// Request a string response from the provided URL.
+</span><span style="color:#75715e"></span>StringRequest stringRequest <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> StringRequest<span style="color:#f92672">(</span>Request<span style="color:#f92672">.</span><span style="color:#a6e22e">Method</span><span style="color:#f92672">.</span><span style="color:#a6e22e">GET</span><span style="color:#f92672">,</span> url<span style="color:#f92672">,</span>
+            <span style="color:#66d9ef">new</span> Response<span style="color:#f92672">.</span><span style="color:#a6e22e">Listener</span><span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;()</span> <span style="color:#f92672">{</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onResponse</span><span style="color:#f92672">(</span>String response<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// Display the first 500 characters of the response string.
+</span><span style="color:#75715e"></span>        mTextView<span style="color:#f92672">.</span><span style="color:#a6e22e">setText</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Response is: &#34;</span><span style="color:#f92672">+</span> response<span style="color:#f92672">.</span><span style="color:#a6e22e">substring</span><span style="color:#f92672">(</span>0<span style="color:#f92672">,</span>500<span style="color:#f92672">));</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">},</span> <span style="color:#66d9ef">new</span> Response<span style="color:#f92672">.</span><span style="color:#a6e22e">ErrorListener</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onErrorResponse</span><span style="color:#f92672">(</span>VolleyError error<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        mTextView<span style="color:#f92672">.</span><span style="color:#a6e22e">setText</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;That didn&#39;t work!&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">});</span>
+<span style="color:#75715e">// Add the request to the RequestQueue.
+</span><span style="color:#75715e"></span>queue<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>stringRequest<span style="color:#f92672">);</span>
+</code></pre></div><p>Volley传递解析后的响应到主线程中。主线程中使用接受到的数据填充UI是很方便的，同时你也在响应监听器中可以修改UI控件。</p>
+<h3 id="发送请求">发送请求</h3>
+<p>为了发送request，需要简单地构建一个<strong>Request</strong>并且使用add方法添加到<strong>RequestQueue</strong>，正如显示的，一旦添加了<strong>Request</strong>，它将被传递，获取服务，有它自己解析响应，最终传递结果。</p>
+<p>当调用add方法的时候，Volley会运行一个缓存处理线程和网络分发的线程。当添加请求到队列中，请求就会被cache线程选取并且分类：如果请求能从cache中获取，缓存的响应将会在cache线程中解析并把解析后的响应传递到主线程中。如果请求不能从cache中获取，请求将被放置到网络队列里。首先网络线程会从网络队列中获取Request，执行HTTP传输，在工作线程中解析响应，把响应写入到缓存，然后把解析后的响应传递到主线程中。</p>
+<p>注意这些昂贵的开销像阻塞的I/O和解析和解码是在工作线程完成的。你可以在任意线程中添加Request，但是响应总是被传递到主线程中。</p>
+<p>图1展示了request的生命周期</p>
+<p><img src="http://img.blog.csdn.net/20170612224303424?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvd2ZlaWk=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<h3 id="取消request">取消Request</h3>
+<p>为了取消Request，调用cancel()方法。一旦Request被取消，Volley保证响应的handler不会被调用。这意味着在实践中你能在Activity的onStop()方法取消所有的request并且也不需要在响应的Handler中有getActivity()==null的检测，是否onSaveInstanceState()已经被调用了，或者其他的防御的编码。</p>
+<p>为了利用这个行为，需要做的就是跟踪所有的request，能够在恰当的时机取消它们。一个比较简单的方法：可以给每个Request对象分配一个tag对象。你可以使用这个tag去支持取消一定范围的Request。例如，可以使用activity类标记所有请求，然后在onStop()方法中调用<strong>requestQueue.cancelAll(this)</strong>。类似情景是可以在ViewPager的当前的Tab标记所有的缩略图的请求，在滑动到新的Tab的时候然后取消request。</p>
+<p>下面的例子使用字符串来添加tag</p>
+<ol>
+<li>定义tag，并在request中添加tag</li>
+</ol>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> String TAG <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;MyTag&#34;</span><span style="color:#f92672">;</span>
+StringRequest stringRequest<span style="color:#f92672">;</span> <span style="color:#75715e">// Assume this exists.
+</span><span style="color:#75715e"></span>RequestQueue mRequestQueue<span style="color:#f92672">;</span>  <span style="color:#75715e">// Assume this exists.
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">// Set the tag on the request.
+</span><span style="color:#75715e"></span>stringRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">setTag</span><span style="color:#f92672">(</span>TAG<span style="color:#f92672">);</span>
+
+<span style="color:#75715e">// Add the request to the RequestQueue.
+</span><span style="color:#75715e"></span>mRequestQueue<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>stringRequest<span style="color:#f92672">);</span>
+</code></pre></div><ol start="2">
+<li>
+<p>在你的activity的onStop()方法中，使用tag取消所有的Request</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Override</span>
+<span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onStop</span> <span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">onStop</span><span style="color:#f92672">();</span>
+    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mRequestQueue <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        mRequestQueue<span style="color:#f92672">.</span><span style="color:#a6e22e">cancelAll</span><span style="color:#f92672">(</span>TAG<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div></li>
+</ol>
+<p>取消请求时请留意。如果你依赖于你的响应处理程序（也就是回调）来推进状态或启动另一个进程，则需要解决此问题。再次提醒，一旦Request被取消响应的处理代码（也就是回调）将不被调用。</p>
+<h2 id="设置requestqueue">设置RequestQueue</h2>
+<p>前面的章节讲解了如何使用Volley.newRequestQueue去设置一个默认行为的RequestQueue，这节将会带你领略创建RequestQueue的真正的步骤，设置自定义的RequestQueue。</p>
+<p>这节也描述了推荐的创建RequestQueue的方式单例，这样可以保证RequestQueue与APP的生命周期一致。</p>
+<h4 id="设置network和cache">设置Network和Cache</h4>
+<p>一个RequestQueue需要两件事来完成它的工作：一个是network去执行Request的传输，和一个cache来处理缓存。在Volley的工具库中有相关的标准实现：DiskBasedCache提供了 one-file-per-response的缓存带着内存的索引，和BasicNetwork提供了网络传输依据于你的首选的HTTP客户端。</p>
+<p>BasicNetwork是Volley的默认网络实现。一个BasicNetwork必须被一个HTTP客户端初始化。典型的是HttpURLConnection。（也可以使用OkHttp来实现）</p>
+<p>下面的代码展示了设置RequestQueue的步骤：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">RequestQueue mRequestQueue<span style="color:#f92672">;</span>
+
+<span style="color:#75715e">// Instantiate the cache
+</span><span style="color:#75715e"></span>Cache cache <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DiskBasedCache<span style="color:#f92672">(</span>getCacheDir<span style="color:#f92672">(),</span> 1024 <span style="color:#f92672">*</span> 1024<span style="color:#f92672">);</span> <span style="color:#75715e">// 1MB cap
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">// Set up the network to use HttpURLConnection as the HTTP client.
+</span><span style="color:#75715e"></span>Network network <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> BasicNetwork<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> HurlStack<span style="color:#f92672">());</span>
+
+<span style="color:#75715e">// Instantiate the RequestQueue with the cache and network.
+</span><span style="color:#75715e"></span>mRequestQueue <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> RequestQueue<span style="color:#f92672">(</span>cache<span style="color:#f92672">,</span> network<span style="color:#f92672">);</span>
+
+<span style="color:#75715e">// Start the queue
+</span><span style="color:#75715e"></span>mRequestQueue<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+
+String url <span style="color:#f92672">=</span><span style="color:#e6db74">&#34;http://www.example.com&#34;</span><span style="color:#f92672">;</span>
+
+<span style="color:#75715e">// Formulate the request and handle the response.
+</span><span style="color:#75715e"></span>StringRequest stringRequest <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> StringRequest<span style="color:#f92672">(</span>Request<span style="color:#f92672">.</span><span style="color:#a6e22e">Method</span><span style="color:#f92672">.</span><span style="color:#a6e22e">GET</span><span style="color:#f92672">,</span> url<span style="color:#f92672">,</span>
+        <span style="color:#66d9ef">new</span> Response<span style="color:#f92672">.</span><span style="color:#a6e22e">Listener</span><span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;()</span> <span style="color:#f92672">{</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onResponse</span><span style="color:#f92672">(</span>String response<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// Do something with the response
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
+<span style="color:#f92672">},</span>
+    <span style="color:#66d9ef">new</span> Response<span style="color:#f92672">.</span><span style="color:#a6e22e">ErrorListener</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#a6e22e">@Override</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onErrorResponse</span><span style="color:#f92672">(</span>VolleyError error<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// Handle error
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
+<span style="color:#f92672">});</span>
+
+<span style="color:#75715e">// Add the request to the RequestQueue.
+</span><span style="color:#75715e"></span>mRequestQueue<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>stringRequest<span style="color:#f92672">);</span>
+
+<span style="color:#75715e">// ...
+</span></code></pre></div><p>如果你只需要一次性的请求并且不想离开线程池，您可以在需要的地方创建RequestQueue，并在您的响应或错误返回后在RequestQueue上调用stop（）。但是更常用的情景是创建RequestQueue作为单例并且保持RequestQueue在APP的生命周期中一直运行，下节将会讲解。</p>
+<h4 id="使用单例模式">使用单例模式</h4>
+<p>如果你的应用一直使用网络，那或许需要设置单例的RequestQueue并且保证RequestQueue与在APP的生命周期一致。你可以通过各种方式实现。推荐的方法是实现单例类包裹着RequestQueue和其他的Volley功能。另一个方式实现Application的子类设置RequeueQueue在 <strong>Application.onCreate()</strong>。但是这种方式是不鼓励的；静态的单例可以更加模块化的方式提供相同的功能。</p>
+<p>一个关键的点是RequestQueue实例化时使用Appliction context而不是Activity context。确保RequestQueue在应用的生命周期中一直在运行，而不是每次随着activity的创建一直被销毁再创建。</p>
+<p>下面的单例的例子提供了RequestQueue和ImageLoader的功能:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MySingleton</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> MySingleton mInstance<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> RequestQueue mRequestQueue<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> ImageLoader mImageLoader<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> Context mCtx<span style="color:#f92672">;</span>
+
+    <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">MySingleton</span><span style="color:#f92672">(</span>Context context<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        mCtx <span style="color:#f92672">=</span> context<span style="color:#f92672">;</span>
+        mRequestQueue <span style="color:#f92672">=</span> getRequestQueue<span style="color:#f92672">();</span>
+
+        mImageLoader <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ImageLoader<span style="color:#f92672">(</span>mRequestQueue<span style="color:#f92672">,</span>
+                <span style="color:#66d9ef">new</span> ImageLoader<span style="color:#f92672">.</span><span style="color:#a6e22e">ImageCache</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> LruCache<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Bitmap<span style="color:#f92672">&gt;</span>
+                    cache <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> LruCache<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Bitmap<span style="color:#f92672">&gt;(</span>20<span style="color:#f92672">);</span>
+
+            <span style="color:#a6e22e">@Override</span>
+            <span style="color:#66d9ef">public</span> Bitmap <span style="color:#a6e22e">getBitmap</span><span style="color:#f92672">(</span>String url<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">return</span> cache<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>url<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+
+            <span style="color:#a6e22e">@Override</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">putBitmap</span><span style="color:#f92672">(</span>String url<span style="color:#f92672">,</span> Bitmap bitmap<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                cache<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span>url<span style="color:#f92672">,</span> bitmap<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">});</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">synchronized</span> MySingleton <span style="color:#a6e22e">getInstance</span><span style="color:#f92672">(</span>Context context<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mInstance <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            mInstance <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> MySingleton<span style="color:#f92672">(</span>context<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> mInstance<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#66d9ef">public</span> RequestQueue <span style="color:#a6e22e">getRequestQueue</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mRequestQueue <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// getApplicationContext() is key, it keeps you from leaking the
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">// Activity or BroadcastReceiver if someone passes one in.
+</span><span style="color:#75715e"></span>            mRequestQueue <span style="color:#f92672">=</span> Volley<span style="color:#f92672">.</span><span style="color:#a6e22e">newRequestQueue</span><span style="color:#f92672">(</span>mCtx<span style="color:#f92672">.</span><span style="color:#a6e22e">getApplicationContext</span><span style="color:#f92672">());</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> mRequestQueue<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#66d9ef">public</span> <span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">addToRequestQueue</span><span style="color:#f92672">(</span>Request<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> req<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        getRequestQueue<span style="color:#f92672">().</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>req<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#66d9ef">public</span> ImageLoader <span style="color:#a6e22e">getImageLoader</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> mImageLoader<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>下面的例子是使用单例的RequestQueue。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">// Get a RequestQueue
+</span><span style="color:#75715e"></span>RequestQueue queue <span style="color:#f92672">=</span> MySingleton<span style="color:#f92672">.</span><span style="color:#a6e22e">getInstance</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getApplicationContext</span><span style="color:#f92672">()).</span>
+    getRequestQueue<span style="color:#f92672">();</span>
+
+<span style="color:#75715e">// ...
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">// Add a request (in this example, called stringRequest) to your RequestQueue.
+</span><span style="color:#75715e"></span>MySingleton<span style="color:#f92672">.</span><span style="color:#a6e22e">getInstance</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">).</span><span style="color:#a6e22e">addToRequestQueue</span><span style="color:#f92672">(</span>stringRequest<span style="color:#f92672">);</span>
+</code></pre></div><h2 id="标准请求">标准请求</h2>
+<p>本节将描述如何使用Volley支持的常用类型：</p>
+<p>StringRequest：指定特定URL并且在响应中接受到字符串，对于例子可以看<strong>设置RequeseQueue</strong>。</p>
+<p>JsonObjectRequest和JsonArrayRequest（二者均为<strong>JsonRequest</strong>的子类）：指定特定的URL并且会获取到JSON或者JSON数据组。</p>
+<p>如果你期望的响应是这些类型的一种，那不需要设置自定义的Request。这节将描述怎么去使用这些标准的请求类型，对于如何自定义Request请看下一节。</p>
+<h3 id="json-request">JSON Request</h3>
+<p>Volley为JSON请求提供了下面的类：</p>
+<ul>
+<li>JsonArrayRequest ：一个Request给定URL，将会接受到<a href="https://developer.android.com/reference/org/json/JSONArray.html">JSONArray</a>的响应body</li>
+<li>JsonObjectRequest：一个Request给定的URL，接受到<a href="https://developer.android.com/reference/org/json/JSONObject.html">JSONObject</a>响应body，允许<a href="https://developer.android.com/reference/org/json/JSONObject.html">JSONObject</a>作为请求body的一部分。</li>
+</ul>
+<p>上述的两个类均为JSONObject的子类。你使用下面的模板来使用其他的JSON类。例如，下面的代码片段描述了获取JSON并展示到UI上。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">TextView mTxtDisplay<span style="color:#f92672">;</span>
+ImageView mImageView<span style="color:#f92672">;</span>
+mTxtDisplay <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>TextView<span style="color:#f92672">)</span> findViewById<span style="color:#f92672">(</span>R<span style="color:#f92672">.</span><span style="color:#a6e22e">id</span><span style="color:#f92672">.</span><span style="color:#a6e22e">txtDisplay</span><span style="color:#f92672">);</span>
+String url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://my-json-feed&#34;</span><span style="color:#f92672">;</span>
+
+JsonObjectRequest jsObjRequest <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> JsonObjectRequest
+        <span style="color:#f92672">(</span>Request<span style="color:#f92672">.</span><span style="color:#a6e22e">Method</span><span style="color:#f92672">.</span><span style="color:#a6e22e">GET</span><span style="color:#f92672">,</span> url<span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> Response<span style="color:#f92672">.</span><span style="color:#a6e22e">Listener</span><span style="color:#f92672">&lt;</span>JSONObject<span style="color:#f92672">&gt;()</span> <span style="color:#f92672">{</span>
+
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onResponse</span><span style="color:#f92672">(</span>JSONObject response<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        mTxtDisplay<span style="color:#f92672">.</span><span style="color:#a6e22e">setText</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Response: &#34;</span> <span style="color:#f92672">+</span> response<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">());</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">},</span> <span style="color:#66d9ef">new</span> Response<span style="color:#f92672">.</span><span style="color:#a6e22e">ErrorListener</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onErrorResponse</span><span style="color:#f92672">(</span>VolleyError error<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">});</span>
+
+<span style="color:#75715e">// Access the RequestQueue through yozur singleton class.
+</span><span style="color:#75715e"></span>MySingleton<span style="color:#f92672">.</span><span style="color:#a6e22e">getInstance</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">).</span><span style="color:#a6e22e">addToRequestQueue</span><span style="color:#f92672">(</span>jsObjRequest<span style="color:#f92672">);</span>
+</code></pre></div><p>对于实现自定义的Request依赖于<a href="https://github.com/google/gson">Gson</a>, 可以看下节。</p>
+<h2 id="实现自定义的request">实现自定义的Request</h2>
+<p>本节将描述怎么实现自定义的Request类型。</p>
+<h3 id="自定义request">自定义Request</h3>
+<p>在工具类中需要的Request都可以拿来即用；如果你的响应的数据类型是String，Image，或者JSON，那不必实现自定义的Request。</p>
+<p>对于实现自定义的Request你仅仅需要实现下面的步骤：</p>
+<ul>
+<li>继承Request<!-- raw HTML omitted -->类，<!-- raw HTML omitted -->为参数化表示期望解析的响应的类型。因此如果希望解析的响应是一个字符串就需要继承Request<!-- raw HTML omitted -->。可以查看类StringRequest和ImageRequest作为继承Request<!-- raw HTML omitted -->的例子。</li>
+<li>实现parseNetworkResponse() 和 deliverResponse()抽象方法，下面有更多细节。</li>
+</ul>
+<h3 id="parsenetworkresponse方法">parseNetworkResponse方法</h3>
+<p>Response封装了给定类型解析后的响应，（比如String，image或者JSON）。下面是一个parseNetworkResponse() 的实现：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Override</span>
+<span style="color:#66d9ef">protected</span> Response<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">parseNetworkResponse</span><span style="color:#f92672">(</span>
+        NetworkResponse response<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+        String json <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> String<span style="color:#f92672">(</span>response<span style="color:#f92672">.</span><span style="color:#a6e22e">data</span><span style="color:#f92672">,</span>
+        HttpHeaderParser<span style="color:#f92672">.</span><span style="color:#a6e22e">parseCharset</span><span style="color:#f92672">(</span>response<span style="color:#f92672">.</span><span style="color:#a6e22e">headers</span><span style="color:#f92672">));</span>
+    <span style="color:#66d9ef">return</span> Response<span style="color:#f92672">.</span><span style="color:#a6e22e">success</span><span style="color:#f92672">(</span>gson<span style="color:#f92672">.</span><span style="color:#a6e22e">fromJson</span><span style="color:#f92672">(</span>json<span style="color:#f92672">,</span> clazz<span style="color:#f92672">),</span>
+    HttpHeaderParser<span style="color:#f92672">.</span><span style="color:#a6e22e">parseCacheHeaders</span><span style="color:#f92672">(</span>response<span style="color:#f92672">));</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#75715e">// handle errors
+</span><span style="color:#75715e"></span><span style="color:#f92672">...</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>注意：</p>
+<ul>
+<li>NetworkResponse作为parseNetworkResponse()的参数，NetworkResponse包含响应作为byte[]类型，HTTP 状态码，和响应头。</li>
+<li>实现必须返回一个Response<!-- raw HTML omitted -->，它包含了实现的响应对象的类型和缓存原始数据或者在解析失败的情况下的错误。</li>
+</ul>
+<p>如果你的协议包含非标准的语义，你可以构建自己的Cache.Entry,但是大多数请求都是这样的：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">return</span> Response<span style="color:#f92672">.</span><span style="color:#a6e22e">success</span><span style="color:#f92672">(</span>myDecodedObject<span style="color:#f92672">,</span>
+        HttpHeaderParser<span style="color:#f92672">.</span><span style="color:#a6e22e">parseCacheHeaders</span><span style="color:#f92672">(</span>response<span style="color:#f92672">));</span>
+</code></pre></div><p>Volley调用parseNetworkResponse()方法是在工作线程中。这个确保了耗时的操作不会阻塞主线程，比如解析JPEG成Bitmap。</p>
+<h3 id="deliverresponse方法">deliverResponse方法</h3>
+<p>Volley返回parseNetworkResponse()的对象传递到主线程。大多数的请求会在这里调用回调接口，例如：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">deliverResponse</span><span style="color:#f92672">(</span>T response<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        listener<span style="color:#f92672">.</span><span style="color:#a6e22e">onResponse</span><span style="color:#f92672">(</span>response<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>例如GsonRequest</p>
+<p>Gson是一个使用反射技术把java对象转化成JSON，或者JSON转化为Java对象的库。你可以定义java对象与它对应的JSON的key有相同的名字。传递Gson对象，并且Gson将会填充对象的属性。下面是完整的Volley的Request实现。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">GsonRequest</span><span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">extends</span> Request<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Gson gson <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Gson<span style="color:#f92672">();</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Class<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> clazz<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> String<span style="color:#f92672">&gt;</span> headers<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Listener<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> listener<span style="color:#f92672">;</span>
+
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * Make a GET request and return a parsed object from JSON.
+</span><span style="color:#75715e">     *
+</span><span style="color:#75715e">     * @param url URL of the request to make
+</span><span style="color:#75715e">     * @param clazz Relevant class object, for Gson&#39;s reflection
+</span><span style="color:#75715e">     * @param headers Map of request headers
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">GsonRequest</span><span style="color:#f92672">(</span>String url<span style="color:#f92672">,</span> Class<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> clazz<span style="color:#f92672">,</span> Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> String<span style="color:#f92672">&gt;</span> headers<span style="color:#f92672">,</span>
+            Listener<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> listener<span style="color:#f92672">,</span> ErrorListener errorListener<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">super</span><span style="color:#f92672">(</span>Method<span style="color:#f92672">.</span><span style="color:#a6e22e">GET</span><span style="color:#f92672">,</span> url<span style="color:#f92672">,</span> errorListener<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">clazz</span> <span style="color:#f92672">=</span> clazz<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">headers</span> <span style="color:#f92672">=</span> headers<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">listener</span> <span style="color:#f92672">=</span> listener<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> String<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">getHeaders</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> AuthFailureError <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> headers <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">?</span> headers <span style="color:#f92672">:</span> <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getHeaders</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">deliverResponse</span><span style="color:#f92672">(</span>T response<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        listener<span style="color:#f92672">.</span><span style="color:#a6e22e">onResponse</span><span style="color:#f92672">(</span>response<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">protected</span> Response<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">parseNetworkResponse</span><span style="color:#f92672">(</span>NetworkResponse response<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            String json <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> String<span style="color:#f92672">(</span>
+                    response<span style="color:#f92672">.</span><span style="color:#a6e22e">data</span><span style="color:#f92672">,</span>
+                    HttpHeaderParser<span style="color:#f92672">.</span><span style="color:#a6e22e">parseCharset</span><span style="color:#f92672">(</span>response<span style="color:#f92672">.</span><span style="color:#a6e22e">headers</span><span style="color:#f92672">));</span>
+            <span style="color:#66d9ef">return</span> Response<span style="color:#f92672">.</span><span style="color:#a6e22e">success</span><span style="color:#f92672">(</span>
+                    gson<span style="color:#f92672">.</span><span style="color:#a6e22e">fromJson</span><span style="color:#f92672">(</span>json<span style="color:#f92672">,</span> clazz<span style="color:#f92672">),</span>
+                    HttpHeaderParser<span style="color:#f92672">.</span><span style="color:#a6e22e">parseCacheHeaders</span><span style="color:#f92672">(</span>response<span style="color:#f92672">));</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>UnsupportedEncodingException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">return</span> Response<span style="color:#f92672">.</span><span style="color:#a6e22e">error</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> ParseError<span style="color:#f92672">(</span>e<span style="color:#f92672">));</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>JsonSyntaxException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">return</span> Response<span style="color:#f92672">.</span><span style="color:#a6e22e">error</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> ParseError<span style="color:#f92672">(</span>e<span style="color:#f92672">));</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>Volley提供了方便的类JsonArrayReques和JsonArrayObject。可以看<strong>标准请求</strong>一节来查看更多信息。</p>
+<ul class="pa0">
+  
+   <li class="list">
+     <a href="/tags/volley" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Volley</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div>
+    </div>
+
+    <aside class="w-30-l mt6-l"><div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">这是什么 posts</p>
+      <nav id="TableOfContents">
+  <ul>
+    <li><a href="#概述">概述</a></li>
+    <li><a href="#发送简单请求">发送简单请求</a>
+      <ul>
+        <li><a href="#添加网络权限">添加网络权限</a></li>
+        <li><a href="#使用newrequestqueue">使用newRequestQueue</a></li>
+        <li><a href="#发送请求">发送请求</a></li>
+        <li><a href="#取消request">取消Request</a></li>
+      </ul>
+    </li>
+    <li><a href="#设置requestqueue">设置RequestQueue</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#标准请求">标准请求</a>
+      <ul>
+        <li><a href="#json-request">JSON Request</a></li>
+      </ul>
+    </li>
+    <li><a href="#实现自定义的request">实现自定义的Request</a>
+      <ul>
+        <li><a href="#自定义request">自定义Request</a></li>
+        <li><a href="#parsenetworkresponse方法">parseNetworkResponse方法</a></li>
+        <li><a href="#deliverresponse方法">deliverResponse方法</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">相关內容</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/posts/2017-11-04-volley%E4%BC%A0%E8%BE%93%E7%BD%91%E7%BB%9C%E6%95%B0%E6%8D%AE/">Volley传输网络数据</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://wfeii.github.io/" >
+    &copy;  音视频技术部 2020 
+  </a>
+    <div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+  </div>
+</footer>
+
+    
+
+  <script src="/dist/js/app.3fc0f988d21662902933.js"></script>
+
+
+  </body>
+</html>

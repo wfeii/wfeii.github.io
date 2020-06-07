@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Android基础 on 音视频技术部</title>
+    <link>https://wfeii.github.io/categories/android%E5%9F%BA%E7%A1%80/</link>
+    <description>Recent content in Android基础 on 音视频技术部</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Wed, 20 Apr 2016 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://wfeii.github.io/categories/android%E5%9F%BA%E7%A1%80/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>ContentProvider</title>
+      <link>https://wfeii.github.io/posts/_posts/android_base/content-provider/2014-11-08-contentprovider/</link>
+      <pubDate>Wed, 20 Apr 2016 00:00:00 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/_posts/android_base/content-provider/2014-11-08-contentprovider/</guid>
+      <description>什么是Android中的Content Provider Content Provider是用于管理访问结构化数据集的一种组件，最经常管理数据集是数据库。content provider会封装数据，提供数据安全的机制。content provider用于一个进程与另一个运行中的进程的数据连接。 Notice:
+当不打算共享数据给其他应用时，不需要定义自己的Content Provider.
+Content Provider如何表示数据的呢？ Content Provider呈现数据是通过一个或多个表，类似与数据库，使用Content Provider跟使用数据库相类似。
+如何访问Content Povider? Content Provider的访问很简单
+ 定义Uri 获取ContentResolver对象 使用ContentResolver对象进行相关的操作。 配置访问时要求的权限  如何定义Uri，以及Uri到底是做什么用的？ Uri是URI的引用，URI是Uniform Resource Identifier(统一资源标识符)简称，用于标识某一资源名称的, 组成形式：协议://authority／path。
+ContentResolver使用的Uri是用于标识内容提供者的数据，组成形式：content://authority/path如果使用Content Provider共享的数据是数据库，那么path就是操作的table
+/*填入要操作的数据的内容提供者的字符串*/ Uri uri = Uri.parse(&amp;quot; &amp;quot;); ContentResolver能够进行哪些相关的操作 可能（这里使用可能是因为要看Content Provider具体实现，也许访问的Content Provider只支持其中部分操作）支持的操作如下：
+ insert delete update query  如何insert插入数据？ 可以像这样：
+{% highlight ruby %} /1. 定义要操作的Uri（记得初始化）/ Uri mUri; /2. 定义ContentValues对象，用于保存要插入的数据/ ContentValues contentValues= new ContentValues(); contentValues.put(); contentValues.pust(); &amp;hellip; /3 获取ContentResolver对象/ ContentResolver resolver = getContentResolver(); /4 插入数据/ resolver.</description>
+    </item>
+    
+    <item>
+      <title>ContentProvider</title>
+      <link>https://wfeii.github.io/posts/android_base/content-provider/2014-11-08-contentprovider/</link>
+      <pubDate>Wed, 20 Apr 2016 00:00:00 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/android_base/content-provider/2014-11-08-contentprovider/</guid>
+      <description>什么是Android中的Content Provider Content Provider是用于管理访问结构化数据集的一种组件，最经常管理数据集是数据库。content provider会封装数据，提供数据安全的机制。content provider用于一个进程与另一个运行中的进程的数据连接。 Notice:
+当不打算共享数据给其他应用时，不需要定义自己的Content Provider.
+Content Provider如何表示数据的呢？ Content Provider呈现数据是通过一个或多个表，类似与数据库，使用Content Provider跟使用数据库相类似。
+如何访问Content Povider? Content Provider的访问很简单
+ 定义Uri 获取ContentResolver对象 使用ContentResolver对象进行相关的操作。 配置访问时要求的权限  如何定义Uri，以及Uri到底是做什么用的？ Uri是URI的引用，URI是Uniform Resource Identifier(统一资源标识符)简称，用于标识某一资源名称的, 组成形式：协议://authority／path。
+ContentResolver使用的Uri是用于标识内容提供者的数据，组成形式：content://authority/path如果使用Content Provider共享的数据是数据库，那么path就是操作的table
+/*填入要操作的数据的内容提供者的字符串*/ Uri uri = Uri.parse(&amp;quot; &amp;quot;); ContentResolver能够进行哪些相关的操作 可能（这里使用可能是因为要看Content Provider具体实现，也许访问的Content Provider只支持其中部分操作）支持的操作如下：
+ insert delete update query  如何insert插入数据？ 可以像这样：
+{% highlight ruby %} /1. 定义要操作的Uri（记得初始化）/ Uri mUri; /2. 定义ContentValues对象，用于保存要插入的数据/ ContentValues contentValues= new ContentValues(); contentValues.put(); contentValues.pust(); &amp;hellip; /3 获取ContentResolver对象/ ContentResolver resolver = getContentResolver(); /4 插入数据/ resolver.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://wfeii.github.io/posts/_posts/android_base/server/2014-10-31-services/</link>
+      <pubDate>Sun, 10 Apr 2016 00:00:00 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/_posts/android_base/server/2014-10-31-services/</guid>
+      <description>基础 什么是Android中的Serice？ Service是一个长期运行在后台不提供用户界面的组件。
+Service听起来像是一个线程，它们有什么区别？  线程独立主线程（UI线程）之外，而Service可以运行在主线程（默认情况下)中，也可以不在其中。 线程一旦被启动，只有满足相应的条件才能停止，而Service开启，可以通过stopService()或者unbindService()来停止。  Service如何启动呢？   started ： 在组件(例如activity)中调用startService()，一旦启动将会长时间运行在后台，通常started的服务用于执行单个操作并且不需要返回结果给开启者。例如下载，当完成下载，应该调用stopSelf()方法&amp;quot;自杀&amp;rdquo;。 bound : 在组件中调用bindService()方法，bound的服务允许组件发送请求，获取结果，甚至可以进行进程间通信（IPC）,当service没有被绑定时，service对象将会被销毁。    Notice: service默认运行在主进程的主线程中，这就意味着如果service要处理耗时操作或者阻塞操作(例如Map3播放，联网，蓝牙连接），应该在服务中开启工作线程来做这些工作，通过这种方式可以减少应用无响应(Application Not Responding ANR)的发生。
+ Started Service 如何定义Started Service呢？ 继承Service或者IntentService
+在manifest文件中配置Service
+&amp;lt;manifest ... &amp;gt; ... &amp;lt;application ... &amp;gt; &amp;lt;service android:name=&amp;quot;....&amp;quot; /&amp;gt; ... &amp;lt;/application&amp;gt; &amp;lt;/manifest&amp;gt; Service和IntentService怎么选择使用哪一个呢？  对于单个操作可以使用IntentService，IntentService开启一个工作线程，
+当onHandlentent()函数执行完毕，service就会自杀，部分源码是这样的  	private final class ServiceHandler extends Handler { @Override public void handleMessage(Message msg) { onHandleIntent((Intent)msg.obj); //处理完操作就会自杀， stopSelf(msg.arg1); } }  较复杂逻辑的要继承Service来完成了。 IntentService使用比较简单只需实现onHandlentent()方法。  继承Service应该覆写哪些方法呢？ 所以要覆写三个方法。</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://wfeii.github.io/posts/android_base/server/2014-10-31-services/</link>
+      <pubDate>Sun, 10 Apr 2016 00:00:00 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/android_base/server/2014-10-31-services/</guid>
+      <description>基础 什么是Android中的Serice？ Service是一个长期运行在后台不提供用户界面的组件。
+Service听起来像是一个线程，它们有什么区别？  线程独立主线程（UI线程）之外，而Service可以运行在主线程（默认情况下)中，也可以不在其中。 线程一旦被启动，只有满足相应的条件才能停止，而Service开启，可以通过stopService()或者unbindService()来停止。  Service如何启动呢？   started ： 在组件(例如activity)中调用startService()，一旦启动将会长时间运行在后台，通常started的服务用于执行单个操作并且不需要返回结果给开启者。例如下载，当完成下载，应该调用stopSelf()方法&amp;quot;自杀&amp;rdquo;。 bound : 在组件中调用bindService()方法，bound的服务允许组件发送请求，获取结果，甚至可以进行进程间通信（IPC）,当service没有被绑定时，service对象将会被销毁。    Notice: service默认运行在主进程的主线程中，这就意味着如果service要处理耗时操作或者阻塞操作(例如Map3播放，联网，蓝牙连接），应该在服务中开启工作线程来做这些工作，通过这种方式可以减少应用无响应(Application Not Responding ANR)的发生。
+ Started Service 如何定义Started Service呢？ 继承Service或者IntentService
+在manifest文件中配置Service
+&amp;lt;manifest ... &amp;gt; ... &amp;lt;application ... &amp;gt; &amp;lt;service android:name=&amp;quot;....&amp;quot; /&amp;gt; ... &amp;lt;/application&amp;gt; &amp;lt;/manifest&amp;gt; Service和IntentService怎么选择使用哪一个呢？  对于单个操作可以使用IntentService，IntentService开启一个工作线程，
+当onHandlentent()函数执行完毕，service就会自杀，部分源码是这样的  	private final class ServiceHandler extends Handler { @Override public void handleMessage(Message msg) { onHandleIntent((Intent)msg.obj); //处理完操作就会自杀， stopSelf(msg.arg1); } }  较复杂逻辑的要继承Service来完成了。 IntentService使用比较简单只需实现onHandlentent()方法。  继承Service应该覆写哪些方法呢？ 所以要覆写三个方法。</description>
+    </item>
+    
+    <item>
+      <title>Bound Services</title>
+      <link>https://wfeii.github.io/posts/_posts/android_base/server/2014-11-01-boundservices/</link>
+      <pubDate>Sat, 20 Jun 2015 00:00:00 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/_posts/android_base/server/2014-11-01-boundservices/</guid>
+      <description>&lt;h3 id=&#34;基础&#34;&gt;基础&lt;/h3&gt;
+&lt;h4 id=&#34;如何绑定service&#34;&gt;如何绑定service?&lt;/h4&gt;
+&lt;ol&gt;
+&lt;li&gt;创建一个bound service&lt;/li&gt;
+&lt;li&gt;在组件中调用bindService()方法进行绑定&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id=&#34;如何创建一个bound-service呢&#34;&gt;如何创建一个bound Service呢？&lt;/h4&gt;
+&lt;p&gt;继承Service，用于绑定的类，首先，必须提供一个IBinder用于与客户端(例如Activity)&lt;br&gt;
+交互,有三种方式可以提供此IBinder,每一种方式又有不同的实现方式。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;继承Binder(实现了IBinder)类&lt;/li&gt;
+&lt;li&gt;使用Messenger&lt;/li&gt;
+&lt;li&gt;使用AIDL&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;其次是在onBind()中返回IBinder&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;**Notice:**多个clients连接到service时，只在第一次绑定时调用onBind()方法获取&lt;br&gt;
+IBinder对象，对于其他的clients，系统直接传递一个IBinder，不会再调&lt;br&gt;
+用onBind()方法.&lt;/p&gt;
+&lt;/blockquote&gt;</description>
+    </item>
+    
+    <item>
+      <title>Bound Services</title>
+      <link>https://wfeii.github.io/posts/android_base/server/2014-11-01-boundservices/</link>
+      <pubDate>Sat, 20 Jun 2015 00:00:00 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/android_base/server/2014-11-01-boundservices/</guid>
+      <description>&lt;h3 id=&#34;基础&#34;&gt;基础&lt;/h3&gt;
+&lt;h4 id=&#34;如何绑定service&#34;&gt;如何绑定service?&lt;/h4&gt;
+&lt;ol&gt;
+&lt;li&gt;创建一个bound service&lt;/li&gt;
+&lt;li&gt;在组件中调用bindService()方法进行绑定&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id=&#34;如何创建一个bound-service呢&#34;&gt;如何创建一个bound Service呢？&lt;/h4&gt;
+&lt;p&gt;继承Service，用于绑定的类，首先，必须提供一个IBinder用于与客户端(例如Activity)&lt;br&gt;
+交互,有三种方式可以提供此IBinder,每一种方式又有不同的实现方式。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;继承Binder(实现了IBinder)类&lt;/li&gt;
+&lt;li&gt;使用Messenger&lt;/li&gt;
+&lt;li&gt;使用AIDL&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;其次是在onBind()中返回IBinder&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;**Notice:**多个clients连接到service时，只在第一次绑定时调用onBind()方法获取&lt;br&gt;
+IBinder对象，对于其他的clients，系统直接传递一个IBinder，不会再调&lt;br&gt;
+用onBind()方法.&lt;/p&gt;
+&lt;/blockquote&gt;</description>
+    </item>
+    
+    <item>
+      <title>Fragment Usage</title>
+      <link>https://wfeii.github.io/posts/_posts/android_base/activity/2014-11-25-fragment/</link>
+      <pubDate>Sat, 30 May 2015 00:00:00 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/_posts/android_base/activity/2014-11-25-fragment/</guid>
+      <description>&lt;h3 id=&#34;使用fragment实现代码与布局的复用&#34;&gt;使用Fragment实现代码与布局的复用&lt;/h3&gt;
+&lt;p&gt;源码是 &lt;strong&gt;&lt;a href=&#34;https://github.com/wangfei1991/Androidbase/tree/master/Fragment/FragmentExample&#34;&gt;Androidbase / Fragment / FragmentExample /&lt;/a&gt;&lt;/strong&gt; 中的&lt;strong&gt;DynamicFragment&lt;/strong&gt;相关的代码。&lt;/p&gt;
+&lt;p&gt;实现的效果：在手机中处理title与content显示在不同的界面,在平板中左边显示title,右边显示content。&lt;br&gt;
+&lt;a href=&#34;https://raw.githubusercontent.com/wangfei1991/Blog/gh-pages/img/android/android_knowledge/fragments.png&#34;&gt;查看效果图&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;实现的思路： 在手机中加载的布局和平板加载的布局肯定不同，要分别定义不同的布局。在手机中点击title，跳转到另一界面显示content，可以使用两个fragment分别让activity关联。在平板中不涉及界面的跳转，可以在布局文件中使用**&amp;lt;fragment&amp;gt;**标签来定义。&lt;/p&gt;
+&lt;p&gt;实现的步骤：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;定义不同的布局，在本例中定义了两个布局文件activity_dynamic_fragment,一个是在layout中定义（用于手机使用）,一个是layout-large中定义(用于平板)。&lt;/li&gt;
+&lt;li&gt;定义title的fragment和content的fragment&lt;/li&gt;
+&lt;li&gt;在Activity的onCreate()方法中content相关的view是否存在，不存在就是手机设备要把title的fragment加到activity中。&lt;/li&gt;
+&lt;li&gt;title点击处理使用了回调的方式，手机的处理方式是添加content的fragment,而平板的处理方式是获取content的fragment来更新。&lt;/li&gt;
+&lt;/ol&gt;</description>
+    </item>
+    
+    <item>
+      <title>Fragment Usage</title>
+      <link>https://wfeii.github.io/posts/android_base/activity/2014-11-25-fragment/</link>
+      <pubDate>Sat, 30 May 2015 00:00:00 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/android_base/activity/2014-11-25-fragment/</guid>
+      <description>&lt;h3 id=&#34;使用fragment实现代码与布局的复用&#34;&gt;使用Fragment实现代码与布局的复用&lt;/h3&gt;
+&lt;p&gt;源码是 &lt;strong&gt;&lt;a href=&#34;https://github.com/wangfei1991/Androidbase/tree/master/Fragment/FragmentExample&#34;&gt;Androidbase / Fragment / FragmentExample /&lt;/a&gt;&lt;/strong&gt; 中的&lt;strong&gt;DynamicFragment&lt;/strong&gt;相关的代码。&lt;/p&gt;
+&lt;p&gt;实现的效果：在手机中处理title与content显示在不同的界面,在平板中左边显示title,右边显示content。&lt;br&gt;
+&lt;a href=&#34;https://raw.githubusercontent.com/wangfei1991/Blog/gh-pages/img/android/android_knowledge/fragments.png&#34;&gt;查看效果图&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;实现的思路： 在手机中加载的布局和平板加载的布局肯定不同，要分别定义不同的布局。在手机中点击title，跳转到另一界面显示content，可以使用两个fragment分别让activity关联。在平板中不涉及界面的跳转，可以在布局文件中使用**&amp;lt;fragment&amp;gt;**标签来定义。&lt;/p&gt;
+&lt;p&gt;实现的步骤：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;定义不同的布局，在本例中定义了两个布局文件activity_dynamic_fragment,一个是在layout中定义（用于手机使用）,一个是layout-large中定义(用于平板)。&lt;/li&gt;
+&lt;li&gt;定义title的fragment和content的fragment&lt;/li&gt;
+&lt;li&gt;在Activity的onCreate()方法中content相关的view是否存在，不存在就是手机设备要把title的fragment加到activity中。&lt;/li&gt;
+&lt;li&gt;title点击处理使用了回调的方式，手机的处理方式是添加content的fragment,而平板的处理方式是获取content的fragment来更新。&lt;/li&gt;
+&lt;/ol&gt;</description>
+    </item>
+    
+    <item>
+      <title>Fragment</title>
+      <link>https://wfeii.github.io/posts/_posts/android_base/activity/2014-11-18-fragment/</link>
+      <pubDate>Thu, 28 May 2015 00:00:00 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/_posts/android_base/activity/2014-11-18-fragment/</guid>
+      <description>&lt;h3 id=&#34;什么是fragment&#34;&gt;什么是Fragment？&lt;/h3&gt;
+&lt;p&gt;Fragment不是Activity，但是需要内嵌到Activtiy中，Fragment不是容器（viewGroup或者其子类），通常Fragment创建ViewGroup.&lt;br&gt;
+Fragment代表的是一种行为或者Activity的用户界面的一部分。&lt;/p&gt;
+&lt;h3 id=&#34;为什么要使用fragment呢&#34;&gt;为什么要使用Fragment呢？&lt;/h3&gt;
+&lt;p&gt;Android是在3.0时引入的Fragment，为了更好的支持大屏幕设备（平板）。使用Fragment来封装UI和Java代码，提高了复用性。&lt;/p&gt;
+&lt;h3 id=&#34;什么时候使用fragment呢&#34;&gt;什么时候使用Fragment呢？&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;逻辑共享：不同设备和屏幕尺寸之间共享UI和逻辑，通常用于平板电脑&lt;/li&gt;
+&lt;li&gt;回退导航：把fragment添加到堆栈中，当回退时，就会出栈，这种实现方式避免了activity的重建&lt;/li&gt;
+&lt;li&gt;整体滑动的效果：与ViewPager一起使用实现整体滑动的效果&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+    <item>
+      <title>Fragment</title>
+      <link>https://wfeii.github.io/posts/android_base/activity/2014-11-18-fragment/</link>
+      <pubDate>Thu, 28 May 2015 00:00:00 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/android_base/activity/2014-11-18-fragment/</guid>
+      <description>&lt;h3 id=&#34;什么是fragment&#34;&gt;什么是Fragment？&lt;/h3&gt;
+&lt;p&gt;Fragment不是Activity，但是需要内嵌到Activtiy中，Fragment不是容器（viewGroup或者其子类），通常Fragment创建ViewGroup.&lt;br&gt;
+Fragment代表的是一种行为或者Activity的用户界面的一部分。&lt;/p&gt;
+&lt;h3 id=&#34;为什么要使用fragment呢&#34;&gt;为什么要使用Fragment呢？&lt;/h3&gt;
+&lt;p&gt;Android是在3.0时引入的Fragment，为了更好的支持大屏幕设备（平板）。使用Fragment来封装UI和Java代码，提高了复用性。&lt;/p&gt;
+&lt;h3 id=&#34;什么时候使用fragment呢&#34;&gt;什么时候使用Fragment呢？&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;逻辑共享：不同设备和屏幕尺寸之间共享UI和逻辑，通常用于平板电脑&lt;/li&gt;
+&lt;li&gt;回退导航：把fragment添加到堆栈中，当回退时，就会出栈，这种实现方式避免了activity的重建&lt;/li&gt;
+&lt;li&gt;整体滑动的效果：与ViewPager一起使用实现整体滑动的效果&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+    <item>
+      <title>Activity</title>
+      <link>https://wfeii.github.io/posts/_posts/android_base/activity/2014-10-30-activity/</link>
+      <pubDate>Thu, 07 May 2015 00:00:00 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/_posts/android_base/activity/2014-10-30-activity/</guid>
+      <description>&lt;h3 id=&#34;创建activity&#34;&gt;创建Activity&lt;/h3&gt;
+&lt;h4 id=&#34;什么是android中的activity&#34;&gt;什么是Android中的Activity？&lt;/h4&gt;
+&lt;blockquote&gt;
+&lt;p&gt;一个activity是提供一个界面，用于与用户交互（打电话，发邮件等）的应用组件。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;如何创建一个activity呢&#34;&gt;如何创建一个Activity呢？&lt;/h4&gt;
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;在layout中定义个布局文件&lt;/li&gt;
+&lt;li&gt;定义一个Activity（或者已存在的Activity子类）的子类，并实现相关的方法.&lt;/li&gt;
+&lt;li&gt;在AndroidManifest.xml中配置Activity&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;定义一个activity子类时要实现哪些方法呢&#34;&gt;定义一个Activity子类时，要实现哪些方法呢&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;onCreate(): 你必须实现这个方法，系统会在创建activity时，调用此方法，在这个方法中初始化的activity重要部分，尤其是调用setContentView()使用资源资源来设置activity的界面。&lt;/li&gt;
+&lt;li&gt;onPause(): 当用户将要离开activity时，系统调用的第一方法就是此方法，通常保存在当前会话中的变化的信息。&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://wangfei1991.github.io/Blog/android%E5%9F%BA%E7%A1%80/2014/10/30/activity/#activity-7&#34;&gt;更多的activity信息请看管理生命周期&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+    <item>
+      <title>Activity</title>
+      <link>https://wfeii.github.io/posts/android_base/activity/2014-10-30-activity/</link>
+      <pubDate>Thu, 07 May 2015 00:00:00 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/android_base/activity/2014-10-30-activity/</guid>
+      <description>&lt;h3 id=&#34;创建activity&#34;&gt;创建Activity&lt;/h3&gt;
+&lt;h4 id=&#34;什么是android中的activity&#34;&gt;什么是Android中的Activity？&lt;/h4&gt;
+&lt;blockquote&gt;
+&lt;p&gt;一个activity是提供一个界面，用于与用户交互（打电话，发邮件等）的应用组件。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;如何创建一个activity呢&#34;&gt;如何创建一个Activity呢？&lt;/h4&gt;
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;在layout中定义个布局文件&lt;/li&gt;
+&lt;li&gt;定义一个Activity（或者已存在的Activity子类）的子类，并实现相关的方法.&lt;/li&gt;
+&lt;li&gt;在AndroidManifest.xml中配置Activity&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;定义一个activity子类时要实现哪些方法呢&#34;&gt;定义一个Activity子类时，要实现哪些方法呢&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;onCreate(): 你必须实现这个方法，系统会在创建activity时，调用此方法，在这个方法中初始化的activity重要部分，尤其是调用setContentView()使用资源资源来设置activity的界面。&lt;/li&gt;
+&lt;li&gt;onPause(): 当用户将要离开activity时，系统调用的第一方法就是此方法，通常保存在当前会话中的变化的信息。&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://wangfei1991.github.io/Blog/android%E5%9F%BA%E7%A1%80/2014/10/30/activity/#activity-7&#34;&gt;更多的activity信息请看管理生命周期&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+    <item>
+      <title>menu和action bar</title>
+      <link>https://wfeii.github.io/posts/_posts/ui/2014-11-25-menuandactionbar/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/_posts/ui/2014-11-25-menuandactionbar/</guid>
+      <description>从android3.0开始传统的6-items的菜单被action bar的形式所取代，在这篇文章中，将使用action bar方式实现menu，并且使用的是支持库的方式，这样可以解决版本兼容问题。
+三种菜单类型  options menu context menu popup menu  如何定义menu  在res/menu/下使用xml中定义menu item, 代码中填充菜单 直接在代码中创建menu，添加menu条目   NOTICE： 最好使用menu资源来定义menu items
+   It&amp;rsquo;s easier to visualize the menu structure in XML. It separates the content for the menu from your application&amp;rsquo;s behavioral code. It allows you to create alternative menu configurations for different platform versions, screen sizes, and other configurations by leveraging the app resources framework.   下面就是不同类型menu的创建方式</description>
+    </item>
+    
+    <item>
+      <title>menu和action bar</title>
+      <link>https://wfeii.github.io/posts/ui/2014-11-25-menuandactionbar/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/ui/2014-11-25-menuandactionbar/</guid>
+      <description>从android3.0开始传统的6-items的菜单被action bar的形式所取代，在这篇文章中，将使用action bar方式实现menu，并且使用的是支持库的方式，这样可以解决版本兼容问题。
+三种菜单类型  options menu context menu popup menu  如何定义menu  在res/menu/下使用xml中定义menu item, 代码中填充菜单 直接在代码中创建menu，添加menu条目   NOTICE： 最好使用menu资源来定义menu items
+   It&amp;rsquo;s easier to visualize the menu structure in XML. It separates the content for the menu from your application&amp;rsquo;s behavioral code. It allows you to create alternative menu configurations for different platform versions, screen sizes, and other configurations by leveraging the app resources framework.   下面就是不同类型menu的创建方式</description>
+    </item>
+    
+    <item>
+      <title>menu和actionbar</title>
+      <link>https://wfeii.github.io/posts/_posts/ui/2014-11-26-menuandactionbar/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/_posts/ui/2014-11-26-menuandactionbar/</guid>
+      <description>context menu的创建 context menu可以使用到任意view上，但通常使用在ListView，GridView的items上，或者其他用户能够执行item操作的view集合。
+有两种方式可以创建context menu
+  In a floating context menu. A menu appears as a floating list of menu items (similar to a dialog) when the user performs a long-click (press and hold) on a view that declares support for a context menu. Users can perform a contextual action on one item at a time. In the contextual action mode. This mode is a system implementation of ActionMode that displays a contextual action bar at the top of the screen with action items that affect the selected item(s).</description>
+    </item>
+    
+    <item>
+      <title>menu和actionbar</title>
+      <link>https://wfeii.github.io/posts/ui/2014-11-26-menuandactionbar/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/posts/ui/2014-11-26-menuandactionbar/</guid>
+      <description>context menu的创建 context menu可以使用到任意view上，但通常使用在ListView，GridView的items上，或者其他用户能够执行item操作的view集合。
+有两种方式可以创建context menu
+  In a floating context menu. A menu appears as a floating list of menu items (similar to a dialog) when the user performs a long-click (press and hold) on a view that declares support for a context menu. Users can perform a contextual action on one item at a time. In the contextual action mode. This mode is a system implementation of ActionMode that displays a contextual action bar at the top of the screen with action items that affect the selected item(s).</description>
+    </item>
+    
+  </channel>
+</rss>

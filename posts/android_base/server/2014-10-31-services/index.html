@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>音视频技术部</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="generator" content="Hugo 0.72.0" />
+    
+    
+      <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
+    
+
+    
+    
+      <link href="/dist/css/app.4fc0b62e4b82c997bb0041217cd6b979.css" rel="stylesheet">
+    
+
+    
+
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="" />
+<meta property="og:description" content="基础 什么是Android中的Serice？ Service是一个长期运行在后台不提供用户界面的组件。
+Service听起来像是一个线程，它们有什么区别？  线程独立主线程（UI线程）之外，而Service可以运行在主线程（默认情况下)中，也可以不在其中。 线程一旦被启动，只有满足相应的条件才能停止，而Service开启，可以通过stopService()或者unbindService()来停止。  Service如何启动呢？   started ： 在组件(例如activity)中调用startService()，一旦启动将会长时间运行在后台，通常started的服务用于执行单个操作并且不需要返回结果给开启者。例如下载，当完成下载，应该调用stopSelf()方法&quot;自杀&rdquo;。 bound : 在组件中调用bindService()方法，bound的服务允许组件发送请求，获取结果，甚至可以进行进程间通信（IPC）,当service没有被绑定时，service对象将会被销毁。    Notice: service默认运行在主进程的主线程中，这就意味着如果service要处理耗时操作或者阻塞操作(例如Map3播放，联网，蓝牙连接），应该在服务中开启工作线程来做这些工作，通过这种方式可以减少应用无响应(Application Not Responding ANR)的发生。
+ Started Service 如何定义Started Service呢？ 继承Service或者IntentService
+在manifest文件中配置Service
+&lt;manifest ... &gt; ... &lt;application ... &gt; &lt;service android:name=&quot;....&quot; /&gt; ... &lt;/application&gt; &lt;/manifest&gt; Service和IntentService怎么选择使用哪一个呢？  对于单个操作可以使用IntentService，IntentService开启一个工作线程，
+当onHandlentent()函数执行完毕，service就会自杀，部分源码是这样的  	private final class ServiceHandler extends Handler { @Override public void handleMessage(Message msg) { onHandleIntent((Intent)msg.obj); //处理完操作就会自杀， stopSelf(msg.arg1); } }  较复杂逻辑的要继承Service来完成了。 IntentService使用比较简单只需实现onHandlentent()方法。  继承Service应该覆写哪些方法呢？ 所以要覆写三个方法。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://wfeii.github.io/posts/android_base/server/2014-10-31-services/" />
+<meta property="article:published_time" content="2016-04-10T00:00:00+00:00" />
+<meta property="article:modified_time" content="2016-04-10T00:00:00+00:00" />
+<meta itemprop="name" content="">
+<meta itemprop="description" content="基础 什么是Android中的Serice？ Service是一个长期运行在后台不提供用户界面的组件。
+Service听起来像是一个线程，它们有什么区别？  线程独立主线程（UI线程）之外，而Service可以运行在主线程（默认情况下)中，也可以不在其中。 线程一旦被启动，只有满足相应的条件才能停止，而Service开启，可以通过stopService()或者unbindService()来停止。  Service如何启动呢？   started ： 在组件(例如activity)中调用startService()，一旦启动将会长时间运行在后台，通常started的服务用于执行单个操作并且不需要返回结果给开启者。例如下载，当完成下载，应该调用stopSelf()方法&quot;自杀&rdquo;。 bound : 在组件中调用bindService()方法，bound的服务允许组件发送请求，获取结果，甚至可以进行进程间通信（IPC）,当service没有被绑定时，service对象将会被销毁。    Notice: service默认运行在主进程的主线程中，这就意味着如果service要处理耗时操作或者阻塞操作(例如Map3播放，联网，蓝牙连接），应该在服务中开启工作线程来做这些工作，通过这种方式可以减少应用无响应(Application Not Responding ANR)的发生。
+ Started Service 如何定义Started Service呢？ 继承Service或者IntentService
+在manifest文件中配置Service
+&lt;manifest ... &gt; ... &lt;application ... &gt; &lt;service android:name=&quot;....&quot; /&gt; ... &lt;/application&gt; &lt;/manifest&gt; Service和IntentService怎么选择使用哪一个呢？  对于单个操作可以使用IntentService，IntentService开启一个工作线程，
+当onHandlentent()函数执行完毕，service就会自杀，部分源码是这样的  	private final class ServiceHandler extends Handler { @Override public void handleMessage(Message msg) { onHandleIntent((Intent)msg.obj); //处理完操作就会自杀， stopSelf(msg.arg1); } }  较复杂逻辑的要继承Service来完成了。 IntentService使用比较简单只需实现onHandlentent()方法。  继承Service应该覆写哪些方法呢？ 所以要覆写三个方法。">
+<meta itemprop="datePublished" content="2016-04-10T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2016-04-10T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="162">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content=""/>
+<meta name="twitter:description" content="基础 什么是Android中的Serice？ Service是一个长期运行在后台不提供用户界面的组件。
+Service听起来像是一个线程，它们有什么区别？  线程独立主线程（UI线程）之外，而Service可以运行在主线程（默认情况下)中，也可以不在其中。 线程一旦被启动，只有满足相应的条件才能停止，而Service开启，可以通过stopService()或者unbindService()来停止。  Service如何启动呢？   started ： 在组件(例如activity)中调用startService()，一旦启动将会长时间运行在后台，通常started的服务用于执行单个操作并且不需要返回结果给开启者。例如下载，当完成下载，应该调用stopSelf()方法&quot;自杀&rdquo;。 bound : 在组件中调用bindService()方法，bound的服务允许组件发送请求，获取结果，甚至可以进行进程间通信（IPC）,当service没有被绑定时，service对象将会被销毁。    Notice: service默认运行在主进程的主线程中，这就意味着如果service要处理耗时操作或者阻塞操作(例如Map3播放，联网，蓝牙连接），应该在服务中开启工作线程来做这些工作，通过这种方式可以减少应用无响应(Application Not Responding ANR)的发生。
+ Started Service 如何定义Started Service呢？ 继承Service或者IntentService
+在manifest文件中配置Service
+&lt;manifest ... &gt; ... &lt;application ... &gt; &lt;service android:name=&quot;....&quot; /&gt; ... &lt;/application&gt; &lt;/manifest&gt; Service和IntentService怎么选择使用哪一个呢？  对于单个操作可以使用IntentService，IntentService开启一个工作线程，
+当onHandlentent()函数执行完毕，service就会自杀，部分源码是这样的  	private final class ServiceHandler extends Handler { @Override public void handleMessage(Message msg) { onHandleIntent((Intent)msg.obj); //处理完操作就会自杀， stopSelf(msg.arg1); } }  较复杂逻辑的要继承Service来完成了。 IntentService使用比较简单只需实现onHandlentent()方法。  继承Service应该覆写哪些方法呢？ 所以要覆写三个方法。"/>
+
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        音视频技术部
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/about/" title="关于 page">
+              关于
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/posts/" title="文章 page">
+              文章
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        文章
+      </aside>
+      
+
+
+
+
+  <div id="sharing" class="mt3">
+
+    
+    <a href="https://www.facebook.com/sharer.php?u=https://wfeii.github.io/posts/android_base/server/2014-10-31-services/" class="facebook no-underline" aria-label="share on Facebook">
+      <svg height="32px"  style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M28.765,50.32h6.744V33.998h4.499l0.596-5.624h-5.095  l0.007-2.816c0-1.466,0.14-2.253,2.244-2.253h2.812V17.68h-4.5c-5.405,0-7.307,2.729-7.307,7.317v3.377h-3.369v5.625h3.369V50.32z   M33,64C16.432,64,3,50.569,3,34S16.432,4,33,4s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;"/></svg>
+
+    </a>
+
+    
+    
+    <a href="https://twitter.com/share?url=https://wfeii.github.io/posts/android_base/server/2014-10-31-services/&amp;text=" class="twitter no-underline" aria-label="share on Twitter">
+      <svg height="32px"  style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M37.167,22.283c-2.619,0.953-4.274,3.411-4.086,6.101  l0.063,1.038l-1.048-0.127c-3.813-0.487-7.145-2.139-9.974-4.915l-1.383-1.377l-0.356,1.017c-0.754,2.267-0.272,4.661,1.299,6.271  c0.838,0.89,0.649,1.017-0.796,0.487c-0.503-0.169-0.943-0.296-0.985-0.233c-0.146,0.149,0.356,2.076,0.754,2.839  c0.545,1.06,1.655,2.097,2.871,2.712l1.027,0.487l-1.215,0.021c-1.173,0-1.215,0.021-1.089,0.467  c0.419,1.377,2.074,2.839,3.918,3.475l1.299,0.444l-1.131,0.678c-1.676,0.976-3.646,1.526-5.616,1.568  C19.775,43.256,19,43.341,19,43.405c0,0.211,2.557,1.397,4.044,1.864c4.463,1.377,9.765,0.783,13.746-1.568  c2.829-1.673,5.657-5,6.978-8.221c0.713-1.716,1.425-4.851,1.425-6.354c0-0.975,0.063-1.102,1.236-2.267  c0.692-0.678,1.341-1.419,1.467-1.631c0.21-0.403,0.188-0.403-0.88-0.043c-1.781,0.636-2.033,0.551-1.152-0.402  c0.649-0.678,1.425-1.907,1.425-2.267c0-0.063-0.314,0.042-0.671,0.233c-0.377,0.212-1.215,0.53-1.844,0.72l-1.131,0.361l-1.027-0.7  c-0.566-0.381-1.361-0.805-1.781-0.932C39.766,21.902,38.131,21.944,37.167,22.283z M33,64C16.432,64,3,50.569,3,34S16.432,4,33,4  s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/></svg>
+
+    </a>
+
+    
+    <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https://wfeii.github.io/posts/android_base/server/2014-10-31-services/&amp;title=" class="linkedin no-underline" aria-label="share on LinkedIn">
+      <svg  height="32px"  style="enable-background:new 0 0 65 65;" version="1.1" viewBox="0 0 65 65" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <path d="M50.837,48.137V36.425c0-6.275-3.35-9.195-7.816-9.195  c-3.604,0-5.219,1.983-6.119,3.374V27.71h-6.79c0.09,1.917,0,20.427,0,20.427h6.79V36.729c0-0.609,0.044-1.219,0.224-1.655  c0.49-1.22,1.607-2.483,3.482-2.483c2.458,0,3.44,1.873,3.44,4.618v10.929H50.837z M22.959,24.922c2.367,0,3.842-1.57,3.842-3.531  c-0.044-2.003-1.475-3.528-3.797-3.528s-3.841,1.524-3.841,3.528c0,1.961,1.474,3.531,3.753,3.531H22.959z M34,64  C17.432,64,4,50.568,4,34C4,17.431,17.432,4,34,4s30,13.431,30,30C64,50.568,50.568,64,34,64z M26.354,48.137V27.71h-6.789v20.427  H26.354z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/>
+</svg>
+
+    </a>
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1"></h1>
+      
+      <p class="tracked">
+          By <strong>
+          
+              王飞
+          
+          </strong>
+      </p>
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2016-04-10T00:00:00Z">April 10, 2016</time>
+
+      
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links nested-img mid-gray pr4-l w-two-thirds-l"><h3 id="基础">基础</h3>
+<h4 id="什么是android中的serice">什么是Android中的Serice？</h4>
+<p>Service是一个长期运行在后台不提供用户界面的组件。</p>
+<h4 id="service听起来像是一个线程它们有什么区别">Service听起来像是一个线程，它们有什么区别？</h4>
+<ul>
+<li>线程独立主线程（UI线程）之外，而Service可以运行在主线程（默认情况下)中，也可以不在其中。</li>
+<li>线程一旦被启动，只有满足相应的条件才能停止，而Service开启，可以通过stopService()或者unbindService()来停止。</li>
+</ul>
+<h4 id="service如何启动呢">Service如何启动呢？</h4>
+<blockquote>
+<ul>
+<li>started ： 在组件(例如activity)中调用startService()，一旦启动将会长时间运行在后台，通常started的服务用于执行单个操作并且不需要返回结果给开启者。例如下载，当完成下载，应该调用stopSelf()方法&quot;自杀&rdquo;。</li>
+<li>bound : 在组件中调用bindService()方法，bound的服务允许组件发送请求，获取结果，甚至可以进行进程间通信（IPC）,当service没有被绑定时，service对象将会被销毁。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p><strong>Notice:</strong> service默认运行在主进程的主线程中，这就意味着如果service要处理耗时操作或者阻塞操作(例如Map3播放，联网，蓝牙连接），应该在服务中开启工作线程来做这些工作，通过这种方式可以减少应用无响应(Application Not Responding ANR)的发生。</p>
+</blockquote>
+<h3 id="started-service">Started Service</h3>
+<h4 id="如何定义started-service呢">如何定义Started Service呢？</h4>
+<p>继承Service或者IntentService<br>
+在manifest文件中配置Service</p>
+<pre><code>&lt;manifest ... &gt;
+    ...
+    &lt;application ... &gt;
+    &lt;service android:name=&quot;....&quot; /&gt;
+    ...
+    &lt;/application&gt;
+&lt;/manifest&gt;  
+</code></pre><!-- raw HTML omitted -->
+<h4 id="service和intentservice怎么选择使用哪一个呢">Service和IntentService怎么选择使用哪一个呢？</h4>
+<ul>
+<li>对于单个操作可以使用IntentService，IntentService开启一个工作线程，<br>
+当onHandlentent()函数执行完毕，service就会自杀，部分源码是这样的</li>
+</ul>
+<pre><code>	private final class ServiceHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            onHandleIntent((Intent)msg.obj);  //处理完操作就会自杀，
+            stopSelf(msg.arg1);
+        }
+    }  
+</code></pre><ul>
+<li>较复杂逻辑的要继承Service来完成了。</li>
+<li>IntentService使用比较简单只需实现onHandlentent()方法。</li>
+</ul>
+<h4 id="继承service应该覆写哪些方法呢">继承Service应该覆写哪些方法呢？</h4>
+<p><img src="https://raw.githubusercontent.com/wangfei1991/Blog/master/img/android/android_knowledge/startedServiceflow.png" alt="activity开启service执行过程"><br>
+所以要覆写三个方法。</p>
+<pre><code>  public class HelloService extends Service {
+
+  @Override
+  public void onCreate() {
+    /*在创建Service时执行，如果开启的服务已经再运行，不会调用这个方法*/
+  }
+
+  @Override
+  public int onStartCommand(Intent intent, int flags, int startId) {
+/**
+       *1. 在组件(例如Activity)调用了startService()就会执行此方法，一旦此方法  
+	   *   执行，service就会运行在后台，如果你想停止服务需要在组件中  
+	   *   调用stopService()，或者在service中调用stopSelf()  
+	   *2. 对于返回值必须是下面常量的其中一个：
+	   *   START_NOT_STICKY : 当系统杀死该服务,将不会重建这个service的对象。  
+	   *   START_NOT_STICKY : 当系统杀死该服务，将会重新创建service，并且调  
+	   *                      用onStartCommand()方法，但不会重新提交最后  
+	   *                      一次intent,也就是系统调用onStartCommand()  
+	   *                      但传入intent为null  
+	   *   START_REDELIVER_INTENT: 系统杀死service后，重新创建service并且  
+	   *                           调用onStartCommand()并把最后的请求的  
+	   *                           intent传入  
+	   */
+      return START_STICKY;
+  }
+
+  /*********************用于绑定服务这里可以返回null****************/
+  @Override
+  public IBinder onBind(Intent intent) {
+      // We don't provide binding, so return null
+      return null;
+  }
+
+  @Override
+  public void onDestroy() {
+/*
+        *当服务不再被使用时会调用此方法，在此方法中，应该放弃资源比如线程的  
+        *注册的监听，等等。  
+        */
+  }
+}
+</code></pre><h4 id="在组件中如何启动started-service呢">在组件中如何启动started service呢？</h4>
+<p>使用startService(Intent),并且intent定义方法与开启activity的intent一样有两种方式显式（类名）与隐式（action）。</p>
+<h4 id="如何停止started-service">如何停止started service?</h4>
+<ul>
+<li>stopService()： 组件来停止服务，一般用于防止耗电，避免浪费系统资源 时使用。</li>
+<li>stopSelf()： 一般用于在onStartCommand()执行一个请求，当执行完相应操作就使用stopSelf()自杀。</li>
+<li>stopSelf(int)： 当在onStartCommand()中执行多个请求时，建议使用此方法，因为这样可以避免当新的请求到来后，关闭了service的情况。</li>
+</ul>
+<h3 id="参考文档">参考文档</h3>
+<p><a href="http://developer.android.com/guide/components/services.html">参考文档1</a></p>
+<ul class="pa0">
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div>
+    </div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://wfeii.github.io/" >
+    &copy;  音视频技术部 2020 
+  </a>
+    <div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+  </div>
+</footer>
+
+    
+
+  <script src="/dist/js/app.3fc0f988d21662902933.js"></script>
+
+
+  </body>
+</html>
