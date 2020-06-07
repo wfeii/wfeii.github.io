@@ -3,27 +3,57 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://wfeii.github.io/posts/</loc>
-    <lastmod>2017-03-02T12:00:00-05:00</lastmod>
+    <loc>https://wfeii.github.io/posts/my-first-post/</loc>
+    <lastmod>2020-06-07T18:47:53+08:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://wfeii.github.io/</loc>
-    <lastmod>2017-03-02T12:00:00-05:00</lastmod>
+    <lastmod>2020-06-07T18:47:53+08:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://wfeii.github.io/categories/android/</loc>
+    <lastmod>2017-11-04T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://wfeii.github.io/tags/android-studio/</loc>
+    <lastmod>2017-11-04T00:00:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://wfeii.github.io/categories/</loc>
+    <lastmod>2017-11-04T00:00:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://wfeii.github.io/tags/</loc>
+    <lastmod>2017-11-04T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://wfeii.github.io/posts/android_studio/2017-11-04-%E9%AB%98%E6%95%88%E5%AE%9E%E7%94%A8android-studio-%E4%B8%80/</loc>
+    <lastmod>2017-11-04T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://wfeii.github.io/posts/</loc>
+    <lastmod>2017-03-02T12:00:00-05:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>

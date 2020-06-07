@@ -6,9 +6,19 @@
     <description>Recent content in Tags on 音视频技术部</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
+    <lastBuildDate>Sat, 04 Nov 2017 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://wfeii.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Android Studio</title>
+      <link>https://wfeii.github.io/tags/android-studio/</link>
+      <pubDate>Sat, 04 Nov 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://wfeii.github.io/tags/android-studio/</guid>
+      <description></description>
+    </item>
     
   </channel>
 </rss>
