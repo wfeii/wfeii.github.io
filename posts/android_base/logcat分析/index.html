@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#">
+    <meta charset="UTF-8" />
+
+    <meta name="generator" content="Hugo 0.72.0" /><meta name="theme-color" content="#fff" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
+    
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+
+    <title>Android Log 分析 | 技术部的那点事</title>
+
+    <link rel="stylesheet" href="/css/meme.min.506f6e7867ce04c324b6eb3dffec27ca1e4231eabf8bf50e1f8cbff93bf442ca.css" integrity="sha256-UG9ueGfOBMMktus9/&#43;wnyh5CMeq/i/UOH4y/&#43;Tv0Qso=" />
+
+    
+    <script src="/js/meme.min.e431136e7c56f46aac38fef8c23d57d0bff7bb5c62406b0227004051e7095604.js" integrity="sha256-5DETbnxW9GqsOP74wj1X0L/3u1xiQGsCJwBAUecJVgQ="></script>
+
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB&#43;Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&amp;family=Noto&#43;Serif&#43;SC:wght@400;500;700&amp;family=Source&#43;Code&#43;Pro:ital,wght@0,400;0,700;1,400;1,700&amp;display=swap" media="print" onload="this.media='all'" />
+        <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB&#43;Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&amp;family=Noto&#43;Serif&#43;SC:wght@400;500;700&amp;family=Source&#43;Code&#43;Pro:ital,wght@0,400;0,700;1,400;1,700&amp;display=swap" /></noscript>
+
+    <meta name="author" content="快马夜小刀" /><meta name="description" content="Bug在任何类型的开发中都会存在的，而Bug报告又是定位问题，解决问题的关键。 Bug……
+    
+    " />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#2a6df4" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="技术部的那点事" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="技术部的那点事" />
+    <meta name="msapplication-starturl" content="../../../" />
+    <meta name="msapplication-TileColor" content="#fff" />
+    <meta name="msapplication-TileImage" content="../../../icons/mstile-150x150.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    
+    
+
+    
+    <link rel="canonical" href="https://example.com/posts/android_base/logcat%E5%88%86%E6%9E%90/" />
+    
+
+<script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "datePublished": "2017-11-04T16:40:12+00:00",
+        "dateModified": "2020-06-13T21:51:28+08:00",
+        "url": "https://example.com/posts/android_base/logcat%E5%88%86%E6%9E%90/",
+        "headline": "Android Log 分析",
+        "description": "Bug在任何类型的开发中都会存在的，而Bug报告又是定位问题，解决问题的关键。 Bug……\n    \n    ",
+        "inLanguage" : "zh-CN",
+        "articleSection": "posts",
+        "wordCount":  4729 ,
+        "image": "https://example.com/icons/apple-touch-icon.png",
+        "author": {
+            "@type": "Person",
+            "description": "陷我们于无知的，恰恰是我们的已知。",
+            "email": "wangfei199101@gmail.com",
+            "url": "https://wfeii.github.io/",
+            "name": "快马夜小刀"
+        },
+        "license": "[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)",
+        "publisher": {
+            "@type": "Organization",
+            "name": "技术部的那点事",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://example.com/icons/apple-touch-icon.png"
+            },
+            "url": "https://example.com/"
+        },
+        "mainEntityOfPage": {
+            "@type": "WebSite",
+            "@id": "https://example.com/"
+        }
+    }
+</script>
+
+    
+
+<meta name="twitter:card" content="summary" />
+
+<meta name="twitter:site" content="@reuixiy" />
+
+    
+
+
+
+<meta property="og:title" content="Android Log 分析" />
+<meta property="og:description" content="Bug在任何类型的开发中都会存在的，而Bug报告又是定位问题，解决问题的关键。 Bug……
+    
+    " />
+<meta property="og:url" content="https://example.com/posts/android_base/logcat%E5%88%86%E6%9E%90/" />
+<meta property="og:site_name" content="技术部的那点事" />
+<meta property="og:locale" content="zh" /><meta property="og:image" content="https://example.com/icons/apple-touch-icon.png" />
+    <meta property="og:type" content="article" />
+    <meta property="article:published_time" content="2017-11-04T16:40:12&#43;00:00" />
+    <meta property="article:modified_time" content="2020-06-13T21:51:28&#43;08:00" />
+    
+    <meta property="article:section" content="posts" />
+
+
+
+    
+</head>
+
+    <body>
+        <div class="container">
+            
+    <header class="header" data-scroll-header>
+        
+            <div class="header-wrapper">
+                <div class="header-inner single">
+                    
+    <div class="site-brand">
+        
+            <a href="/" class="brand">技术部的那点事</a>
+        
+    </div>
+
+                    <nav class="nav">
+    <ul class="menu" id="menu">
+        
+            
+        
+        
+        
+        
+            
+                <li class="menu-item"><a href="/posts/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon archive"><path d="M32 448c0 17.7 14.3 32 32 32h384c17.7 0 32-14.3 32-32V160H32v288zm160-212c0-6.6 5.4-12 12-12h104c6.6 0 12 5.4 12 12v8c0 6.6-5.4 12-12 12H204c-6.6 0-12-5.4-12-12v-8zM480 32H32C14.3 32 0 46.3 0 64v48c0 8.8 7.2 16 16 16h480c8.8 0 16-7.2 16-16V64c0-17.7-14.3-32-32-32z"/></svg><span class="menu-item-name">文章</span></a>
+                </li>
+            
+        
+            
+                <li class="menu-item"><a href="/categories/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon th"><path d="M149.333 56v80c0 13.255-10.745 24-24 24H24c-13.255 0-24-10.745-24-24V56c0-13.255 10.745-24 24-24h101.333c13.255 0 24 10.745 24 24zm181.334 240v-80c0-13.255-10.745-24-24-24H205.333c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h101.333c13.256 0 24.001-10.745 24.001-24zm32-240v80c0 13.255 10.745 24 24 24H488c13.255 0 24-10.745 24-24V56c0-13.255-10.745-24-24-24H386.667c-13.255 0-24 10.745-24 24zm-32 80V56c0-13.255-10.745-24-24-24H205.333c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h101.333c13.256 0 24.001-10.745 24.001-24zm-205.334 56H24c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h101.333c13.255 0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24zM0 376v80c0 13.255 10.745 24 24 24h101.333c13.255 0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24H24c-13.255 0-24 10.745-24 24zm386.667-56H488c13.255 0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24H386.667c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24zm0 160H488c13.255 0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24H386.667c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24zM181.333 376v80c0 13.255 10.745 24 24 24h101.333c13.255 0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24H205.333c-13.255 0-24 10.745-24 24z"/></svg><span class="menu-item-name">分类</span></a>
+                </li>
+            
+        
+            
+                <li class="menu-item"><a href="/tags/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" class="icon tags"><path d="M497.941 225.941L286.059 14.059A48 48 0 0 0 252.118 0H48C21.49 0 0 21.49 0 48v204.118a48 48 0 0 0 14.059 33.941l211.882 211.882c18.744 18.745 49.136 18.746 67.882 0l204.118-204.118c18.745-18.745 18.745-49.137 0-67.882zM112 160c-26.51 0-48-21.49-48-48s21.49-48 48-48 48 21.49 48 48-21.49 48-48 48zm513.941 133.823L421.823 497.941c-18.745 18.745-49.137 18.745-67.882 0l-.36-.36L527.64 323.522c16.999-16.999 26.36-39.6 26.36-63.64s-9.362-46.641-26.36-63.64L331.397 0h48.721a48 48 0 0 1 33.941 14.059l211.882 211.882c18.745 18.745 18.745 49.137 0 67.882z"/></svg><span class="menu-item-name">标签</span></a>
+                </li>
+            
+        
+            
+                <li class="menu-item"><a href="/about/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512" class="icon user-circle"><path d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm0 96c48.6 0 88 39.4 88 88s-39.4 88-88 88-88-39.4-88-88 39.4-88 88-88zm0 344c-58.7 0-111.3-26.6-146.5-68.2 18.8-35.4 55.6-59.8 98.5-59.8 2.4 0 4.8.4 7.1 1.1 13 4.2 26.6 6.9 40.9 6.9 14.3 0 28-2.7 40.9-6.9 2.3-.7 4.7-1.1 7.1-1.1 42.9 0 79.7 24.4 98.5 59.8C359.3 421.4 306.7 448 248 448z"/></svg><span class="menu-item-name">关于</span></a>
+                </li>
+            
+        
+            
+                
+                    
+                    
+                        <li class="menu-item">
+                            <a id="theme-switcher" href="#"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon theme-icon-light"><path d="M193.2 104.5l48.8-97.5a18 18 0 0128 0l48.8 97.5 103.4 -34.5a18 18 0 0119.8 19.8l-34.5 103.4l97.5 48.8a18 18 0 010 28l-97.5 48.8 34.5 103.4a18 18 0 01-19.8 19.8l-103.4-34.5-48.8 97.5a18 18 0 01-28 0l-48.8-97.5l-103.4 34.5a18 18 0 01-19.8-19.8l34.5-103.4-97.5-48.8a18 18 0 010-28l97.5-48.8-34.5-103.4a18 18 0 0119.8-19.8zM256 128a128 128 0 10.01 0M256 160a96 96 0 10.01 0"/></svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon theme-icon-dark"><path d="M27 412a256 256 0 10154-407a11.5 11.5 0 00-5 20a201.5 201.5 0 01-134 374a11.5 11.5 0 00-15 13"/></svg></a>
+                        </li>
+                    
+                
+            
+        
+            
+                
+            
+        
+    </ul>
+</nav>
+
+                    
+                </div>
+            </div>
+            
+    <input type="checkbox" id="nav-toggle" aria-hidden="true" />
+    <label for="nav-toggle" class="nav-toggle"></label>
+    <label for="nav-toggle" class="nav-curtain"></label>
+
+
+        
+    </header>
+
+
+
+
+            
+            
+    <main class="main single" id="main">
+    <div class="main-inner">
+
+        
+
+        <article class="content post" data-align="justify" data-type="posts" data-layout="post" data-toc-num="true">
+
+            <h1 class="post-title">Android Log 分析</h1>
+
+            
+
+            
+                
+            
+
+            
+                
+
+<div class="post-meta">
+    
+        
+        <time datetime="2017-11-04T16:40:12&#43;00:00" class="post-meta-item published"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="icon post-meta-icon"><path d="M148 288h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm108-12v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 96v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm192 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96-260v352c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h48V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h128V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h48c26.5 0 48 21.5 48 48zm-48 346V160H48v298c0 3.3 2.7 6 6 6h340c3.3 0 6-2.7 6-6z"/></svg>&nbsp;2017.11.4</time>
+    
+    
+        
+        <time datetime="2020-06-13T21:51:28&#43;08:00" class="post-meta-item modified"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="icon post-meta-icon"><path d="M400 64h-48V12c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v52H160V12c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v52H48C21.49 64 0 85.49 0 112v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm-6 400H54a6 6 0 0 1-6-6V160h352v298a6 6 0 0 1-6 6zm-52.849-200.65L198.842 404.519c-4.705 4.667-12.303 4.637-16.971-.068l-75.091-75.699c-4.667-4.705-4.637-12.303.068-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l44.104 44.461 111.072-110.181c4.705-4.667 12.303-4.637 16.971.068l22.536 22.718c4.667 4.705 4.636 12.303-.069 16.97z"/></svg>&nbsp;2020.6.13</time>
+    
+    
+    
+        
+        
+        
+            
+        
+    
+    
+        
+        <span class="post-meta-item wordcount"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon post-meta-icon"><path d="M497.9 142.1l-46.1 46.1c-4.7 4.7-12.3 4.7-17 0l-111-111c-4.7-4.7-4.7-12.3 0-17l46.1-46.1c18.7-18.7 49.1-18.7 67.9 0l60.1 60.1c18.8 18.7 18.8 49.1 0 67.9zM284.2 99.8L21.6 362.4.4 483.9c-2.9 16.4 11.4 30.6 27.8 27.8l121.5-21.3 262.6-262.6c4.7-4.7 4.7-12.3 0-17l-111-111c-4.8-4.7-12.4-4.7-17.1 0zM124.1 339.9c-5.5-5.5-5.5-14.3 0-19.8l154-154c5.5-5.5 14.3-5.5 19.8 0s5.5 14.3 0 19.8l-154 154c-5.5 5.5-14.3 5.5-19.8 0zM88 424h48v36.3l-64.5 11.3-31.1-31.1L51.7 376H88v48z"/></svg>&nbsp;4729</span>
+    
+    
+        
+        <span class="post-meta-item reading-time"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon post-meta-icon"><path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm61.8-104.4l-84.9-61.7c-3.1-2.3-4.9-5.9-4.9-9.7V116c0-6.6 5.4-12 12-12h32c6.6 0 12 5.4 12 12v141.7l66.8 48.6c5.4 3.9 6.5 11.4 2.6 16.8L334.6 349c-3.9 5.3-11.4 6.5-16.8 2.6z"/></svg>&nbsp;10&nbsp;分钟</span>
+    
+    
+    
+</div>
+
+            
+
+            <div class="post-body">
+              <p>Bug在任何类型的开发中都会存在的，而Bug报告又是定位问题，解决问题的关键。</p>
+<p>Bug报告中包含的内容：</p>
+<ul>
+<li>logcat文件以文字形式存储所有的log信息
+<ul>
+<li>main 包含了所有的log
+<ul>
+<li>system log 存储framework相关的log</li>
+<li>event log  进程的正在做的事情</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>dumpsys获取系统运行状态的信息，通过adb shell 可以获取想要的系统信息，内存使用情况的信息等等
+<ul>
+<li>Activity Manager的状态 - dumpsys activity
+<ul>
+<li>Package信息 - dumpsys package</li>
+<li>内存使用情况 - dumpsys meminfo</li>
+<li>进程一段时间内的内存使用情况 - dumpsys procstats</li>
+<li>界面相关的状态 - dumpsys gfxinfo</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>dumpstate 系统运行状态的信息</li>
+</ul>
+<blockquote>
+<p>常用命令 ：
+adb shell bugreport  获取logcat信息，dumpsys信息，dumpstate信息
+adb shell logcat -v threadtime -d 获取logcat文件</p>
+<blockquote>
+<p>adb shell logcat -b events -v threadtime -d  获取events log<br>
+adb shell logcat -b main -v threadtime -d 获取main log
+adb shell dumpsys 获取系统信息。
+adb shell dumpstate 获取系统状态信息，dumpstate包含dumpsys</p>
+</blockquote>
+</blockquote>
+<p>下面的部分会细化bug报告中的各部分，描述一个问题给出相关技巧和使用<strong>grep</strong>来查找相关的log</p>
+<h3 id="logcat"><a href="#logcat" class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><strong>LogCat</strong></h3>
+<p>logcat文件以文字形式存储了所有了的日志信息，<strong>system</strong> 部分存储了framework的相关log，而 <strong>main</strong> 包含了所有log。每行log都以 <strong>timestamp PID(Process ID) TID(Thread ID)  log-level</strong> 开头。</p>
+<pre><code>\------ SYSTEM LOG (logcat -v threadtime -d *:v) ------
+--------- beginning of system  
+Blah  
+Blah  
+Blah  
+
+--------- beginning of main  
+Blah   
+Blah  
+Blah  
+</code></pre><h4 id="阅读event-log"><a href="#阅读event-log" class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><strong>阅读event log</strong></h4>
+<p>event log 里面包含了文字形式的二进格式的log信息，它比logcat里面的信息简洁但是更难理解。当阅读event log的时候，我们应该搜索特定的PID来看进程做了什么，格式为<strong>timestamp PID TID log-level log-tag tag-values.</strong></p>
+<p>log等级包括：</p>
+<ul>
+<li>V: verbose</li>
+<li>D: debug</li>
+<li>I: information</li>
+<li>W: warning</li>
+<li>E: error</li>
+</ul>
+<pre><code>------ EVENT LOG (logcat -b events -v threadtime -d *:v) ------  
+09-28 13:47:34.179   785  5113 I am_proc_bound: [0,23054,com.google.android.gms.unstable]  
+09-28 13:47:34.777   785  1975 I am_proc_start: [0,23134,10032,com.android.chrome,broadcast,com.android.chrome/org.chromium.chrome.browser.precache.PrecacheServiceLauncher]  
+09-28 13:47:34.806   785  2764 I am_proc_bound: [0,23134,com.android.chrome]  
+...  
+</code></pre><p>对于Event log标签更详细的信息,可以阅读<a href="http://download.csdn.net/download/wfeii/9966454" target="_blank" rel="noopener">Event log tags</a></p>
+<h3 id="anr和死锁"><a href="#anr和死锁" class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><strong>ANR和死锁</strong></h3>
+<p>log能帮助我们找到导致ANR错误和死锁原因。</p>
+<h4 id="识别无响应的app"><a href="#识别无响应的app" class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><strong>识别无响应的APP</strong></h4>
+<p>当应用一段时间无响应的时候，通常是由于主线程阻塞了或者是主线程做的事太多。系统会kill掉应用并且把相关的堆栈信息存储在/data/anr目录下。<br>
+可以使用<strong>grep am_anr</strong>在event log找到原因：</p>
+<pre><code>grep &quot;am_anr&quot; bugreport-2015-10-01-18-13-48.txt  
+10-01 18:12:49.599  4600  4614 I am_anr  : [0,29761,com.google.android.youtube,953695941,executing service com.google.android.youtube/com.google.android.apps.youtube.app.offline.transfer.OfflineTransferService]  
+10-01 18:14:10.211  4600  4614 I am_anr  : [0,30363,com.google.android.apps.plus,953728580,executing service com.google.android.apps.plus/com.google.android.apps.photos.service.PhotosService]  
+</code></pre><p>或者在logcat中使用<strong>grep ANR</strong>来搜索，搜索结果将会包含ANR有关CPU使用的信息。</p>
+<h4 id="查找堆栈信息"><a href="#查找堆栈信息" class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><strong>查找堆栈信息</strong></h4>
+<p>我们经常可以发现对应的ANR的堆栈信息，确保时间和进程ID匹配正在调查的ANR。然后检查进程的主线的相关堆栈信息。</p>
+<blockquote>
+<p>需要牢记的:</p>
+</blockquote>
+<blockquote>
+<ul>
+<li>主线程只是说明线程ANR的时候正在做什么，但是不一定是造成ANR的原因（堆栈信息可能是无辜的，有些事可能卡顿了主线程一段时间但是不足以构成ANR）</li>
+<li>可能不止一个堆栈信息，确保浏览正确的部分</li>
+</ul>
+</blockquote>
+<pre><code>------ VM TRACES AT LAST ANR (/data/anr/traces.txt: 2015-10-01 18:14:41) ------  
+
+----- pid 30363 at 2015-10-01 18:14:11 -----
+Cmd line: com.google.android.apps.plus
+Build fingerprint: 'google/angler/angler:6.0/MDA89D/2294819:userdebug/dev-keys'
+ABI: 'arm'
+Build type: optimized
+Zygote loaded classes=3978 post zygote classes=27
+Intern table: 45068 strong; 21 weak
+JNI: CheckJNI is off; globals=283 (plus 360 weak)
+Libraries: /system/lib/libandroid.so /system/lib/libcompiler_rt.so /system/lib/libjavacrypto.so /system/lib/libjnigraphics.so /system/lib/libmedia_jni.so /system/lib/libwebviewchromium_loader.so libjavacore.so (7)
+Heap: 29% free, 21MB/30MB; 32251 objects
+Dumping cumulative Gc timings
+Total number of allocations 32251
+Total bytes allocated 21MB
+Total bytes freed 0B
+Free memory 9MB
+Free memory until GC 9MB
+Free memory until OOME 490MB
+Total memory 30MB
+Max memory 512MB
+Zygote space size 1260KB
+Total mutator paused time: 0
+Total time waiting for GC to complete: 0
+Total GC count: 0
+Total GC time: 0
+Total blocking GC count: 0
+Total blocking GC time: 0
+
+suspend all histogram:  Sum: 119.728ms 99% C.I. 0.010ms-107.765ms Avg: 5.442ms Max: 119.562ms
+DALVIK THREADS (12):  
+&quot;Signal Catcher&quot; daemon prio=5 tid=2 Runnable
+  | group=&quot;system&quot; sCount=0 dsCount=0 obj=0x12c400a0 self=0xef460000  
+  | sysTid=30368 nice=0 cgrp=default sched=0/0 handle=0xf4a69930  
+  | state=R schedstat=( 9021773 5500523 26 ) utm=0 stm=0 core=1 HZ=100  
+  | stack=0xf496d000-0xf496f000 stackSize=1014KB  
+  | held mutexes= &quot;mutator lock&quot;(shared held)  
+  native: #00 pc 0035a217  /system/lib/libart.so (art::DumpNativeStack(std::__1::basic_ostream&lt;char, std::__1::char_traits&lt;char&gt; &gt;&amp;, int, char const*, art::ArtMethod*, void*)+126)  
+  native: #01 pc 0033b03b  /system/lib/libart.so (art::Thread::Dump(std::__1::basic_ostream&lt;char, std::__1::char_traits&lt;char&gt; &gt;&amp;) const+138)  
+  native: #02 pc 00344701  /system/lib/libart.so (art::DumpCheckpoint::Run(art::Thread*)+424)  
+  native: #03 pc 00345265  /system/lib/libart.so (art::ThreadList::RunCheckpoint(art::Closure*)+200)  
+  native: #04 pc 00345769  /system/lib/libart.so (art::ThreadList::Dump(std::__1::basic_ostream&lt;char, std::__1::char_traits&lt;char&gt; &gt;&amp;)+124)  
+  native: #05 pc 00345e51  /system/lib/libart.so (art::ThreadList::DumpForSigQuit(std::__1::basic_ostream&lt;char, std::__1::char_traits&lt;char&gt; &gt;&amp;)+312)  
+  native: #06 pc 0031f829  /system/lib/libart.so (art::Runtime::DumpForSigQuit(std::__1::basic_ostream&lt;char, std::__1::char_traits&lt;char&gt; &gt;&amp;)+68)  
+  native: #07 pc 00326831  /system/lib/libart.so (art::SignalCatcher::HandleSigQuit()+896)  
+  native: #08 pc 003270a1  /system/lib/libart.so (art::SignalCatcher::Run(void*)+324)  
+  native: #09 pc 0003f813  /system/lib/libc.so (__pthread_start(void*)+30)  
+  native: #10 pc 00019f75  /system/lib/libc.so (__start_thread+6)  
+  (no managed stack frames)  
+
+&quot;main&quot; prio=5 tid=1 Suspended  
+  | group=&quot;main&quot; sCount=1 dsCount=0 obj=0x747552a0 self=0xf5376500  
+  | sysTid=30363 nice=0 cgrp=default sched=0/0 handle=0xf74feb34  
+  | state=S schedstat=( 331107086 164153349 851 ) utm=6 stm=27 core=3 HZ=100  
+  | stack=0xff00f000-0xff011000 stackSize=8MB  
+  | held mutexes=
+  kernel: __switch_to+0x7c/0x88  
+  kernel: futex_wait_queue_me+0xd4/0x130  
+  kernel: futex_wait+0xf0/0x1f4  
+  kernel: do_futex+0xcc/0x8f4  
+  kernel: compat_SyS_futex+0xd0/0x14c  
+  kernel: cpu_switch_to+0x48/0x4c  
+  native: #00 pc 000175e8  /system/lib/libc.so (syscall+28)  
+  native: #01 pc 000f5ced  /system/lib/libart.so (art::ConditionVariable::Wait(art::Thread*)+80)  
+  native: #02 pc 00335353  /system/lib/libart.so (art::Thread::FullSuspendCheck()+838)  
+  native: #03 pc 0011d3a7  /system/lib/libart.so (art::ClassLinker::LoadClassMembers(art::Thread*, art::DexFile const&amp;, unsigned char const*, art::Handle&lt;art::mirror::Class&gt;, art::OatFile::OatClass const*)+746)  
+  native: #04 pc 0011d81d  /system/lib/libart.so (art::ClassLinker::LoadClass(art::Thread*, art::DexFile const&amp;, art::DexFile::ClassDef const&amp;, art::Handle&lt;art::mirror::Class&gt;)+88)  
+  native: #05 pc 00132059  /system/lib/libart.so (art::ClassLinker::DefineClass(art::Thread*, char const*, unsigned int, art::Handle&lt;art::mirror::ClassLoader&gt;, art::DexFile const&amp;, art::DexFile::ClassDef const&amp;)+320)  
+  native: #06 pc 001326c1  /system/lib/libart.so (art::ClassLinker::FindClassInPathClassLoader(art::ScopedObjectAccessAlreadyRunnable&amp;, art::Thread*, char const*, unsigned int, art::Handle&lt;art::mirror::ClassLoader&gt;, art::mirror::Class**)+688)  
+  native: #07 pc 002cb1a1  /system/lib/libart.so (art::VMClassLoader_findLoadedClass(_JNIEnv*, _jclass*, _jobject*, _jstring*)+264)  
+  native: #08 pc 002847fd  /data/dalvik-cache/arm/system@framework@boot.oat (Java_java_lang_VMClassLoader_findLoadedClass__Ljava_lang_ClassLoader_2Ljava_lang_String_2+112)
+  at java.lang.VMClassLoader.findLoadedClass!(Native method)  
+  at java.lang.ClassLoader.findLoadedClass(ClassLoader.java:362)  
+  at java.lang.ClassLoader.loadClass(ClassLoader.java:499)  
+  at java.lang.ClassLoader.loadClass(ClassLoader.java:469)  
+  at android.app.ActivityThread.installProvider(ActivityThread.java:5141)  
+  at android.app.ActivityThread.installContentProviders(ActivityThread.java:4748)  
+  at android.app.ActivityThread.handleBindApplication(ActivityThread.java:4688)  
+  at android.app.ActivityThread.-wrap1(ActivityThread.java:-1)  
+  at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1405)  
+  at android.os.Handler.dispatchMessage(Handler.java:102)
+  at android.os.Looper.loop(Looper.java:148)  
+  at android.app.ActivityThread.main(ActivityThread.java:5417)  
+  at java.lang.reflect.Method.invoke!(Native method)  
+  at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:726)  
+  at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:616)    
+
+  ...  
+  Stacks for other threads in this process follow  
+  ...  
+</code></pre><p>从上面可以看出是主线程中做了数据库相关的操作，导致了ANR。</p>
+<h4 id="发现死锁"><a href="#发现死锁" class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><strong>发现死锁</strong></h4>
+<p>死锁常常表现为ANR，因为线程被阻塞。如果死锁触及到系统服务，watchdog最终会kill掉它，在log中会有一条类似<strong>WATCHDOG KILLING SYSTEM PROCESS</strong>的语句。从用户的角度看，设备会重启，虽然从技术上是运行时重启不是真正的重启。</p>
+<ul>
+<li>运行时重启，系统服务死了并且重启，用户看到设备返回到启动动画</li>
+<li>重启，内核crash了，用户看到设备返回到Google的启动log</li>
+</ul>
+<p>为了查找死锁，检查堆栈信息查找类似这样的格式： Thread A等待Thread B持有的东西，Thread B等待线程A等待的东西。</p>
+<pre><code>&quot;Binder_B&quot; prio=5 tid=73 Blocked  
+  | group=&quot;main&quot; sCount=1 dsCount=0 obj=0x13faa0a0 self=0x95e24800  
+  | sysTid=2016 nice=0 cgrp=default sched=0/0 handle=0x8b68d930  
+  | state=S schedstat=( 9351576559 4141431119 16920 ) utm=819 stm=116 core=1 HZ=100  
+  | stack=0x8b591000-0x8b593000 stackSize=1014KB  
+  | held mutexes=
+  at com.android.server.pm.UserManagerService.exists(UserManagerService.java:387)  
+  ** - waiting to lock &lt;0x025f9b02&gt; (a android.util.ArrayMap) held by thread 20**    
+  at com.android.server.pm.PackageManagerService.getApplicationInfo(PackageManagerService.java:2848)  
+  at com.android.server.AppOpsService.getOpsRawLocked(AppOpsService.java:881)  
+  at com.android.server.AppOpsService.getOpsLocked(AppOpsService.java:856)  
+  at com.android.server.AppOpsService.noteOperationUnchecked(AppOpsService.java:719)  
+  - locked &lt;0x0231885a&gt; (a com.android.server.AppOpsService)  
+  at com.android.server.AppOpsService.noteOperation(AppOpsService.java:713)  
+  at com.android.server.AppOpsService$2.getMountMode(AppOpsService.java:260)  
+  at com.android.server.MountService$MountServiceInternalImpl.getExternalStorageMountMode(MountService.java:3416)  
+  at com.android.server.am.ActivityManagerService.startProcessLocked(ActivityManagerService.java:3228)  
+  at com.android.server.am.ActivityManagerService.startProcessLocked(ActivityManagerService.java:3170)  
+  at com.android.server.am.ActivityManagerService.startProcessLocked(ActivityManagerService.java:3059)  
+  at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:1070)  
+  - locked &lt;0x044d166f&gt; (a com.android.server.am.ActivityManagerService)  
+  at com.android.server.am.ActivityManagerService.finishReceiver(ActivityManagerService.java:16950)  
+  at android.app.ActivityManagerNative.onTransact(ActivityManagerNative.java:494)  
+  at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2432)  
+  at android.os.Binder.execTransact(Binder.java:453)  
+...  
+  &quot;PackageManager&quot; prio=5 tid=20 Blocked  
+  | group=&quot;main&quot; sCount=1 dsCount=0 obj=0x1304f4a0 self=0xa7f43900  
+  | sysTid=1300 nice=10 cgrp=bg_non_interactive sched=0/0 handle=0x9fcf9930  
+  | state=S schedstat=( 26190141996 13612154802 44357 ) utm=2410 stm=209 core=2 HZ=100  
+  | stack=0x9fbf7000-0x9fbf9000 stackSize=1038KB  
+  | held mutexes=
+  at com.android.server.AppOpsService.noteOperationUnchecked(AppOpsService.java:718)  
+  **- waiting to lock &lt;0x0231885a&gt; (a com.android.server.AppOpsService) held by thread 73**  
+  at com.android.server.AppOpsService.noteOperation(AppOpsService.java:713)  
+  at com.android.server.AppOpsService$2.getMountMode(AppOpsService.java:260)  
+  at com.android.server.AppOpsService$2.hasExternalStorage(AppOpsService.java:273)  
+  at com.android.server.MountService$MountServiceInternalImpl.hasExternalStorage(MountService.java:3431)  
+  at com.android.server.MountService.getVolumeList(MountService.java:2609)  
+  at android.os.storage.StorageManager.getVolumeList(StorageManager.java:880)  
+  at android.os.Environment$UserEnvironment.getExternalDirs(Environment.java:83)  
+  at android.os.Environment.isExternalStorageEmulated(Environment.java:708)  
+  at com.android.server.pm.PackageManagerService.isExternalMediaAvailable(PackageManagerService.java:9327)  
+  at com.android.server.pm.PackageManagerService.startCleaningPackages(PackageManagerService.java:9367)  
+  - locked &lt;0x025f9b02&gt; (a android.util.ArrayMap)  
+  at com.android.server.pm.PackageManagerService$PackageHandler.doHandleMessage(PackageManagerService.java:1320)  
+  at com.android.server.pm.PackageManagerService$PackageHandler.handleMessage(PackageManagerService.java:1122)  
+  at android.os.Handler.dispatchMessage(Handler.java:102)  
+  at android.os.Looper.loop(Looper.java:148)  
+  at android.os.HandlerThread.run(HandlerThread.java:61)  
+  at com.android.server.ServiceThread.run(ServiceThread.java:46)  
+</code></pre><h3 id="activity"><a href="#activity" class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><strong>Activity</strong></h3>
+<p>Activity是提供一个界面与用户交互的组件，比如拨打电话，拍照，发邮件等等，从bug报告的角度看，Activity是一个用户能够聚焦的事物，在crash点那个Activity获取了焦点是很重要。Activity是运行在进程中的，所以定位到启动，停止特定Activity的所有进程也有助于故障的排除。</p>
+<h4 id="查看聚焦的activity"><a href="#查看聚焦的activity" class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><strong>查看聚焦的Activity</strong></h4>
+<p>要查看聚焦的Activity可以搜索<strong>am_focused_activity</strong></p>
+<pre><code>grep &quot;am_focused_activity&quot;  bugreport-2015-10-01-18-13-48.txt  
+10-01 18:10:41.409  4600 14112 I am_focused_activity: [0,com.google.android.GoogleCamera/com.android.camera.CameraActivity]  
+10-01 18:11:17.313  4600  5687 I am_focused_activity: [0,com.google.android.googlequicksearchbox/com.google.android.launcher.GEL]   
+10-01 18:11:52.747  4600 14113 I am_focused_activity: [0,com.google.android.GoogleCamera/com.android.camera.CameraActivity]  
+10-01 18:14:07.762  4600  5687 I am_focused_activity: [0,com.google.android.googlequicksearchbox/com.google.android.launcher.GEL]  
+</code></pre><h4 id="查看进程的启动"><a href="#查看进程的启动" class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><strong>查看进程的启动</strong></h4>
+<p>为了去查看进程启动的记录，可以搜索<strong>Start proc</strong></p>
+<pre><code> grep &quot;Start proc&quot; bugreport-2015-10-01-18-13-48.txt
+10-01 18:09:15.309  4600  4612 I ActivityManager: Start proc 24533:com.metago.astro/u0a240 for broadcast com.metago.astro/com.inmobi.commons.analytics.androidsdk.IMAdTrackerReceiver  
+10-01 18:09:15.687  4600 14112 I ActivityManager: Start proc 24548:com.google.android.apps.fitness/u0a173 for service com.google.android.apps.fitness/.api.services.ActivityUpsamplingService  
+10-01 18:09:15.777  4600  6604 I ActivityManager: Start proc 24563:cloudtv.hdwidgets/u0a145 for broadcast cloudtv.hdwidgets/cloudtv.switches.SwitchSystemUpdateReceiver  
+10-01 18:09:20.574  4600  6604 I ActivityManager: Start proc 24617:com.wageworks.ezreceipts/u0a111 for broadcast com.wageworks.ezreceipts/.ui.managers.IntentReceiver  
+...  
+</code></pre><h4 id="设备系统波动"><a href="#设备系统波动" class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><strong>设备系统波动</strong></h4>
+<p>为了判断设备系统是不是<a href="https://en.wikipedia.org/wiki/Thrashing_(computer_science)" target="_blank" rel="noopener">thrashing</a>，检测是不是短时间大量的进程被杀（am_proc_died） 和进程启动（am_proc_start）</p>
+<pre><code>grep -e &quot;am_proc_died&quot; -e &quot;am_proc_start&quot; bugreport-2015-10-01-18-13-48.txt
+10-01 18:07:06.494  4600  9696 I am_proc_died: [0,20074,com.android.musicfx]  
+10-01 18:07:06.555  4600  6606 I am_proc_died: [0,31166,com.concur.breeze]  
+10-01 18:07:06.566  4600 14112 I am_proc_died: [0,18812,com.google.android.apps.fitness]    
+10-01 18:07:07.018  4600  7513 I am_proc_start: [0,20361,10113,com.sony.playmemories.mobile,broadcast,com.sony.playmemories.mobile/.service.StartupReceiver]  
+10-01 18:07:07.357  4600  4614 I am_proc_start: [0,20381,10056,com.google.android.talk,service,com.google.android.talk/com.google.android.libraries.hangouts.video.CallService]  
+10-01 18:07:07.784  4600  4612 I am_proc_start: [0,20402,10190,com.andcreate.app.trafficmonitor:loopback_measure_serivce,service,com.andcreate.app.trafficmonitor/.loopback.LoopbackMeasureService]  
+10-01 18:07:10.753  4600  5997 I am_proc_start: [0,20450,10097,com.amazon.mShop.android.shopping,broadcast,com.amazon.mShop.android.shopping/com.amazon.identity.auth.device.storage.LambortishClock$ChangeTimestampsBroadcastReceiver]  
+10-01 18:07:15.267  4600  6605 I am_proc_start: [0,20539,10173,com.google.android.apps.fitness,service,com.google.android.apps.fitness/.api.services.ActivityUpsamplingService]  
+10-01 18:07:15.985  4600  4612 I am_proc_start: [0,20568,10022,com.android.musicfx,broadcast,com.android.musicfx/.ControlPanelReceiver]  
+10-01 18:07:16.315  4600  7512 I am_proc_died: [0,20096,com.google.android.GoogleCamera]  
+</code></pre><h3 id="内存"><a href="#内存" class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><strong>内存</strong></h3>
+<p>因为Android设备只有有限的物理内存，因此管理RAM是至关重要的，Bug报告中包含一些低内存的提示和提供了内存快照的dumpstate</p>
+<h4 id="识别低内存"><a href="#识别低内存" class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><strong>识别低内存</strong></h4>
+<p>低内存导致系统的波动，为了启动其他进程不得不去杀其他进程。为了找到对应的证据可以搜索event log的<strong>am_proc_died</strong>和<strong>am_proc_start</strong>标签。</p>
+<p>低内存拖慢任务的切换而且会阻止返回（因为用户尝试去返回的任务可能被杀了）。如果launcher被杀，它会在用户触摸主页按钮的时候重新启动，并且日志会显示launcher重新加载其内容。</p>
+<h4 id="查看历史信息"><a href="#查看历史信息" class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><strong>查看历史信息</strong></h4>
+<p>在event log中当出现<strong>am_low_memory</strong>时候表示最后的缓存进程已经被杀了。这之后，系统会启动被杀的服务。</p>
+<pre><code>grep &quot;am_low_memory&quot; bugreport-2015-10-01-18-13-48.txt  
+10-01 18:11:02.219  4600  7513 I am_low_memory: 41  
+10-01 18:12:18.526  4600 14112 I am_low_memory: 39  
+10-01 18:12:18.874  4600  7514 I am_low_memory: 38  
+10-01 18:12:22.570  4600 14112 I am_low_memory: 40  
+10-01 18:12:34.811  4600 20319 I am_low_memory: 43  
+10-01 18:12:37.945  4600  6521 I am_low_memory: 43  
+10-01 18:12:47.804  4600 14110 I am_low_memory: 43  
+</code></pre><h4 id="查看系统波动指标"><a href="#查看系统波动指标" class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><strong>查看系统波动指标</strong></h4>
+<p>其他系统波动的指标(分页，直接回收等等)包括<strong>kswapd</strong>,<strong>kworker</strong>，<strong>mmcqd</strong> 的消耗回收（log收集的时候也可能导致波动的指标）</p>
+<pre><code>------ CPU INFO (top -n 1 -d 1 -m 30 -t) ------
+
+User 15%, System 54%, IOW 28%, IRQ 0%  
+User 82 + Nice 2 + Sys 287 + Idle 1 + IOW 152 + IRQ 0 + SIRQ 5 = 529  
+
+  PID   TID PR CPU% S     VSS     RSS PCY UID      Thread          Proc  
+15229 15229  0  19% R      0K      0K  fg root     kworker/0:2  
+29512 29517  1   7% D 1173524K 101188K  bg u0_a27   Signal Catcher  com.google.android.talk  
+24565 24570  3   6% D 2090920K 145168K  fg u0_a22   Signal Catcher  com.google.android.googlequicksearchbox:search  
+19525 19525  2   6% R   3476K   1644K  fg shell    top             top  
+24957 24962  2   5% R 1706928K 125716K  bg u0_a47   Signal Catcher  com.google.android.GoogleCamera  
+19519 19519  3   4% S      0K      0K  fg root     kworker/3:1  
+  120   120  0   3% S      0K      0K  fg root     mmcqd/1  
+18233 18233  1   3% S      0K      0K  fg root     kworker/1:1  
+25589 25594  1   2% D 1270476K  75776K  fg u0_a8    Signal Catcher  com.google.android.gms  
+19399 19399  2   1% S      0K      0K  fg root     kworker/2:2  
+ 1963  1978  1   0% S 1819100K 125136K  fg system   android.fg      system_server  
+ 1963  1981  3   0% S 1819100K 125136K  fg system   android.display system_server    
+</code></pre><p>ANR的log也能提供类似的内存快照</p>
+<pre><code>10-03 17:19:59.959  1963  1976 E ActivityManager: ANR in com.google.android.apps.magazines  
+10-03 17:19:59.959  1963  1976 E ActivityManager: PID: 18819   
+10-03 17:19:59.959  1963  1976 E ActivityManager: Reason: Broadcast of Intent { act=android.net.conn.CONNECTIVITY_CHANGE flg=0x4000010 cmp=com.google.android.apps.magazines/com.google.apps.dots.android.newsstand.appwidget.NewsWidgetProvider (has extras) }  
+10-03 17:19:59.959  1963  1976 E ActivityManager: Load: 19.19 / 14.76 / 12.03  
+10-03 17:19:59.959  1963  1976 E ActivityManager: CPU usage from 0ms to 11463ms later:  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   54% 15229/kworker/0:2: 0% user + 54% kernel  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   38% 1963/system_server: 14% user + 23% kernel / faults: 17152 minor 1073 major  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   11% 120/mmcqd/1: 0% user + 11% kernel  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   10% 2737/com.android.systemui: 4.7% user + 5.6% kernel / faults: 7211 minor 149 major  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   0.2% 1451/debuggerd: 0% user + 0.2% kernel / faults: 15211 minor 147 major  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   8.7% 6162/com.twofortyfouram.locale: 4% user + 4.7% kernel / faults: 4924 minor 260 major  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   6.1% 24565/com.google.android.googlequicksearchbox:search: 2.4% user + 3.7% kernel / faults: 2902 minor 129 major  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   6% 55/kswapd0: 0% user + 6% kernel  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   4.9% 18819/com.google.android.apps.magazines: 1.5% user + 3.3% kernel / faults: 10129 minor 986 major  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   2.8% 18233/kworker/1:1: 0% user + 2.8% kernel  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   4.2% 3145/com.android.phone: 2% user + 2.2% kernel / faults: 3005 minor 43 major  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   4.2% 8084/com.android.chrome: 2% user + 2.1% kernel / faults: 4798 minor 380 major  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   3.4% 182/surfaceflinger: 1.1% user + 2.3% kernel / faults: 842 minor 13 major  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   3% 18236/kworker/1:2: 0% user + 3% kernel  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   2.9% 19231/com.android.systemui:screenshot: 0.8% user + 2.1% kernel / faults: 6119 minor 348 major  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   2.3% 15350/kworker/0:4: 0% user + 2.3% kernel  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   2.2% 1454/mediaserver: 0% user + 2.2% kernel / faults: 479 minor 6 major  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   2% 16496/com.android.chrome:sandboxed_process10: 0.1% user + 1.8% kernel / faults: 3610 minor 234 major  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   1% 3119/com.android.nfc: 0.4% user + 0.5% kernel / faults: 1789 minor 17 major   
+10-03 17:19:59.959  1963  1976 E ActivityManager:   1.7% 19337/com.jarettmillard.localeconnectiontype:background: 0.1% user + 1.5% kernel / faults: 7854 minor 439 major  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   0.7% 3066/com.google.android.inputmethod.latin: 0.3% user + 0.3% kernel / faults: 1336 minor 7 major  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   1% 25589/com.google.android.gms: 0.3% user + 0.6% kernel / faults: 2867 minor 237 major  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   0.9% 1460/sensors.qcom: 0.5% user + 0.4% kernel / faults: 262 minor 5 major  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   0.8% 3650/mpdecision: 0% user + 0.8% kernel / faults: 160 minor 1 major  
+10-03 17:19:59.959  1963  1976 E ActivityManager:   0.1% 3132/com.redbend.vdmc: 0% user + 0% kernel / faults: 1746 minor 5 major  
+</code></pre><h4 id="获取内存快照"><a href="#获取内存快照" class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><strong>获取内存快照</strong></h4>
+<p>dumpstate列出了运行的java和native进程的内存快照，记住快照只是某个特定时间点的，系统可能在时间点之前已经恢复了也可能更糟糕。</p>
+<ul>
+<li>为了理解进程运行的时间可以参考下面** Process runtime**一节</li>
+<li>为了明白现在哪些事物在运行请看<strong>Why is a process running</strong></li>
+</ul>
+<p>使用<strong>adb shell dumpstate</strong>命令获取信息,或者通过<strong>adb shell dumpsys meminfo</strong>获取。</p>
+<pre><code>Total PSS by OOM adjustment:  
+    86752 kB: Native  
+               22645 kB: surfaceflinger (pid 197)  
+               18597 kB: mediaserver (pid 204)  
+               ...   
+   136959 kB: System  
+              136959 kB: system (pid 785)  
+   220218 kB: Persistent  
+              138859 kB: com.android.systemui (pid 947 / activities)  
+               39178 kB: com.android.nfc (pid 1636)  
+               28313 kB: com.android.phone (pid 1659)  
+               13868 kB: com.redbend.vdmc (pid 1646)  
+     9534 kB: Persistent Service
+                9534 kB: com.android.bluetooth (pid 23807)   
+   178604 kB: Foreground  
+              168620 kB: com.google.android.googlequicksearchbox (pid 1675 / activities)
+                9984 kB: com.google.android.apps.maps (pid 13952)    
+   188286 kB: Visible  
+               85326 kB: com.google.android.wearable.app (pid 1535)   
+               38978 kB: com.google.process.gapps (pid 1510)   
+               31936 kB: com.google.android.gms.persistent (pid 2072)   
+               27950 kB: com.google.android.gms.wearable (pid 1601)  
+                4096 kB: com.google.android.googlequicksearchbox:interactor (pid 1550)   
+    52948 kB: Perceptible  
+               52948 kB: com.google.android.inputmethod.latin (pid 1566)   
+   150851 kB: A Services   
+               81121 kB: com.google.android.gms (pid 1814)    
+               37586 kB: com.google.android.talk (pid 9584)  
+               10949 kB: com.google.android.music:main (pid 4019)  
+               10727 kB: com.motorola.targetnotif (pid 31071)  
+               10468 kB: com.google.android.GoogleCamera (pid 9984)  
+    33298 kB: Previous
+               33298 kB: com.android.settings (pid 9673 / activities)  
+   165188 kB: B Services
+               49490 kB: com.facebook.katana (pid 15035)  
+               22483 kB: com.whatsapp (pid 28694)  
+               21308 kB: com.iPass.OpenMobile (pid 5325)   
+               19788 kB: com.google.android.apps.googlevoice (pid 23934)   
+               17399 kB: com.google.android.googlequicksearchbox:search (pid 30359)   
+                9073 kB: com.google.android.apps.youtube.unplugged (pid 21194)    
+                7660 kB: com.iPass.OpenMobile:remote (pid 23754)   
+                7291 kB: com.pujie.wristwear.pujieblack (pid 24240)   
+                7157 kB: com.instagram.android:mqtt (pid 9530)   
+                3539 kB: com.qualcomm.qcrilmsgtunnel (pid 16186)   
+   204324 kB: Cached   
+               43424 kB: com.amazon.mShop.android (pid 13558)   
+               22563 kB: com.google.android.apps.magazines (pid 13844)   
+               ...   
+                4298 kB: com.google.android.apps.enterprise.dmagent (pid 13826)   
+</code></pre><h4 id="进程"><a href="#进程" class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><strong>进程</strong></h4>
+<p>Bug报告中包含大量的进程信息，包括启动，停止时间，运行时长，关联的服务，oom_adj值等等。对于Android是怎么管理进程的，请参考<a href="https://developer.android.com/guide/components/processes-and-threads.html" target="_blank" rel="noopener">Processes and Threads</a></p>
+<h4 id="确定进程的运行"><a href="#确定进程的运行" class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a>确定进程的运行</h4>
+<p><strong>procstats</strong> 部分包含了进程运行了多长时间，运行的关联的服务的完整数据。为了获取易读的摘要，可以搜索<strong>AGGREGATED OVER</strong>来浏览最近3小时或者24小时的数据。搜索的摘要：浏览进程列表，这些进程在各种优先事项中运行了多久，和RAM的使用情况，展示格式min-average-max PSS/min-average-max USS。</p>
+<blockquote>
+<p>Tips: 使用<strong>adb shell dumpsys procstats</strong>命令获取</p>
+</blockquote>
+<pre><code>-------------------------------------------------------------------------------   
+DUMP OF SERVICE processinfo:  
+-------------------------------------------------------------------------------    
+DUMP OF SERVICE procstats:  
+COMMITTED STATS FROM 2015-10-19-23-54-56 (checked in):    
+...    
+COMMITTED STATS FROM 2015-10-20-03-00-00 (checked in):    
+...    
+CURRENT STATS:    
+...    
+AGGREGATED OVER LAST 24 HOURS:   
+System memory usage:   
+...   
+Per-Package Stats:    
+...   
+Summary:   
+...    
+  * com.google.android.gms.persistent / u0a13 / v8186448:    
+           TOTAL: 100% (21MB-27MB-40MB/20MB-24MB-38MB over 597)   
+             Top: 51% (22MB-26MB-38MB/21MB-24MB-36MB over 383)   
+          Imp Fg: 49% (21MB-27MB-40MB/20MB-25MB-38MB over 214)    
+…   
+          Start time: 2015-10-19 09:14:37   
+  Total elapsed time: +1d0h22m7s390ms (partial) libart.so   
+
+AGGREGATED OVER LAST 3 HOURS:    
+System memory usage:  
+...  
+Per-Package Stats:  
+...  
+Summary:  
+  * com.google.android.gms.persistent / u0a13 / v8186448:   
+           TOTAL: 100% (23MB-27MB-32MB/21MB-25MB-29MB over 111)  
+             Top: 61% (23MB-26MB-31MB/21MB-24MB-28MB over 67）  
+          Imp Fg: 39% (23MB-28MB-32MB/21MB-26MB-29MB over 44)   
+...   
+          Start time: 2015-10-20 06:49:24  
+  Total elapsed time: +2h46m59s736ms (partial) libart.so   
+</code></pre><h4 id="为什么进程会运行"><a href="#为什么进程会运行" class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><strong>为什么进程会运行?</strong></h4>
+<p><strong>adb shell dumpsys activity processes</strong> 部分列出了所有当前正在运行的进程并且通过oom_adj值排序（Android 标记进程的重要性是通过分配给进程一个oom_adj值，这个值会通过ActivityManager动态的更新）。这个输出类似于 <strong>memory snapshot</strong> 但是会包含一些进程正在运行的原因。下面的例子中，黑色条目中表示 <strong>gms.persistent</strong> 进程运行在 <strong>vis</strong> （visible）优先级下是因为 <strong>system</strong> 进程绑定到了它的 <strong>NetworkLocationService</strong> 服务。</p>
+<pre><code>-------------------------------------------------------------------------------  
+ACTIVITY MANAGER RUNNING PROCESSES (dumpsys activity processes)  
+...  
+Process LRU list (sorted by oom_adj, 34 total, non-act at 14, non-svc at 14):  
+    PERS #33: sys   F/ /P  trm: 0 902:system/1000 (fixed)  
+    PERS #32: pers  F/ /P  trm: 0 2925:com.android.systemui/u0a27 (fixed)  
+    PERS #31: pers  F/ /P  trm: 0 3477:com.quicinc.cne.CNEService/1000 (fixed)  
+    PERS #30: pers  F/ /P  trm: 0 3484:com.android.nfc/1027 (fixed)  
+    PERS #29: pers  F/ /P  trm: 0 3502:com.qualcomm.qti.rcsbootstraputil/1001 (fixed)  
+    PERS #28: pers  F/ /P  trm: 0 3534:com.qualcomm.qti.rcsimsbootstraputil/1001 (fixed)  
+    PERS #27: pers  F/ /P  trm: 0 3553:com.android.phone/1001 (fixed)  
+    Proc #25: psvc  F/ /IF trm: 0 4951:com.android.bluetooth/1002 (service)  
+        com.android.bluetooth/.hfp.HeadsetService&lt;=Proc{902:system/1000}  
+    Proc # 0: fore  F/A/T  trm: 0 3586:com.google.android.googlequicksearchbox/u0a29 (top-activity)  
+  Proc #26: vis   F/ /SB trm: 0 3374:com.google.android.googlequicksearchbox:interactor/u0a29 (service)
+        com.google.android.googlequicksearchbox/com.google.android.voiceinteraction.GsaVoiceInteractionService&lt;=Proc{902:system/1000}   
+    Proc # 5: vis   F/ /T  trm: 0 3745:com.google.android.gms.persistent/u0a12 (service)
+        com.google.android.gms/com.google.android.location.network.NetworkLocationService&lt;=Proc{902:system/1000}    
+    Proc # 3: vis   F/ /SB trm: 0 3279:com.google.android.gms/u0a12 (service)
+        com.google.android.gms/.icing.service.IndexService&lt;=Proc{947:com.google.android.googlequicksearchbox:search/u0a29}  
+    Proc # 2: vis   F/ /T  trm: 0 947:com.google.android.googlequicksearchbox:search/u0a29 (service)
+        com.google.android.googlequicksearchbox/com.google.android.sidekick.main.remoteservice.GoogleNowRemoteService&lt;=Proc{3586:com.google.android.googlequicksearchbox/u0a29}  
+    Proc # 1: vis   F/ /T  trm: 0 2981:com.google.process.gapps/u0a12 (service)
+        com.google.android.gms/.tapandpay.hce.service.TpHceService&lt;=Proc{3484:com.android.nfc/1027}  
+    Proc #11: prcp  B/ /IB trm: 0 3392:com.google.android.inputmethod.latin/u0a64 (service)
+        com.google.android.inputmethod.latin/com.android.inputmethod.latin.LatinIME&lt;=Proc{902:system/1000}  
+    Proc #24: svc   B/ /S  trm: 0 27071:com.google.android.music:main/u0a67 (started-services)  
+    Proc #22: svc   B/ /S  trm: 0 853:com.qualcomm.qcrilmsgtunnel/1001 (started-services)  
+    Proc # 4: prev  B/ /LA trm: 0 32734:com.google.android.GoogleCamera/u0a53 (previous)  
+    Proc #23: svcb  B/ /S  trm: 0 671:com.qualcomm.telephony/1000 (started-services)  
+    Proc #20: cch   B/ /CE trm: 0 27659:com.android.providers.calendar/u0a2 (provider)
+        com.android.providers.calendar/.CalendarProvider2&lt;=Proc{27697:com.google.android.calendar/u0a40}
+</code></pre>
+            </div>
+
+        </article>
+
+        
+
+        
+    
+    
+        <ul class="post-copyright">
+            <li class="copyright-item author"><span class="copyright-item-text">作者</span>：<a href="https://wfeii.github.io/" target="_blank" rel="noopener">快马夜小刀</a></li>
+            
+                
+                
+                
+                
+                <li class="copyright-item link"><span class="copyright-item-text">链接</span>：<a href="/posts/android_base/logcat%E5%88%86%E6%9E%90/" target="_blank" rel="noopener">https://example.com/posts/android_base/logcat分析/</a></li>
+            
+            <li class="copyright-item license"><span class="copyright-item-text">许可</span>：<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a></li>
+            
+        </ul>
+    
+
+
+
+        
+    <div class="updated-badge-container">
+        <span title="Updated @ 2020-06-13 21:51:28 CST" style="cursor:help">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="130" height="20" class="updated-badge"><linearGradient id="b" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient><clipPath id="a"><rect width="130" height="20" rx="3" fill="#fff"/></clipPath><g clip-path="url(#a)"><path class="updated-badge-left" d="M0 0h55v20H0z"/><path class="updated-badge-right" d="M55 0h75v20H55z"/><path fill="url(#b)" d="M0 0h130v20H0z"/></g><g fill="#fff" text-anchor="middle" font-size="110"><text x="285" y="150" fill="#010101" fill-opacity=".3" textLength="450" transform="scale(.1)">updated</text><text x="285" y="140" textLength="450" transform="scale(.1)">updated</text><text x="915" y="150" fill="#010101" fill-opacity=".3" textLength="650" transform="scale(.1)">2020-06-13</text><text x="915" y="140" textLength="650" transform="scale(.1)">2020-06-13</text></g></svg>
+        </span></div>
+
+
+
+        
+
+
+        <div class="post-share">
+
+        
+
+        <div class="share-items">
+
+            
+                <div class="share-item twitter">
+                    
+                    <a href="https://twitter.com/share?url=https://example.com/posts/android_base/logcat%E5%88%86%E6%9E%90/&amp;text=Android%20Log%20%e5%88%86%e6%9e%90&amp;hashtags=&amp;via=reuixiy" title="分享到「Twitter」" target="_blank" rel="noopener"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon twitter-icon"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg></a>
+                </div>
+            
+
+            
+                <div class="share-item facebook">
+                    
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=https://example.com/posts/android_base/logcat%E5%88%86%E6%9E%90/&amp;hashtag=%23" title="分享到「Facebook」" target="_blank" rel="noopener"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon facebook-icon"><path d="M504 256C504 119 393 8 256 8S8 119 8 256c0 123.78 90.69 226.38 209.25 245V327.69h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14 0 55.52 4.84 55.52 4.84v61h-31.28c-30.8 0-40.41 19.12-40.41 38.73V256h68.78l-11 71.69h-57.78V501C413.31 482.38 504 379.78 504 256z"/></svg></a>
+                </div>
+            
+
+            
+                <div class="share-item linkedin">
+                    
+                    <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https://example.com/posts/android_base/logcat%E5%88%86%E6%9E%90/&amp;title=Android%20Log%20%e5%88%86%e6%9e%90&amp;summary=Bug%e5%9c%a8%e4%bb%bb%e4%bd%95%e7%b1%bb%e5%9e%8b%e7%9a%84%e5%bc%80%e5%8f%91%e4%b8%ad%e9%83%bd%e4%bc%9a%e5%ad%98%e5%9c%a8%e7%9a%84%ef%bc%8c%e8%80%8cBug%e6%8a%a5%e5%91%8a%e5%8f%88%e6%98%af%e5%ae%9a%e4%bd%8d%e9%97%ae%e9%a2%98%ef%bc%8c%e8%a7%a3%e5%86%b3%e9%97%ae%e9%a2%98%e7%9a%84%e5%85%b3%e9%94%ae%e3%80%82%20Bug%e2%80%a6%e2%80%a6%0a%20%20%20%20%0a%20%20%20%20&amp;source=%e6%8a%80%e6%9c%af%e9%83%a8%e7%9a%84%e9%82%a3%e7%82%b9%e4%ba%8b" title="分享到「LinkedIn」" target="_blank" rel="noopener"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="icon linkedin-icon"><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z"/></svg></a>
+                </div>
+            
+
+            
+                <div class="share-item telegram">
+                    
+                    <a href="https://t.me/share/url?url=https://example.com/posts/android_base/logcat%E5%88%86%E6%9E%90/&amp;text=Android%20Log%20%e5%88%86%e6%9e%90" title="分享到「Telegram」" target="_blank" rel="noopener"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512" class="icon telegram-icon"><path d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm121.8 169.9l-40.7 191.8c-3 13.6-11.1 16.9-22.4 10.5l-62-45.7-29.9 28.8c-3.3 3.3-6.1 6.1-12.5 6.1l4.4-63.1 114.9-103.8c5-4.4-1.1-6.9-7.7-2.5l-142 89.4-61.2-19.1c-13.3-4.2-13.6-13.3 2.8-19.7l239.1-92.2c11.1-4 20.8 2.7 17.2 19.5z"/></svg></a>
+                </div>
+            
+
+            
+                <div class="share-item weibo">
+                    
+                    <a href="https://service.weibo.com/share/share.php?&amp;url=https://example.com/posts/android_base/logcat%E5%88%86%E6%9E%90/&amp;title=Android%20Log%20%e5%88%86%e6%9e%90&amp;pic=https://example.com/icons/apple-touch-icon.png&amp;searchPic=false" title="分享到「新浪微博」" target="_blank" rel="noopener"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon weibo-icon"><path d="M407 177.6c7.6-24-13.4-46.8-37.4-41.7-22 4.8-28.8-28.1-7.1-32.8 50.1-10.9 92.3 37.1 76.5 84.8-6.8 21.2-38.8 10.8-32-10.3zM214.8 446.7C108.5 446.7 0 395.3 0 310.4c0-44.3 28-95.4 76.3-143.7C176 67 279.5 65.8 249.9 161c-4 13.1 12.3 5.7 12.3 6 79.5-33.6 140.5-16.8 114 51.4-3.7 9.4 1.1 10.9 8.3 13.1 135.7 42.3 34.8 215.2-169.7 215.2zm143.7-146.3c-5.4-55.7-78.5-94-163.4-85.7-84.8 8.6-148.8 60.3-143.4 116s78.5 94 163.4 85.7c84.8-8.6 148.8-60.3 143.4-116zM347.9 35.1c-25.9 5.6-16.8 43.7 8.3 38.3 72.3-15.2 134.8 52.8 111.7 124-7.4 24.2 29.1 37 37.4 12 31.9-99.8-55.1-195.9-157.4-174.3zm-78.5 311c-17.1 38.8-66.8 60-109.1 46.3-40.8-13.1-58-53.4-40.3-89.7 17.7-35.4 63.1-55.4 103.4-45.1 42 10.8 63.1 50.2 46 88.5zm-86.3-30c-12.9-5.4-30 .3-38 12.9-8.3 12.9-4.3 28 8.6 34 13.1 6 30.8.3 39.1-12.9 8-13.1 3.7-28.3-9.7-34zm32.6-13.4c-5.1-1.7-11.4.6-14.3 5.4-2.9 5.1-1.4 10.6 3.7 12.9 5.1 2 11.7-.3 14.6-5.4 2.8-5.2 1.1-10.9-4-12.9z"/></svg></a>
+                </div>
+            
+
+            
+                <div class="share-item douban">
+                    
+                    <a href="https://www.douban.com/share/service?href=https://example.com/posts/android_base/logcat%E5%88%86%E6%9E%90/&amp;name=Android%20Log%20%e5%88%86%e6%9e%90&amp;text=Bug%e5%9c%a8%e4%bb%bb%e4%bd%95%e7%b1%bb%e5%9e%8b%e7%9a%84%e5%bc%80%e5%8f%91%e4%b8%ad%e9%83%bd%e4%bc%9a%e5%ad%98%e5%9c%a8%e7%9a%84%ef%bc%8c%e8%80%8cBug%e6%8a%a5%e5%91%8a%e5%8f%88%e6%98%af%e5%ae%9a%e4%bd%8d%e9%97%ae%e9%a2%98%ef%bc%8c%e8%a7%a3%e5%86%b3%e9%97%ae%e9%a2%98%e7%9a%84%e5%85%b3%e9%94%ae%e3%80%82%20Bug%e2%80%a6%e2%80%a6%0a%20%20%20%20%0a%20%20%20%20" title="分享到「豆瓣」" target="_blank" rel="noopener"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon douban-icon"><path d="M.643.92v2.412h22.714V.92H.643zm1.974 4.926v9.42h18.764v-9.42H2.617zm2.72 2.408H18.69v4.605H5.338V8.254zm1.657 7.412l-2.512.938c1.037 1.461 1.87 2.825 2.512 4.091H0v2.385h24v-2.385h-6.678c.818-1.176 1.589-2.543 2.303-4.091l-2.73-.938a29.952 29.952 0 01-2.479 5.03h-4.75c-.786-1.962-1.677-3.641-2.672-5.03Z"/></svg></a>
+                </div>
+            
+
+            
+                <div class="share-item qq">
+                    
+                    <a href="https://connect.qq.com/widget/shareqq/index.html?url=https://example.com/posts/android_base/logcat%E5%88%86%E6%9E%90/&amp;title=Android%20Log%20%e5%88%86%e6%9e%90&amp;summary=Bug%e5%9c%a8%e4%bb%bb%e4%bd%95%e7%b1%bb%e5%9e%8b%e7%9a%84%e5%bc%80%e5%8f%91%e4%b8%ad%e9%83%bd%e4%bc%9a%e5%ad%98%e5%9c%a8%e7%9a%84%ef%bc%8c%e8%80%8cBug%e6%8a%a5%e5%91%8a%e5%8f%88%e6%98%af%e5%ae%9a%e4%bd%8d%e9%97%ae%e9%a2%98%ef%bc%8c%e8%a7%a3%e5%86%b3%e9%97%ae%e9%a2%98%e7%9a%84%e5%85%b3%e9%94%ae%e3%80%82%20Bug%e2%80%a6%e2%80%a6%0a%20%20%20%20%0a%20%20%20%20&amp;pics=https://example.com/icons/apple-touch-icon.png&amp;site=%e6%8a%80%e6%9c%af%e9%83%a8%e7%9a%84%e9%82%a3%e7%82%b9%e4%ba%8b" title="分享到「QQ」" target="_blank" rel="noopener"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="icon qq-icon"><path d="M433.754 420.445c-11.526 1.393-44.86-52.741-44.86-52.741 0 31.345-16.136 72.247-51.051 101.786 16.842 5.192 54.843 19.167 45.803 34.421-7.316 12.343-125.51 7.881-159.632 4.037-34.122 3.844-152.316 8.306-159.632-4.037-9.045-15.25 28.918-29.214 45.783-34.415-34.92-29.539-51.059-70.445-51.059-101.792 0 0-33.334 54.134-44.859 52.741-5.37-.65-12.424-29.644 9.347-99.704 10.261-33.024 21.995-60.478 40.144-105.779C60.683 98.063 108.982.006 224 0c113.737.006 163.156 96.133 160.264 214.963 18.118 45.223 29.912 72.85 40.144 105.778 21.768 70.06 14.716 99.053 9.346 99.704z"/></svg></a>
+                </div>
+            
+
+            
+                <div class="share-item qzone">
+                    
+                    <a href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://example.com/posts/android_base/logcat%E5%88%86%E6%9E%90/&amp;title=Android%20Log%20%e5%88%86%e6%9e%90&amp;summary=Bug%e5%9c%a8%e4%bb%bb%e4%bd%95%e7%b1%bb%e5%9e%8b%e7%9a%84%e5%bc%80%e5%8f%91%e4%b8%ad%e9%83%bd%e4%bc%9a%e5%ad%98%e5%9c%a8%e7%9a%84%ef%bc%8c%e8%80%8cBug%e6%8a%a5%e5%91%8a%e5%8f%88%e6%98%af%e5%ae%9a%e4%bd%8d%e9%97%ae%e9%a2%98%ef%bc%8c%e8%a7%a3%e5%86%b3%e9%97%ae%e9%a2%98%e7%9a%84%e5%85%b3%e9%94%ae%e3%80%82%20Bug%e2%80%a6%e2%80%a6%0a%20%20%20%20%0a%20%20%20%20&amp;pics=https://example.com/icons/apple-touch-icon.png&amp;site=%e6%8a%80%e6%9c%af%e9%83%a8%e7%9a%84%e9%82%a3%e7%82%b9%e4%ba%8b" title="分享到「QQ 空间」" target="_blank" rel="noopener"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon qzone-icon"><path d="M23.985 9.202c-.032-.099-.127-.223-.334-.258-.207-.036-7.351-1.406-7.351-1.406s-.105-.022-.198-.07c-.092-.047-.127-.167-.127-.167S12.447.956 12.349.77C12.25.583 12.104.532 12 .532c-.104 0-.251.051-.349.238-.098.186-3.626 6.531-3.626 6.531s-.035.12-.128.167c-.092.047-.197.07-.197.07S.556 8.908.348 8.943c-.208.036-.302.16-.333.258a.477.477 0 0 0 .125.449l5.362 5.49s.072.08.119.172c.016.104.005.21.005.21s-1.189 7.242-1.22 7.45.075.369.159.43c.083.062.233.106.421.013.189-.093 6.812-3.261 6.812-3.261s.098-.044.201-.061c.103-.017.201.061.201.061s6.623 3.168 6.812 3.261c.188.094.338.049.421-.013a.463.463 0 0 0 .159-.43c-.021-.14-.93-5.677-.93-5.677.876-.54 1.425-1.039 1.849-1.747-2.594.969-6.006 1.717-9.415 1.866-.915.041-2.41.097-3.473-.015-.678-.071-1.17-.144-1.243-.438-.053-.215.054-.46.545-.831a2640.5 2640.5 0 0 1 2.861-2.155c1.285-.968 3.559-2.47 3.559-2.731 0-.285-2.144-.781-4.037-.781-1.945 0-2.275.132-2.811.168-.488.034-.769.005-.804-.138-.06-.248.183-.389.588-.568.709-.314 1.86-.594 1.984-.626.194-.052 3.082-.805 5.618-.535 1.318.14 3.244.668 3.244 1.276 0 .342-1.721 1.494-3.225 2.597-1.149.843-2.217 1.561-2.217 1.688 0 .342 3.533 1.241 6.689 1.01l.003-.022c.048-.092.119-.172.119-.172l5.362-5.49a.477.477 0 0 0 .127-.449z"/></svg></a>
+                </div>
+            
+
+            
+                <div class="share-item qrcode">
+                    <div class="qrcode-container" title="通过「二维码」"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="icon qrcode-icon"><path d="M0 224h192V32H0v192zM64 96h64v64H64V96zm192-64v192h192V32H256zm128 128h-64V96h64v64zM0 480h192V288H0v192zm64-128h64v64H64v-64zm352-64h32v128h-96v-32h-32v96h-64V288h96v32h64v-32zm0 160h32v32h-32v-32zm-64 0h32v32h-32v-32z"/></svg><div id="qrcode-img"></div>
+                    </div>
+                    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+
+<script>
+    var typeNumber = 0;
+    var errorCorrectionLevel = 'L';
+    var qr = qrcode(typeNumber, errorCorrectionLevel);
+    qr.addData('https:\/\/example.com\/posts\/android_base\/logcat%E5%88%86%E6%9E%90\/');
+    qr.make();
+    document.getElementById('qrcode-img').innerHTML = qr.createImgTag();
+</script>
+
+                </div>
+            
+
+        </div>
+
+    </div>
+
+
+
+
+        
+    
+    
+
+
+
+        
+    
+
+
+
+        
+
+
+        
+
+
+        
+    
+        
+        
+    
+    
+    
+    
+        <ul class="post-nav">
+            
+                <li class="post-nav-prev">
+                    <a href="/posts/android_studio/gradle/2017-11-21-%E5%8D%87%E7%BA%A7gradle3.0/" rel="prev">&lt; 升级Gradle3.0</a>
+                </li>
+            
+            
+                <li class="post-nav-next">
+                    <a href="/posts/2017-11-04-gc%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90-%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E5%88%86%E6%9E%90/" rel="next">GC可达性实践-内存泄露分析 &gt;</a>
+                </li>
+            
+        </ul>
+    
+
+
+
+        
+
+
+    </div>
+</main>
+
+
+            
+    <div id="back-to-top" class="back-to-top">
+        <a href="#"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="icon arrow-up"><path d="M34.9 289.5l-22.2-22.2c-9.4-9.4-9.4-24.6 0-33.9L207 39c9.4-9.4 24.6-9.4 33.9 0l194.3 194.3c9.4 9.4 9.4 24.6 0 33.9L413 289.4c-9.5 9.5-25 9.3-34.3-.4L264 168.6V456c0 13.3-10.7 24-24 24h-32c-13.3 0-24-10.7-24-24V168.6L69.2 289.1c-9.3 9.8-24.8 10-34.3.4z"/></svg></a>
+    </div>
+
+
+            
+    <footer id="footer" class="footer">
+        <div class="footer-inner">
+            <div class="site-info">©&nbsp;1969–2020&nbsp;<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon footer-icon"><path d="M462.3 62.6C407.5 15.9 326 24.3 275.7 76.2L256 96.5l-19.7-20.3C186.1 24.3 104.5 15.9 49.7 62.6c-62.8 53.6-66.1 149.8-9.9 207.9l193.5 199.8c12.5 12.9 32.8 12.9 45.3 0l193.5-199.8c56.3-58.1 53-154.3-9.8-207.9z"/></svg>&nbsp;快马夜小刀</div><div class="powered-by">Powered by <a href="https://github.com/gohugoio/hugo" target="_blank" rel="noopener">Hugo</a> | Theme is <a href="https://github.com/reuixiy/hugo-theme-meme" target="_blank" rel="noopener">MemE</a></div><div class="site-copyright"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a></div>
+
+            
+    
+        <ul class="socials"><li class="socials-item">
+                    <a href="/rss.xml" target="_blank" rel="external noopener" title="RSS"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon social-icon"><path d="M19.199 24C19.199 13.467 10.533 4.8 0 4.8V0c13.165 0 24 10.835 24 24h-4.801zM3.291 17.415c1.814 0 3.293 1.479 3.293 3.295 0 1.813-1.485 3.29-3.301 3.29C1.47 24 0 22.526 0 20.71s1.475-3.294 3.291-3.295zM15.909 24h-4.665c0-6.169-5.075-11.245-11.244-11.245V8.09c8.727 0 15.909 7.184 15.909 15.91z"/></svg></a>
+                </li><li class="socials-item">
+                    <a href="mailto:wangfei199101@gmail.com" target="_blank" rel="external noopener" title="Email"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon social-icon"><path d="M464 64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm0 48v40.805c-22.422 18.259-58.168 46.651-134.587 106.49-16.841 13.247-50.201 45.072-73.413 44.701-23.208.375-56.579-31.459-73.413-44.701C106.18 199.465 70.425 171.067 48 152.805V112h416zM48 400V214.398c22.914 18.251 55.409 43.862 104.938 82.646 21.857 17.205 60.134 55.186 103.062 54.955 42.717.231 80.509-37.199 103.053-54.947 49.528-38.783 82.032-64.401 104.947-82.653V400H48z"/></svg></a>
+                </li><li class="socials-item">
+                    <a href="https://github.com/wfeii" target="_blank" rel="external noopener" title="GitHub"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon social-icon"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></a>
+                </li></ul>
+    
+
+
+
+            
+        </div>
+    </footer>
+
+
+        </div>
+        
+    <script src="https://cdn.jsdelivr.net/gh/cferdinandi/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+
+<script>
+    var scroll = new SmoothScroll('a[href*="#"]', {
+        speedAsDuration: true,
+        header: '[data-scroll-header]'
+    });
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom@latest/dist/medium-zoom.min.js"></script>
+
+<script>
+    mediumZoom(document.querySelectorAll('div.post-body img'), {
+        background: 'hsla(var(--color-bg-h), var(--color-bg-s), var(--color-bg-l), 0.95)'
+    })
+</script>
+
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/instant.page@3.0.0/instantpage.min.js" type="module" defer></script>
+
+
+
+
+
+
+
+
+
+
+    </body>
+</html>
